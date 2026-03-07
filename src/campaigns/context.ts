@@ -30,6 +30,8 @@ export interface CampaignContextOptions {
   playerKnowledgeFactIds?: string[];
   /** Full run state: characters, explored, NPC attributes, etc. */
   runState?: RunState | null;
+  /** Current location ID for location-aware context (e.g. Warden must not assume player has been elsewhere) */
+  currentLocationId?: string | null;
 }
 
 /**
@@ -44,6 +46,7 @@ export function getCampaignContextForAgent(
     activeNpcId,
     playerKnowledgeFactIds = [],
     runState,
+    currentLocationId,
   } = options;
   const playerKnowledge = runState?.playerKnowledgeFactIds ?? playerKnowledgeFactIds;
   const campaign = getCampaign(campaignId);
@@ -80,14 +83,22 @@ export function getCampaignContextForAgent(
     });
   }
 
-  // Warden Narrator (opening backstory)
+  // Warden Narrator (opening backstory) — gate by location for Another Bug Hunt prologue
+  const locId = currentLocationId ?? runState?.currentLocationId ?? campaign.world.defaultLocationId;
+  const isPrologueShip = locId === "the-metamorphosis";
   if (campaign.wardenNarrator?.narrative) {
     parts.push("");
     parts.push("## Warden Narrator (opening narrative)");
-    parts.push(
-      "Deliver this at session start to set the scene. Atmospheric, authoritative."
-    );
-    parts.push(`\n${campaign.wardenNarrator.narrative}`);
+    if (isPrologueShip && activeNpcId === "warden-narrator") {
+      parts.push(
+        "At session start on The Metamorphosis: describe the ship, cryosleep, orbital view of Samsa VI. Maas awaits with the briefing. Do NOT mention tropical storm, descent, or surface—they haven't landed yet."
+      );
+    } else {
+      parts.push(
+        "Deliver this at session start to set the scene. Atmospheric, authoritative."
+      );
+      parts.push(`\n${campaign.wardenNarrator.narrative}`);
+    }
   }
 
   // The Company (hints)
@@ -196,8 +207,9 @@ export function getCampaignContextForAgent(
   if (runState?.characters?.length) {
     parts.push("\n## Player characters");
     runState.characters.forEach((c) => {
+      const playerLabel = c.playerName ? `${c.playerName} (${c.name})` : c.name;
       parts.push(
-        `- ${c.name}: ${c.traits.join(", ")}. ${c.personalitySummary}`
+        `- ${playerLabel}: ${c.traits.join(", ")}. ${c.personalitySummary}`
       );
     });
   }
@@ -224,12 +236,32 @@ export function getCampaignContextForAgent(
     parts.push("\n" + anotherBugHuntThemes);
   }
 
-  // Warden-only: summary of what players know (for assisting without spoiling)
+  // Warden-only: location-aware context and what players know
   if (activeNpcId === "warden-narrator" && runState) {
-    parts.push("\n## Warden: What the players know (you may reference only this)");
     const explored = runState.exploredLocationIds ?? [];
     const knownFacts = runState.playerKnowledgeFactIds ?? [];
     const interacted = runState.interactedNpcIds ?? [];
+    const currentLocId = currentLocationId ?? runState.currentLocationId ?? campaign.world.defaultLocationId;
+    const currentLoc = campaign.world.locations.find((l) => l.id === currentLocId);
+
+    parts.push("\n## Warden: CRITICAL — Current player location");
+    parts.push(`- CURRENT LOCATION: ${currentLoc?.name ?? currentLocId}`);
+    parts.push("- You MUST get the player's location correct. They are here right now. Never say they are somewhere they haven't been.");
+    parts.push("");
+
+    // Prologue-safe: at The Metamorphosis, players only know ship, cryosleep, colony exists
+    const isPrologue = currentLocId === "the-metamorphosis";
+    if (isPrologue) {
+      parts.push("## Warden: Prologue context (players still on The Metamorphosis)");
+      parts.push("- Players have just woken from cryosleep on a J2C-I Executive Transport in orbit around Samsa VI.");
+      parts.push("- Maas (corporate liaison) is here to brief them. They have NOT descended to the planet yet.");
+      parts.push("- They know: Samsa VI is a jungle planet, terraforming colony, research station. Six months of silence from Greta Base.");
+      parts.push("- They do NOT yet know: tropical storm, descent, Greta Base details, facility layout, anything on the surface.");
+      parts.push("- Only describe: the ship, cryosleep, Maas, the mission briefing (investigate the colony). Do NOT mention the storm, landing, or surface locations.");
+      parts.push("");
+    }
+
+    parts.push("## Warden: What the players know (you may reference only this)");
     const locNames = campaign.world.locations
       .filter((l) => explored.includes(l.id))
       .map((l) => l.name)
@@ -245,7 +277,7 @@ export function getCampaignContextForAgent(
       parts.push("- Facts they have learned: none yet");
     }
     parts.push("");
-    parts.push("CRITICAL: Do NOT reveal any fact, plot point, puzzle solution, or location detail not listed above. You assist with what they know—you never spoil what they haven't discovered.");
+    parts.push("CRITICAL: Do NOT reveal any fact, plot point, puzzle solution, or location detail not listed above. Never say the player is at a location they have not explored. You assist with what they know—you never spoil what they haven't discovered.");
   }
 
   return parts.join("\n");

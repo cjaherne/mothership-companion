@@ -21,7 +21,7 @@ describe("RunSetupView", () => {
     expect(screen.getByText(/Set up: Another Bug Hunt/)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Corporal Vasquez/)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/paranoid, tactical/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Add character/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Add player/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Start session/ })).toBeDisabled();
   });
 
@@ -38,7 +38,7 @@ describe("RunSetupView", () => {
     fireEvent.change(screen.getByPlaceholderText(/Corporal Vasquez/), {
       target: { value: "Corporal Vasquez" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Add character/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Add player/ }));
     expect(screen.getByText("Corporal Vasquez")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Start session/ })).toBeEnabled();
   });

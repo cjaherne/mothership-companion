@@ -142,8 +142,18 @@ export function BriefingLandingPage({
     forceRefresh((x) => x + 1);
   };
 
+  const currentLocation = locations.find((l) => l.id === currentLocationId);
+  const currentLocationName = currentLocation?.name ?? currentLocationId ?? "Unknown";
+
   return (
-    <div className="flex h-full flex-col gap-6">
+    <div className="flex h-full flex-col gap-4">
+      {/* Large neon current location */}
+      <div className="shrink-0 border-b border-neutral-800 pb-4">
+        <p className="text-2xl font-bold tracking-widest text-neon-cyan drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] sm:text-3xl">
+          {currentLocationName.toUpperCase()}
+        </p>
+      </div>
+
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">
           {campaign.name}
@@ -190,19 +200,19 @@ export function BriefingLandingPage({
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-2">
-        {/* Left: Briefing */}
+        {/* Left: Briefing (compact) */}
         <div className="flex min-h-0 flex-col overflow-hidden">
-          <h4 className="mb-2 text-sm font-medium text-neon-cyan">
+          <h4 className="mb-1 text-xs font-medium text-neon-cyan">
             Scenario Briefing
           </h4>
           <BriefingSection
             text={briefingText}
             pages={briefingPages}
-            className="min-h-[180px] flex-1 overflow-y-auto"
+            className="max-h-[140px] min-h-0 overflow-y-auto"
           />
         </div>
 
-        {/* Right: Characters + NPCs (and Samsa VI map when not prologue) */}
+        {/* Right: Players + NPCs (and Samsa VI map when not prologue) */}
         <div className="flex min-h-0 flex-col gap-4 overflow-hidden">
           <div className="min-h-0 flex-1 overflow-hidden">
             <CharacterList

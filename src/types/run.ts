@@ -5,15 +5,21 @@
  */
 
 import type { NPCManipulatableAttributes } from "./npc";
+import type { MothershipCharacterData } from "@/lib/mothership";
 
 /** Player character in a run (created by user) */
 export interface Character {
   id: string;
+  /** Player's real name (person at the table). Optional for backwards compat. */
+  playerName?: string;
+  /** Character's in-game name */
   name: string;
   /** Traits e.g. ["paranoid", "tactical", "loyal"] */
   traits: string[];
   /** Free-form summary for NPC context: personality, background, how to roleplay them */
   personalitySummary: string;
+  /** Mothership RPG stats, loadout, etc. (optional for backwards compat) */
+  mothership?: MothershipCharacterData;
 }
 
 /** Persisted game state for a run */

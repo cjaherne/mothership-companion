@@ -90,8 +90,8 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
   }, [stop]);
 
   return (
-    <div className={`flex flex-col gap-4 ${className}`}>
-      <div className="flex items-center justify-between gap-2">
+    <div className={`flex min-h-0 flex-col gap-2 ${className}`}>
+      <div className="flex shrink-0 items-center justify-between gap-2">
         <h5 className="text-xs font-medium uppercase tracking-wider text-neutral-500">
           {currentPage?.title ?? "Briefing"}
         </h5>
@@ -119,12 +119,12 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
           </div>
         )}
       </div>
-      <div className="flex-1 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-6">
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-300">
+      <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
+        <p className="whitespace-pre-wrap text-xs leading-relaxed text-neutral-300">
           {displayText}
         </p>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-1">
         <button
           type="button"
           onClick={play}
@@ -136,7 +136,7 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
           type="button"
           onClick={pause}
           disabled={!isPlaying}
-          className="rounded border border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 disabled:opacity-50"
+          className="rounded border border-neutral-600 px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50"
         >
           Pause
         </button>
@@ -144,14 +144,14 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
           type="button"
           onClick={stop}
           disabled={!isPlaying && !isPaused}
-          className="rounded border border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 disabled:opacity-50"
+          className="rounded border border-neutral-600 px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50"
         >
           Stop
         </button>
         <button
           type="button"
           onClick={rewind}
-          className="rounded border border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800"
+          className="rounded border border-neutral-600 px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800"
         >
           Rewind to Start
         </button>

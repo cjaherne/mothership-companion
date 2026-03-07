@@ -64,10 +64,12 @@ export default defineAgent({
         const { getCampaign } = await import("../src/campaigns/registry");
         const WARDEN_NARRATOR_ID = "warden-narrator";
 
+        const typedRunState = runState as unknown as import("../src/types/run").RunState;
         campaignContext = getCampaignContextForAgent(roomCtx.campaignId, {
           activeNpcId: activeNpcId ?? null,
-          runState: runState as unknown as import("../src/types/run").RunState,
+          runState: typedRunState,
           scenarioId: null,
+          currentLocationId: typedRunState?.currentLocationId ?? null,
         });
 
         if (activeNpcId === WARDEN_NARRATOR_ID) {
