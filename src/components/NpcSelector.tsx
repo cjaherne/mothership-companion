@@ -50,7 +50,7 @@ export function NpcSelector({
                 onClick={() => onSelectNpc(npcId)}
                 className={`w-full rounded px-3 py-2 text-left text-sm transition ${
                   isSelected
-                    ? "bg-neon-cyan/20 text-neon-cyan"
+                    ? "bg-amber-500/20 text-amber-400"
                     : "text-neutral-200 hover:bg-neutral-800/80"
                 }`}
               >

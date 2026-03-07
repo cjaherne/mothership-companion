@@ -13,7 +13,6 @@ import {
   getRunState,
   addExploredLocation,
   setActiveNpc,
-  completePrologue,
 } from "@/lib/runs";
 import { BriefingSection } from "./BriefingSection";
 import { CharacterList } from "./CharacterList";
@@ -22,7 +21,6 @@ import { InternalLocationMap } from "./InternalLocationMap";
 import { LocationDetailMap } from "./LocationDetailMap";
 import { NpcSelector } from "./NpcSelector";
 import { THE_METAMORPHOSIS_ID } from "@/campaigns/another-bug-hunt/world";
-import { WARDEN_NARRATOR_ID } from "@/campaigns/shared/meta-npcs";
 
 const REGION_IDS = ["landing-zone", "greta-base", "heron-station", "mothership"];
 
@@ -36,14 +34,12 @@ interface BriefingLandingPageProps {
   campaignId: CampaignId;
   runId: string;
   onProceed: () => void;
-  onBack?: () => void;
 }
 
 export function BriefingLandingPage({
   campaignId,
   runId,
   onProceed,
-  onBack,
 }: BriefingLandingPageProps) {
   const campaign = getCampaign(campaignId);
   const run = getRun(runId);
@@ -105,21 +101,6 @@ export function BriefingLandingPage({
     currentLocationId
   );
 
-  const handleProceedWithNpc = (npcId: string) => {
-    setActiveNpc(runId, npcId);
-    onProceed();
-  };
-
-  const handleTalkToWarden = () => {
-    setActiveNpc(runId, WARDEN_NARRATOR_ID);
-    onProceed();
-  };
-
-  const handleDepartForSamsa = () => {
-    completePrologue(runId, "landing-zone");
-    forceRefresh((x) => x + 1);
-  };
-
   const handleSelectPrimaryRegion = (regionId: string) => {
     setSelectedPrimaryRegionId(regionId);
     setSelectedLocationId(null);
@@ -149,60 +130,22 @@ export function BriefingLandingPage({
     <div className="flex h-full flex-col gap-4">
       {/* Large neon current location */}
       <div className="shrink-0 border-b border-neutral-800 pb-4">
-        <p className="text-2xl font-bold tracking-widest text-neon-cyan drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] sm:text-3xl">
+        <p className="text-2xl font-bold tracking-widest text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] sm:text-3xl">
           {currentLocationName.toUpperCase()}
         </p>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div>
         <h3 className="text-lg font-semibold text-white">
           {campaign.name}
           {scenario && ` — ${scenario.name}`}
         </h3>
-        <div className="flex flex-wrap items-center gap-2">
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="text-sm text-neutral-500 hover:text-neutral-300"
-            >
-              ← Back
-            </button>
-          )}
-          {isPrologue && (
-            <button
-              type="button"
-              onClick={handleDepartForSamsa}
-              className="rounded-lg border border-neon-green/50 bg-neon-green/5 px-4 py-2 text-sm font-medium text-neon-green hover:bg-neon-green/10"
-            >
-              Depart for Samsa VI
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handleTalkToWarden}
-            className="rounded-lg border border-neutral-600 bg-neutral-800/50 px-4 py-2 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white"
-          >
-            Talk to Warden
-          </button>
-          {runState.activeNpcId &&
-            runState.activeNpcId !== WARDEN_NARRATOR_ID &&
-            npcsInLocation.includes(runState.activeNpcId) && (
-              <button
-                type="button"
-                onClick={() => handleProceedWithNpc(runState.activeNpcId!)}
-                className="rounded-lg border border-neon-cyan/50 bg-neon-cyan/5 px-4 py-2 text-sm font-medium text-neon-cyan hover:bg-neon-cyan/10"
-              >
-                Talk to NPC
-              </button>
-            )}
-        </div>
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-2">
         {/* Left: Briefing (compact) */}
         <div className="flex min-h-0 flex-col overflow-hidden">
-          <h4 className="mb-1 text-xs font-medium text-neon-cyan">
+          <h4 className="mb-1 text-xs font-medium text-amber-400">
             Scenario Briefing
           </h4>
           <BriefingSection

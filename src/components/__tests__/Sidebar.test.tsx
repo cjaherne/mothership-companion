@@ -19,7 +19,7 @@ describe("Sidebar", () => {
       />
     );
     const btn = screen.getByRole("button", { name: "Another Bug Hunt" });
-    expect(btn.className).toContain("ring-neon-cyan");
+    expect(btn.className).toContain("ring-amber");
   });
 
   it("calls onSelectCampaign when campaign clicked", () => {

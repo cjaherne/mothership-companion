@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import type { Character } from "@/types/run";
-import {
-  CLASS_NAMES,
-  LOADOUT_NAMES,
-  getLoadoutItems,
-} from "@/lib/mothership";
+import { CLASS_NAMES } from "@/lib/mothership";
 
 interface CharacterListProps {
   characters: Character[];
@@ -18,9 +14,9 @@ export function CharacterList({ characters, className = "" }: CharacterListProps
 
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-lg border border-neutral-800 bg-neutral-950/50 ${className}`}
+      className={`flex flex-col overflow-hidden rounded-lg border border-amber-900/40 bg-amber-950/20 ${className}`}
     >
-      <h4 className="border-b border-neutral-800 px-4 py-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
+      <h4 className="border-b border-amber-900/40 px-4 py-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
         Players
       </h4>
       <ul className="flex-1 overflow-y-auto p-2">
@@ -84,37 +80,37 @@ export function CharacterList({ characters, className = "" }: CharacterListProps
             </div>
             <div className="space-y-3 text-sm">
               {selectedCharacter.mothership && (
-                <div className="rounded border border-neutral-700 bg-neutral-900/80 p-3">
-                  <h6 className="mb-2 text-xs font-medium text-neon-cyan">
+                <div className="rounded border border-amber-900/50 bg-amber-950/20 p-3">
+                  <h6 className="mb-2 text-xs font-medium text-amber-400">
                     Mothership stats
                   </h6>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                    <span className="text-neutral-500">Class:</span>
+                    <span className="text-amber-800/80">Class:</span>
                     <span>{CLASS_NAMES[selectedCharacter.mothership.class]}</span>
-                    <span className="text-neutral-500">Loadout:</span>
-                    <span>{LOADOUT_NAMES[selectedCharacter.mothership.loadout]}</span>
-                    <span className="text-neutral-500">STR/SPD/INT/CBT:</span>
+                    <span className="text-amber-800/80">STR/SPD/INT/CBT:</span>
                     <span>
                       {selectedCharacter.mothership.stats.strength} /{" "}
                       {selectedCharacter.mothership.stats.speed} /{" "}
                       {selectedCharacter.mothership.stats.intellect} /{" "}
                       {selectedCharacter.mothership.stats.combat}
                     </span>
-                    <span className="text-neutral-500">SAN/FEAR/BOD:</span>
+                    <span className="text-amber-800/80">SAN/FEAR/BOD:</span>
                     <span>
                       {selectedCharacter.mothership.stats.sanity} /{" "}
                       {selectedCharacter.mothership.stats.fear} /{" "}
                       {selectedCharacter.mothership.stats.body}
                     </span>
-                    <span className="text-neutral-500">Health:</span>
+                    <span className="text-amber-800/80">Health:</span>
                     <span>{selectedCharacter.mothership.health}</span>
-                    <span className="text-neutral-500">Credits:</span>
-                    <span>{selectedCharacter.mothership.credits}</span>
+                    <span className="text-amber-800/80">Wounds:</span>
+                    <span>0/{selectedCharacter.mothership.maxWounds ?? 2}</span>
+                    <span className="text-amber-800/80">Credits:</span>
+                    <span>{selectedCharacter.mothership.credits} cr</span>
                   </div>
-                  <p className="mt-2 text-xs text-neutral-500">
-                    {getLoadoutItems(selectedCharacter.mothership.loadout).join(", ")}
+                  <p className="mt-2 text-xs text-amber-700/90">
+                    {selectedCharacter.mothership.loadout}
                   </p>
-                  <p className="mt-1 text-xs text-neutral-500">
+                  <p className="mt-1 text-xs text-amber-800/70">
                     Trinket: {selectedCharacter.mothership.trinket} | Patch:{" "}
                     {selectedCharacter.mothership.patch}
                   </p>

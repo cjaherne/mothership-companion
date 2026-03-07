@@ -51,7 +51,7 @@ export function LocationDetailMap({
             type="button"
             onClick={() => onMarkVisited(location.id)}
             disabled={exploredLocationIds.includes(location.id)}
-            className="rounded border border-neon-green/50 bg-neon-green/10 px-2 py-1 text-[10px] font-medium text-neon-green transition hover:bg-neon-green/20 disabled:opacity-50 disabled:hover:bg-neon-green/10"
+            className="rounded border border-amber-500/50 bg-amber-500/10 px-2 py-1 text-[10px] font-medium text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-50 disabled:hover:bg-amber-500/10"
           >
             {exploredLocationIds.includes(location.id) ? "Visited ✓" : "Mark as Visited"}
           </button>
@@ -70,7 +70,7 @@ export function LocationDetailMap({
                 key={poi.id}
                 className="flex items-start gap-2 rounded border border-neutral-800 bg-black/30 px-3 py-2"
               >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-neon-pink/80 mt-1.5" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/80 mt-1.5" />
                 <div>
                   <span className="text-sm text-neutral-200">{poi.name}</span>
                   {poi.description && (
@@ -100,7 +100,7 @@ export function LocationDetailMap({
                   type="button"
                   onClick={() => onLocationClick?.(id)}
                   disabled={!isClickable}
-                  className={`rounded border border-neon-pink/50 px-2 py-1 text-left text-xs text-neon-pink/90 transition hover:border-neon-pink hover:bg-neon-pink/10 ${
+                  className={`rounded border border-amber-600/50 px-2 py-1 text-left text-xs text-amber-300/90 transition hover:border-amber-500 hover:bg-amber-500/10 ${
                     isClickable ? "cursor-pointer" : "cursor-default"
                   }`}
                 >
@@ -113,7 +113,7 @@ export function LocationDetailMap({
       )}
 
       <div className="mt-3 flex items-center gap-1.5 text-[10px] text-neutral-500">
-        <span className="h-1.5 w-1.5 rounded-full bg-neon-pink/80" />
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-400/80" />
         Door / connection
       </div>
     </div>

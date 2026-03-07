@@ -119,7 +119,7 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
           </div>
         )}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-amber-900/40 bg-amber-950/20 p-4">
         <p className="whitespace-pre-wrap text-xs leading-relaxed text-neutral-300">
           {displayText}
         </p>
@@ -128,7 +128,7 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
         <button
           type="button"
           onClick={play}
-          className="rounded border border-neon-cyan/50 px-4 py-2 text-sm font-medium text-neon-cyan hover:bg-neon-cyan/10"
+          className="rounded border border-amber-500/50 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/10"
         >
           {isPaused ? "Resume" : "Play"}
         </button>
