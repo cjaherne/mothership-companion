@@ -24,6 +24,23 @@ export interface World {
   defaultLocationId: string;
 }
 
+/** Mission objectives and briefing */
+export interface Mission {
+  id: string;
+  name: string;
+  objectives: string[];
+  briefing: string;
+}
+
+/** A scenario within a campaign (e.g. Distress Signals) */
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  missionId: string | null;
+  locationIds: string[];
+}
+
 /** Campaign configuration - defines the scenario structure */
 export interface CampaignConfig {
   id: CampaignId;
@@ -34,6 +51,10 @@ export interface CampaignConfig {
   npcIds: string[];
   /** Puzzle IDs in this campaign */
   puzzleIds: string[];
+  /** Scenario IDs in this campaign */
+  scenarioIds?: string[];
+  /** Mission IDs in this campaign */
+  missionIds?: string[];
   /** LiveKit room name (unique per campaign session) */
   roomName: string;
 }

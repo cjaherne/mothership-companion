@@ -6,10 +6,12 @@
  */
 
 import type { CampaignConfig, CampaignId } from "./types";
+import { anotherBugHuntCampaign } from "./another-bug-hunt";
 import { wardenCampaign } from "./warden";
 
 const CAMPAIGNS: Record<CampaignId, CampaignConfig> = {
   [wardenCampaign.id]: wardenCampaign,
+  [anotherBugHuntCampaign.id]: anotherBugHuntCampaign,
 };
 
 /** Default campaign when none specified */

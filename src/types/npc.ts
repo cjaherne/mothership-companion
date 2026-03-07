@@ -25,6 +25,21 @@ export type FactionAlignment =
   | "hostile"
   | "unknown";
 
+/** Numeric attributes (0–1) that players manipulate through dialogue */
+export interface NPCManipulatableAttributes {
+  fear: number;
+  stress: number;
+  affability: number;
+}
+
+/** Thresholds that gate information reveals */
+export interface NPCAttributeThresholds {
+  /** Min affability to share non-critical intel */
+  shareMinor?: number;
+  /** Min trust/fear combo for critical intel */
+  shareMajor?: number;
+}
+
 /** Core personality archetype - determines default voice and behavior */
 export interface NPCPersonalityProfile {
   /** Unique identifier for this NPC type */
@@ -54,6 +69,12 @@ export interface NPCPersonalityProfile {
   /** Conditions under which this NPC will/won't help the player */
   motivationHooks: string[];
 
+  /** Default manipulatable attribute values (0–1) */
+  manipulatableAttributes?: Partial<NPCManipulatableAttributes>;
+
+  /** Thresholds that gate information reveals based on current attributes */
+  attributeThresholds?: NPCAttributeThresholds;
+
   /** Optional: voice ID for TTS (e.g., ElevenLabs, Cartesia) */
   voiceId?: string;
 }
@@ -80,6 +101,9 @@ export interface SpeechProfile {
 export interface NPCInstance extends NPCPersonalityProfile {
   /** Current emotional state (may have shifted during interaction) */
   currentEmotionalState: EmotionalState;
+
+  /** Current attribute values (player-manipulated via dialogue); defaults from profile if absent */
+  currentAttributes?: NPCManipulatableAttributes;
 
   /** Facts this instance has revealed to the player */
   revealedFacts: string[];
