@@ -57,5 +57,23 @@ export function getAvailableVoices(
   };
 }
 
+/**
+ * Get NPC IDs that are in the current location (unlocked and present at currentLocationId).
+ */
+export function getNpcsInLocation(
+  campaign: CampaignConfig,
+  runState: RunState | null | undefined,
+  currentLocationId: string | undefined
+): string[] {
+  const voices = getAvailableVoices(campaign, runState);
+  if (!currentLocationId) return voices.npcs;
+  const conditions = campaign.npcUnlockConditions ?? {};
+  return voices.npcs.filter((npcId) => {
+    const cond = conditions[npcId];
+    if (!cond || cond.type !== "location") return true;
+    return cond.locationIds.includes(currentLocationId);
+  });
+}
+
 /** Meta-NPC IDs (always available, not scenario NPCs) */
 export const META_NPC_IDS = [WARDEN_NARRATOR_ID, THE_COMPANY_ID] as const;

@@ -83,6 +83,9 @@ export interface NPCPersonalityProfile {
 
   /** Optional: voice ID for TTS (e.g., ElevenLabs, Cartesia) */
   voiceId?: string;
+
+  /** Optional: message delivered before interaction (e.g. mission briefing). Agent speaks this first. */
+  greetingMessage?: string;
 }
 
 /** Speech pattern configuration for consistent dialogue generation */
@@ -101,6 +104,9 @@ export interface SpeechProfile {
 
   /** Accent or dialect hint for TTS */
   accentHint?: string;
+
+  /** Vocal quality hint (e.g. "tinny and annoying", "gravelly") for TTS/immersion */
+  vocalQuality?: string;
 }
 
 /** Runtime instance of an NPC in a scene - extends profile with state */

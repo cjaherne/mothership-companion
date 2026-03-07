@@ -9,7 +9,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ selectedCampaignId, onSelectCampaign }: SidebarProps) {
-  const campaignIds = listCampaignIds();
+  const campaignIds = listCampaignIds().filter((id) => id !== "warden");
 
   return (
     <aside className="flex h-full w-56 flex-col border-r border-neutral-800 bg-black/50">

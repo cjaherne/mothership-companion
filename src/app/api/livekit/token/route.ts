@@ -28,10 +28,14 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const campaignId = searchParams.get("campaign");
+  const runId = searchParams.get("runId");
   const participantName = searchParams.get("participant") ?? "player";
 
   const campaign = getCampaignOrDefault(campaignId);
-  const roomName = searchParams.get("room") ?? campaign.roomName;
+  const effectiveCampaignId = campaignId ?? campaign.id;
+  const roomName =
+    searchParams.get("room") ??
+    (runId ? `${effectiveCampaignId}__run__${runId}` : campaign.roomName);
 
   try {
     // Explicitly dispatch agent to room (token-based dispatch was not working for local agent)

@@ -5,10 +5,12 @@
  */
 
 import { exampleSurvivorProfile } from "./example-survivor";
+import { maasProfile } from "./maas";
 import type { NPCPersonalityProfile } from "@/types/npc";
 
 export const distressSignalsNpcs: Record<string, NPCPersonalityProfile> = {
   [exampleSurvivorProfile.id]: exampleSurvivorProfile,
+  [maasProfile.id]: maasProfile,
 };
 
 export function getNpcProfile(npcId: string): NPCPersonalityProfile | undefined {

@@ -19,8 +19,12 @@ export const anotherBugHuntCampaign: CampaignConfig = {
   world: anotherBugHuntWorld,
   scenarios,
   missions,
-  npcIds: ["example-survivor"],
+  npcIds: ["maas", "example-survivor"],
   npcUnlockConditions: {
+    maas: {
+      type: "location",
+      locationIds: ["the-metamorphosis"],
+    },
     "example-survivor": {
       type: "location",
       locationIds: ["garage", "lockers"],

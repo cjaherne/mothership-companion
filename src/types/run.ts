@@ -30,6 +30,8 @@ export interface RunState {
   playerKnowledgeFactIds: string[];
   /** Current location/context */
   currentLocationId?: string;
+  /** NPC the player is currently speaking to (for voice session) */
+  activeNpcId?: string;
   /** Turn or session count */
   turn?: number;
 }

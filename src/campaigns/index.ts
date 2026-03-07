@@ -14,6 +14,7 @@ export {
 } from "./shared/meta-npcs";
 export {
   getAvailableVoices,
+  getNpcsInLocation,
   type AvailableVoices,
 } from "./voices";
 export {
@@ -26,3 +27,4 @@ export {
 } from "./registry";
 export { getCampaignContextForAgent } from "./context";
 export type { CampaignContextOptions } from "./context";
+export { getNpcProfile } from "./another-bug-hunt/npcs";

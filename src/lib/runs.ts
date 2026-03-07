@@ -178,3 +178,19 @@ export function addExploredLocation(runId: string, locationId: string): void {
     });
   }
 }
+
+/** Set active NPC for voice session */
+export function setActiveNpc(runId: string, npcId: string | undefined): void {
+  saveRunState(runId, { activeNpcId: npcId });
+}
+
+/** Complete prologue: move from The Metamorphosis to Landing Zone */
+export function completePrologue(runId: string, landingLocationId: string): void {
+  const state = getRunState(runId);
+  const explored = new Set(state.exploredLocationIds ?? []);
+  explored.add(landingLocationId);
+  saveRunState(runId, {
+    currentLocationId: landingLocationId,
+    exploredLocationIds: Array.from(explored),
+  });
+}

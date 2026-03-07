@@ -2,13 +2,13 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { Sidebar } from "../Sidebar";
 
 describe("Sidebar", () => {
-  it("renders campaign list", () => {
+  it("renders campaign list (excludes Warden, which is a meta-NPC type)", () => {
     render(
       <Sidebar selectedCampaignId={null} onSelectCampaign={() => {}} />
     );
     expect(screen.getByText("Campaigns")).toBeInTheDocument();
-    expect(screen.getByText("Warden")).toBeInTheDocument();
     expect(screen.getByText("Another Bug Hunt")).toBeInTheDocument();
+    expect(screen.queryByText("Warden")).not.toBeInTheDocument();
   });
 
   it("highlights selected campaign", () => {

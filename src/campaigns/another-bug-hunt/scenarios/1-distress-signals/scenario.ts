@@ -3,6 +3,7 @@
  */
 
 import type { Scenario } from "../../../types";
+import { THE_METAMORPHOSIS_ID } from "../../world";
 import { distressSignalsPuzzles } from "./puzzles";
 
 export const distressSignalsScenario: Scenario = {
@@ -12,6 +13,7 @@ export const distressSignalsScenario: Scenario = {
     "Investigate the abandoned Greta Base. Re-establish power, retrieve samples, survive.",
   missionId: "distress-signals",
   locationIds: [
+    THE_METAMORPHOSIS_ID,
     "landing-zone",
     "greta-base",
     "heron-station",
@@ -24,7 +26,7 @@ export const distressSignalsScenario: Scenario = {
     "reactor",
     "vents",
   ],
-  startingLocationId: "landing-zone",
+  startingLocationId: THE_METAMORPHOSIS_ID,
 };
 
 export const puzzleIds = distressSignalsPuzzles.map((p) => p.id);

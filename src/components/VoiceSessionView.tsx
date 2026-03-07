@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -9,7 +9,7 @@ import {
 } from "@livekit/components-react";
 import { getCampaign } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
-import { updateRunLastPlayed } from "@/lib/runs";
+import { updateRunLastPlayed, getRunState } from "@/lib/runs";
 import { RunStatePanel } from "./RunStatePanel";
 
 interface VoiceSessionViewProps {
@@ -49,16 +49,24 @@ export function VoiceSessionView({
   const [token, setToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string>("");
 
+  useEffect(() => {
+    fetch("/api/run/state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId, state: getRunState(runId) }),
+    }).catch(() => {});
+  }, [runId]);
+
   const fetchToken = useCallback(async () => {
     const res = await fetch(
-      `/api/livekit/token?campaign=${campaignId}&participant=player`
+      `/api/livekit/token?campaign=${encodeURIComponent(campaignId)}&runId=${encodeURIComponent(runId)}&participant=player`
     );
     const data = await res.json();
     if (data.token && data.serverUrl) {
       setToken(data.token);
       setServerUrl(data.serverUrl);
     }
-  }, [campaignId]);
+  }, [campaignId, runId]);
 
   const handleDisconnected = useCallback(() => {
     updateRunLastPlayed(runId);

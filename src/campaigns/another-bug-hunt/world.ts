@@ -85,8 +85,12 @@ export const gretaBaseLocations = [
   },
 ];
 
+/** Prologue location - one-off, no connections. Only Maas is here. */
+export const THE_METAMORPHOSIS_ID = "the-metamorphosis";
+
 /** Location IDs that belong to each primary region (for Internal Location Map) */
 export const REGION_INTERNAL_LOCATION_IDS: Record<string, string[]> = {
+  [THE_METAMORPHOSIS_ID]: [THE_METAMORPHOSIS_ID],
   "landing-zone": ["landing-zone"],
   "greta-base": ["greta-base", "airlock", "lockers", "mess-hall", "medical-lab", "garage", "reactor", "vents"],
   "heron-station": ["heron-station"],
@@ -117,6 +121,13 @@ export const anotherBugHuntWorld: World = {
     "Jungle planet. Abandoned terraforming colony. Six months of silence. A raging tropical storm blocks radio.",
   locations: [
     {
+      id: THE_METAMORPHOSIS_ID,
+      name: "The Metamorphosis",
+      description:
+        "A J2C-I Executive Transport in orbit around Samsa VI. You've awakened from cryosleep. Maas, your corporate liaison, awaits to brief you on the mission.",
+      connectedLocationIds: [],
+    },
+    {
       id: "landing-zone",
       name: "Landing Zone",
       description: "Where the shuttle touched down. A short muddy walk to Greta Base.",
@@ -142,7 +153,7 @@ export const anotherBugHuntWorld: World = {
     },
     ...gretaBaseLocations,
   ],
-  defaultLocationId: "landing-zone",
+  defaultLocationId: THE_METAMORPHOSIS_ID,
   planetMap: samsaVIPlanetMap,
   regionInternalLocationIds: REGION_INTERNAL_LOCATION_IDS,
 };

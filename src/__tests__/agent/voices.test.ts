@@ -57,4 +57,18 @@ describe("getAvailableVoices", () => {
     const voices = getAvailableVoices(campaign, runState);
     expect(voices.npcs).toContain("example-survivor");
   });
+
+  it("unlocks maas when the-metamorphosis explored (prologue)", () => {
+    const campaign = getCampaign("another-bug-hunt");
+    const runState: RunState = {
+      characters: [],
+      exploredLocationIds: ["the-metamorphosis"],
+      interactedNpcIds: [],
+      npcAttributeState: {},
+      playerKnowledgeFactIds: [],
+      turn: 0,
+    };
+    const voices = getAvailableVoices(campaign, runState);
+    expect(voices.npcs).toContain("maas");
+  });
 });

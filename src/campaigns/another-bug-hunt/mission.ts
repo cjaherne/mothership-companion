@@ -59,15 +59,7 @@ The transition from cryosleep is never gentle. One moment: the familiar hum of s
 
 You are aboard The Metamorphosis, a J2C-I Executive Transport—The Company's preferred vessel for long-haul corporate operations. The viewport shows Samsa VI below: a swath of greens and grays, storm systems churning across the terminator. You have arrived in orbit.
 
-A figure waits by the briefing console. Maas—your corporate liaison, nominally in charge of the entire mission. Sharp suit, sharper smile, the kind of person who uses "expediency" and "cost-effective" in the same sentence. They've been awake for hours, reviewing the same files you're about to hear.
-
-"Welcome back," Maas says. "Sleep well? Doesn't matter. We're on the clock."
-
-They tap the display. Greta Base blooms on the screen—abandoned, dark, six months without a word.
-
-"Here's the job. Land at the designated zone. Get to Greta Base. Find out what happened. Power, samples, survivors—in that order. The storm will play hell with your comms, so you're on your own until you get systems back online."
-
-Maas leans in. "The Company doesn't send people for nothing. Something went wrong down there. Find it. Report it. And try not to become part of the problem."`,
+A figure waits by the briefing console. Maas—your corporate liaison, nominally in charge of the entire mission. Sharp suit, sharper smile, the kind of person who uses "expediency" and "cost-effective" in the same sentence. They've been awake for hours, reviewing the same files you're about to hear.`,
     },
   ],
 };

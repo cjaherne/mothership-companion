@@ -1,14 +1,28 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getCampaign, getMission, getScenario } from "@/campaigns";
+import {
+  getCampaign,
+  getMission,
+  getScenario,
+  getNpcsInLocation,
+} from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
-import { getRun, getRunState, addExploredLocation } from "@/lib/runs";
+import {
+  getRun,
+  getRunState,
+  addExploredLocation,
+  setActiveNpc,
+  completePrologue,
+} from "@/lib/runs";
 import { BriefingSection } from "./BriefingSection";
 import { CharacterList } from "./CharacterList";
 import { SamsaVIMap } from "./SamsaVIMap";
 import { InternalLocationMap } from "./InternalLocationMap";
 import { LocationDetailMap } from "./LocationDetailMap";
+import { NpcSelector } from "./NpcSelector";
+import { THE_METAMORPHOSIS_ID } from "@/campaigns/another-bug-hunt/world";
+import { WARDEN_NARRATOR_ID } from "@/campaigns/shared/meta-npcs";
 
 const REGION_IDS = ["landing-zone", "greta-base", "heron-station", "mothership"];
 
@@ -84,6 +98,28 @@ export function BriefingLandingPage({
   const regionName =
     planetMap?.regions.find((r) => r.id === primaryRegionId)?.name ?? primaryRegionId;
 
+  const isPrologue = currentLocationId === THE_METAMORPHOSIS_ID;
+  const npcsInLocation = getNpcsInLocation(
+    campaign,
+    runState,
+    currentLocationId
+  );
+
+  const handleProceedWithNpc = (npcId: string) => {
+    setActiveNpc(runId, npcId);
+    onProceed();
+  };
+
+  const handleTalkToWarden = () => {
+    setActiveNpc(runId, WARDEN_NARRATOR_ID);
+    onProceed();
+  };
+
+  const handleDepartForSamsa = () => {
+    completePrologue(runId, "landing-zone");
+    forceRefresh((x) => x + 1);
+  };
+
   const handleSelectPrimaryRegion = (regionId: string) => {
     setSelectedPrimaryRegionId(regionId);
     setSelectedLocationId(null);
@@ -113,7 +149,7 @@ export function BriefingLandingPage({
           {campaign.name}
           {scenario && ` — ${scenario.name}`}
         </h3>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {onBack && (
             <button
               type="button"
@@ -123,13 +159,33 @@ export function BriefingLandingPage({
               ← Back
             </button>
           )}
+          {isPrologue && (
+            <button
+              type="button"
+              onClick={handleDepartForSamsa}
+              className="rounded-lg border border-neon-green/50 bg-neon-green/5 px-4 py-2 text-sm font-medium text-neon-green hover:bg-neon-green/10"
+            >
+              Depart for Samsa VI
+            </button>
+          )}
           <button
             type="button"
-            onClick={onProceed}
-            className="rounded-lg border border-neon-cyan/50 bg-neon-cyan/5 px-4 py-2 text-sm font-medium text-neon-cyan hover:bg-neon-cyan/10"
+            onClick={handleTalkToWarden}
+            className="rounded-lg border border-neutral-600 bg-neutral-800/50 px-4 py-2 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white"
           >
-            Proceed to Session
+            Talk to Warden
           </button>
+          {runState.activeNpcId &&
+            runState.activeNpcId !== WARDEN_NARRATOR_ID &&
+            npcsInLocation.includes(runState.activeNpcId) && (
+              <button
+                type="button"
+                onClick={() => handleProceedWithNpc(runState.activeNpcId!)}
+                className="rounded-lg border border-neon-cyan/50 bg-neon-cyan/5 px-4 py-2 text-sm font-medium text-neon-cyan hover:bg-neon-cyan/10"
+              >
+                Talk to NPC
+              </button>
+            )}
         </div>
       </div>
 
@@ -146,7 +202,7 @@ export function BriefingLandingPage({
           />
         </div>
 
-        {/* Right: Characters (upper) + Samsa VI map (lower) */}
+        {/* Right: Characters + NPCs (and Samsa VI map when not prologue) */}
         <div className="flex min-h-0 flex-col gap-4 overflow-hidden">
           <div className="min-h-0 flex-1 overflow-hidden">
             <CharacterList
@@ -154,7 +210,19 @@ export function BriefingLandingPage({
               className="h-full max-h-[200px]"
             />
           </div>
-          {planetMap && (
+          <div className="min-h-0 flex-1 overflow-hidden">
+            <NpcSelector
+              campaignId={campaignId}
+              npcIds={npcsInLocation}
+              activeNpcId={runState.activeNpcId}
+              onSelectNpc={(id) => {
+                setActiveNpc(runId, id);
+                forceRefresh((x) => x + 1);
+              }}
+              className="h-full max-h-[180px]"
+            />
+          </div>
+          {!isPrologue && planetMap && (
             <div className="min-h-0 flex-1 overflow-hidden">
               <SamsaVIMap
                 planetMap={planetMap}
@@ -170,7 +238,8 @@ export function BriefingLandingPage({
         </div>
       </div>
 
-      {/* Bottom: Internal Location map + Location detail map */}
+      {/* Bottom: Internal Location map + Location detail map (hidden during prologue) */}
+      {!isPrologue && (
       <div className="grid min-h-0 grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="min-h-[200px]">
           <InternalLocationMap
@@ -196,6 +265,7 @@ export function BriefingLandingPage({
           />
         </div>
       </div>
+      )}
     </div>
   );
 }
