@@ -7,6 +7,12 @@
 
 export * from "./types";
 export {
+  WARDEN_NARRATOR_ID,
+  THE_COMPANY_ID,
+  wardenNarratorProfile,
+  theCompanyProfile,
+} from "./shared/meta-npcs";
+export {
   getCampaign,
   getCampaignOrDefault,
   listCampaignIds,

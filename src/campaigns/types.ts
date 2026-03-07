@@ -41,6 +41,18 @@ export interface Scenario {
   locationIds: string[];
 }
 
+/** Warden Narrator - provides opening backstory/narrative (campaign-specific) */
+export interface WardenNarratorConfig {
+  /** Opening narrative to deliver at session start */
+  narrative: string;
+}
+
+/** The Company - provides hints when players ask (campaign-specific) */
+export interface TheCompanyConfig {
+  /** Hints to offer when players request help (escalating) */
+  hints: string[];
+}
+
 /** Campaign configuration - defines the scenario structure */
 export interface CampaignConfig {
   id: CampaignId;
@@ -57,6 +69,10 @@ export interface CampaignConfig {
   missionIds?: string[];
   /** LiveKit room name (unique per campaign session) */
   roomName: string;
+  /** Warden Narrator - opening backstory and narrative (above all campaigns) */
+  wardenNarrator?: WardenNarratorConfig;
+  /** The Company - hint provider when players ask (above all campaigns) */
+  theCompany?: TheCompanyConfig;
 }
 
 /** Per-session player state within a campaign */

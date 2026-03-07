@@ -45,8 +45,28 @@ export function getCampaignContextForAgent(
   const campaign = getCampaign(campaignId);
   const parts: string[] = [];
 
+  // Warden Narrator (opening backstory - deliver at session start)
+  if (campaign.wardenNarrator?.narrative) {
+    parts.push("## Warden Narrator (opening narrative)");
+    parts.push(
+      "Deliver this narrative at session start to set the scene. Atmospheric, authoritative."
+    );
+    parts.push(`\n${campaign.wardenNarrator.narrative}`);
+  }
+
+  // The Company (hints - when players explicitly ask for help)
+  if (campaign.theCompany?.hints?.length) {
+    parts.push("\n## The Company (hints)");
+    parts.push(
+      "When players ask for a hint or help, offer these in order. Escalate gradually—don't give everything at once. Stay in character: cold, corporate."
+    );
+    campaign.theCompany.hints.forEach((hint, i) => {
+      parts.push(`- Hint ${i + 1}: ${hint}`);
+    });
+  }
+
   // World
-  parts.push(`## World: ${campaign.world.name}`);
+  parts.push(`\n## World: ${campaign.world.name}`);
   parts.push(campaign.world.description);
   parts.push(
     "\nLocations: " +
