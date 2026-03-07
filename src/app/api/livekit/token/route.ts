@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AccessToken, AgentDispatchClient } from "livekit-server-sdk";
+import {
+  AccessToken,
+  AgentDispatchClient,
+  RoomConfiguration,
+} from "livekit-server-sdk";
 import { logger } from "@/lib/logger";
 import { getCampaignOrDefault } from "@/campaigns";
+
+/** Seconds to keep room open after last participant leaves */
+const DEPARTURE_TIMEOUT = 10;
+/** Seconds to keep room open if no one joins */
+const EMPTY_TIMEOUT = 60;
 
 /**
  * GET /api/livekit/token
@@ -63,6 +72,12 @@ export async function GET(request: NextRequest) {
       canPublish: true,
       canSubscribe: true,
       canPublishData: true,
+    });
+
+    token.roomConfig = new RoomConfiguration({
+      name: roomName,
+      emptyTimeout: EMPTY_TIMEOUT,
+      departureTimeout: DEPARTURE_TIMEOUT,
     });
 
     const jwt = await token.toJwt();

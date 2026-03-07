@@ -5,6 +5,7 @@ import type { CampaignId } from "@/campaigns";
 import {
   getRunsForCampaign,
   createRun,
+  deleteRun,
   getRunState,
   type CampaignRun,
 } from "@/lib/runs";
@@ -48,6 +49,14 @@ export function CampaignRunOptions({
     onStartRun(campaignId, run.id);
   };
 
+  const handleDelete = (e: React.MouseEvent, run: CampaignRun) => {
+    e.stopPropagation();
+    if (confirm(`Delete this run from ${formatDate(run.lastPlayedAt ?? run.createdAt)}? This cannot be undone.`)) {
+      deleteRun(run.id);
+      setRuns((prev) => prev.filter((r) => r.id !== run.id));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -87,11 +96,11 @@ export function CampaignRunOptions({
           ) : (
             <ul className="mt-4 space-y-2">
               {runs.slice(0, 5).map((run) => (
-                <li key={run.id}>
+                <li key={run.id} className="group flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => handleResume(run)}
-                    className="w-full rounded px-3 py-2 text-left text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                    className="min-w-0 flex-1 rounded px-3 py-2 text-left text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
                   >
                     <span className="block">
                       {formatDate(run.lastPlayedAt ?? run.createdAt)}
@@ -103,6 +112,14 @@ export function CampaignRunOptions({
                           .join(", ")}
                       </span>
                     )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDelete(e, run)}
+                    className="shrink-0 rounded px-2 py-1 text-xs text-neutral-500 opacity-0 transition hover:bg-red-950/50 hover:text-red-400 group-hover:opacity-100"
+                    title="Delete run"
+                  >
+                    Delete
                   </button>
                 </li>
               ))}

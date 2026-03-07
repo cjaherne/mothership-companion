@@ -7,9 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import type { RunState } from "@/types/run";
-
-// In-memory store (runId -> RunState)
-const stateStore = new Map<string, RunState>();
+import { stateStore, clearRunState } from "@/lib/run-state-store";
 
 export async function GET(request: NextRequest) {
   const runId = request.nextUrl.searchParams.get("runId");
@@ -59,5 +57,14 @@ export async function POST(request: NextRequest) {
   };
 
   stateStore.set(runId, merged);
+  return NextResponse.json({ ok: true });
+}
+
+export async function DELETE(request: NextRequest) {
+  const runId = request.nextUrl.searchParams.get("runId");
+  if (!runId) {
+    return NextResponse.json({ error: "runId required" }, { status: 400 });
+  }
+  clearRunState(runId);
   return NextResponse.json({ ok: true });
 }

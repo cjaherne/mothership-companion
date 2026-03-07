@@ -9,7 +9,7 @@ import {
 } from "@livekit/components-react";
 import { getCampaign } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
-import { updateRunLastPlayed, getRunState } from "@/lib/runs";
+import { updateRunLastPlayed, getRunState, syncRunStateToApiAsync } from "@/lib/runs";
 import { RunStatePanel } from "./RunStatePanel";
 
 interface VoiceSessionViewProps {
@@ -58,6 +58,7 @@ export function VoiceSessionView({
   }, [runId]);
 
   const fetchToken = useCallback(async () => {
+    await syncRunStateToApiAsync(runId);
     const res = await fetch(
       `/api/livekit/token?campaign=${encodeURIComponent(campaignId)}&runId=${encodeURIComponent(runId)}&participant=player`
     );
@@ -71,8 +72,13 @@ export function VoiceSessionView({
   const handleDisconnected = useCallback(() => {
     updateRunLastPlayed(runId);
     setToken(null);
+    fetch("/api/livekit/cleanup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ campaignId, runId }),
+    }).catch(() => {});
     onExit();
-  }, [runId, onExit]);
+  }, [campaignId, runId, onExit]);
 
   const campaign = getCampaign(campaignId);
 

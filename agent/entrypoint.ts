@@ -54,6 +54,9 @@ export default defineAgent({
       if (runState) {
         activeNpcId = runState.activeNpcId as string | undefined;
       }
+      if (!activeNpcId) {
+        activeNpcId = "warden-narrator";
+      }
 
       try {
         const { getCampaignContextForAgent } = await import("../src/campaigns/context");
@@ -68,10 +71,8 @@ export default defineAgent({
         });
 
         if (activeNpcId === WARDEN_NARRATOR_ID) {
-          const campaign = getCampaign(roomCtx.campaignId);
-          if (campaign.wardenNarrator?.narrative) {
-            greetingMessage = `Deliver the Warden Narrator opening. Atmospheric, authoritative. Set the scene.\n\n${campaign.wardenNarrator.narrative}`;
-          }
+          ttsVoice = "onyx";
+          greetingMessage = "Warden here, how can I assist comrade?";
         } else if (activeNpcId) {
           const npc = getNpcProfile(activeNpcId);
           if (npc?.greetingMessage) {
@@ -90,7 +91,7 @@ export default defineAgent({
     const instructions =
       campaignContext && activeNpcId
         ? isWarden
-          ? `You are the Warden Narrator—the omniscient voice of this Mothership RPG session. Authoritative, atmospheric, builds tension. Deliver narration and scene-setting when players ask. No asterisks or stage directions. Keep responses concise for voice.
+          ? `You are the Warden—the voice assistant for this Mothership RPG session. Sci-fi dark horror setting. Your persona: grim, atmospheric, subtly foreboding. A veteran of countless colony drops. You assist the players by summarizing what they know: their mission, locations explored, characters they've met, facts and clues they've discovered. You respond to their questions and help them track their progress. You NEVER reveal plot points, puzzle solutions, or information they haven't yet discovered. You listen and respond appropriately—never echo back what they say. Keep responses concise for voice (2-4 sentences typically). No asterisks or stage directions.
 
 ${campaignContext}`
           : `You are roleplaying as the NPC "${activeNpcId}" in a Mothership RPG session. Stay in character at all times. Speak only as this NPC. Use natural, conversational dialogue—no asterisks or stage directions. Keep responses concise for voice (2-4 sentences typically).
@@ -156,10 +157,13 @@ ${campaignContext}`
       });
 
       if (greetingMessage) {
+        const isWardenGreeting = activeNpcId === "warden-narrator";
         await session.generateReply({
-          instructions: `Deliver this as your opening. Speak it in character. Adapt the briefing to your personality—dismissive, corporate, unconcerned with the crew. Cover all the information but in your own annoying way. Do not use asterisks or stage directions. Keep it concise for voice (break into 2-3 parts if long).\n\n${greetingMessage}`,
+          instructions: isWardenGreeting
+            ? `Say exactly this as your greeting. Then wait for the player to speak. "${greetingMessage}"`
+            : `Deliver this as your opening. Speak it in character. Adapt the briefing to your personality—dismissive, corporate, unconcerned with the crew. Cover all the information but in your own annoying way. Do not use asterisks or stage directions. Keep it concise for voice (break into 2-3 parts if long).\n\n${greetingMessage}`,
         });
-        logger.debug("NPC greeting delivered");
+        logger.debug(isWardenGreeting ? "Warden greeting delivered" : "NPC greeting delivered");
       } else if (!activeNpcId) {
         await session.generateReply({
           instructions: "Greet the user briefly and say you are ready to echo what they say.",

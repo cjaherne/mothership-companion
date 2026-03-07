@@ -224,5 +224,29 @@ export function getCampaignContextForAgent(
     parts.push("\n" + anotherBugHuntThemes);
   }
 
+  // Warden-only: summary of what players know (for assisting without spoiling)
+  if (activeNpcId === "warden-narrator" && runState) {
+    parts.push("\n## Warden: What the players know (you may reference only this)");
+    const explored = runState.exploredLocationIds ?? [];
+    const knownFacts = runState.playerKnowledgeFactIds ?? [];
+    const interacted = runState.interactedNpcIds ?? [];
+    const locNames = campaign.world.locations
+      .filter((l) => explored.includes(l.id))
+      .map((l) => l.name)
+      .join(", ");
+    parts.push(`- Explored locations: ${locNames || "none yet"}`);
+    parts.push(`- NPCs interacted with: ${interacted.length ? interacted.join(", ") : "none yet"}`);
+    if (knownFacts.length > 0) {
+      const factTexts = knownFacts
+        .map((fid) => getFact(fid)?.text)
+        .filter(Boolean);
+      parts.push(`- Facts they have learned: ${factTexts.join(" | ")}`);
+    } else {
+      parts.push("- Facts they have learned: none yet");
+    }
+    parts.push("");
+    parts.push("CRITICAL: Do NOT reveal any fact, plot point, puzzle solution, or location detail not listed above. You assist with what they know—you never spoil what they haven't discovered.");
+  }
+
   return parts.join("\n");
 }

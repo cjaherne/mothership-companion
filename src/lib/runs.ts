@@ -41,6 +41,11 @@ export function getRunsForCampaign(campaignId: string): CampaignRun[] {
   return getRuns().filter((r) => r.campaignId === campaignId);
 }
 
+export function deleteRun(runId: string): void {
+  const runs = getRuns().filter((r) => r.id !== runId);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(runs));
+}
+
 export function getRunState(runId: string): RunState {
   const run = getRun(runId);
   return run?.state ? { ...EMPTY_RUN_STATE, ...run.state } : { ...EMPTY_RUN_STATE };
@@ -135,6 +140,17 @@ function syncRunStateToApi(runId: string): void {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ runId, state }),
   }).catch(() => {});
+}
+
+/** Awaitable sync - use before connecting to ensure agent has run state */
+export async function syncRunStateToApiAsync(runId: string): Promise<void> {
+  if (typeof window === "undefined") return;
+  const state = getRunState(runId);
+  await fetch("/api/run/state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ runId, state }),
+  });
 }
 
 function deepMergeRunState(
