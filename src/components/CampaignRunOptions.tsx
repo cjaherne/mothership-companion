@@ -38,7 +38,7 @@ export function CampaignRunOptions({
 
   const handleCreateNew = () => {
     const campaign = getCampaign(campaignId);
-    const scenarioId = campaign.scenarioIds?.[0] ?? undefined;
+    const scenarioId = campaign.scenarios?.[0]?.id ?? undefined;
     const run = createRun(campaignId, scenarioId);
     setRuns((prev) => [run, ...prev]);
     onSetupRun(campaignId, run);

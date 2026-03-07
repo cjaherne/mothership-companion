@@ -10,15 +10,13 @@
  * 3. The Company - always available for hints when asked
  */
 
-import { getCampaign } from "./registry";
+import { getCampaign, getMission, getScenario } from "./registry";
 import type { CampaignId } from "./types";
 import { getAvailableVoices } from "./voices";
 import { anotherBugHuntThemes } from "./another-bug-hunt/themes";
-import { scenarios } from "./another-bug-hunt/scenario";
-import { missions } from "./another-bug-hunt/mission";
 import {
-  getFactsForScenario,
   getFact,
+  getFactsForScenario,
 } from "./another-bug-hunt/facts";
 import { getNpcProfile } from "./another-bug-hunt/npcs";
 import type { RunState } from "@/types/run";
@@ -113,9 +111,9 @@ export function getCampaignContextForAgent(
   );
 
   // Scenario (if campaign has scenarios)
-  const sid = scenarioId ?? campaign.scenarioIds?.[0];
-  if (campaign.scenarioIds?.length && sid) {
-    const scenario = scenarios.find((s) => s.id === sid);
+  const sid = scenarioId ?? campaign.scenarios?.[0]?.id;
+  if (campaign.scenarios?.length && sid) {
+    const scenario = getScenario(campaignId, sid);
     if (scenario) {
       parts.push(`\n## Scenario: ${scenario.name}`);
       parts.push(scenario.description);
@@ -123,10 +121,10 @@ export function getCampaignContextForAgent(
   }
 
   // Mission (if scenario has one)
-  if (campaign.missionIds?.length && sid) {
-    const scenario = scenarios.find((s) => s.id === sid);
+  if (sid) {
+    const scenario = getScenario(campaignId, sid);
     if (scenario?.missionId) {
-      const mission = missions.find((m) => m.id === scenario.missionId);
+      const mission = getMission(campaignId, scenario.missionId);
       if (mission) {
         parts.push(`\n## Mission: ${mission.name}`);
         parts.push(mission.briefing);

@@ -91,10 +91,6 @@ export interface CampaignConfig {
   npcUnlockConditions?: Record<string, NpcUnlockCondition>;
   /** Puzzle IDs in this campaign */
   puzzleIds: string[];
-  /** Scenario IDs in this campaign */
-  scenarioIds?: string[];
-  /** Mission IDs in this campaign */
-  missionIds?: string[];
   /** LiveKit room name (unique per campaign session) */
   roomName: string;
   /** Warden Narrator - opening backstory and narrative (above all campaigns) */

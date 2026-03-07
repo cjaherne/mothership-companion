@@ -27,8 +27,6 @@ export const anotherBugHuntCampaign: CampaignConfig = {
     },
   },
   puzzleIds,
-  scenarioIds: scenarios.map((s) => s.id),
-  missionIds: missions.map((m) => m.id),
   roomName: "mothership-another-bug-hunt",
   wardenNarrator: {
     narrative: `Six months. That's how long Greta Base has been silent. Samsa VI—a jungle planet, a terraforming colony, a research station. The Company sends you because someone has to. The tropical storm howls outside. Radio is dead. You descend into darkness. The facility is ransacked. No survivors—or so it seems. Something waits in the shadows. Something that came from the samples.`,
