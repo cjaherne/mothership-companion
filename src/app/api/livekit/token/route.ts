@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AccessToken } from "livekit-server-sdk";
+import { AccessToken, AgentDispatchClient } from "livekit-server-sdk";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/livekit/token
  *
  * Generates a LiveKit JWT for the client to join a room.
- * The room name is used to dispatch the appropriate voice agent.
+ * Explicitly dispatches the voice agent to the room via API.
  */
 export async function GET(request: NextRequest) {
   const url = process.env.LIVEKIT_URL;
@@ -24,6 +25,20 @@ export async function GET(request: NextRequest) {
   const participantName = searchParams.get("participant") ?? "player";
 
   try {
+    // Explicitly dispatch agent to room (token-based dispatch was not working for local agent)
+    let dispatchOk = false;
+    try {
+      const httpsUrl = url.replace(/^wss:/, "https:").replace(/^ws:/, "http:");
+      const dispatchClient = new AgentDispatchClient(httpsUrl, apiKey, apiSecret);
+      await dispatchClient.createDispatch(roomName, "mothership-warden");
+      dispatchOk = true;
+    } catch (dispatchErr) {
+      logger.error("Agent dispatch failed", {
+        message: dispatchErr instanceof Error ? dispatchErr.message : String(dispatchErr),
+      });
+      // Still return token so user can connect; agent may not join
+    }
+
     const token = new AccessToken(apiKey, apiSecret, {
       identity: participantName,
       name: participantName,
@@ -41,7 +56,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ token: jwt, serverUrl: url });
   } catch (err) {
-    console.error("LiveKit token error:", err);
+    logger.error("LiveKit token error", {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    });
     return NextResponse.json(
       { error: "Failed to generate token" },
       { status: 500 }

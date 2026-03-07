@@ -11,6 +11,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Room, RoomEvent, Track } from "livekit-client";
 
+function getDisconnectMessage(reason: number | undefined): string {
+  if (reason == null) return "Disconnected";
+  const messages: Record<number, string> = {
+    1: "", // CLIENT_INITIATED - normal
+    2: "Duplicate identity in room",
+    3: "Participant removed",
+    4: "Join failed",
+    5: "Connection lost",
+  };
+  return messages[reason] ?? `Disconnected (reason: ${reason})`;
+}
+
 export interface VoiceSessionProps {
   /** LiveKit server URL */
   serverUrl: string;
@@ -83,7 +95,23 @@ export function VoiceSession({
         updateState("connected");
       });
 
-      room.on(RoomEvent.Disconnected, () => {
+      room.on(RoomEvent.Disconnected, (reason) => {
+        // 1 = CLIENT_INITIATED (user clicked Disconnect or normal close)
+        if (reason === 1) {
+          setError(null);
+        } else {
+          const msg = getDisconnectMessage(reason);
+          setError(msg);
+          fetch("/api/log", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              level: "error",
+              message: `VoiceSession disconnected: ${msg}`,
+              meta: { reason },
+            }),
+          }).catch(() => {});
+        }
         updateState("disconnected");
       });
 
@@ -106,6 +134,15 @@ export function VoiceSession({
       const message = err instanceof Error ? err.message : "Failed to connect";
       setError(message);
       updateState("error");
+      fetch("/api/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          level: "error",
+          message: `VoiceSession connect failed: ${message}`,
+          meta: { stack: err instanceof Error ? err.stack : undefined },
+        }),
+      }).catch(() => {});
     }
   }, [token, serverUrl, updateState, onAgentAudio]);
 
@@ -125,11 +162,15 @@ export function VoiceSession({
     }
   }, []);
 
+  // Cleanup only on unmount—disconnect in deps caused cleanup to run during connect (parent re-render)
   useEffect(() => {
     return () => {
-      disconnect();
+      if (roomRef.current) {
+        roomRef.current.disconnect();
+        roomRef.current = null;
+      }
     };
-  }, [disconnect]);
+  }, []);
 
   return (
     <div className={`voice-session ${className}`}>

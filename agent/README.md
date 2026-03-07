@@ -5,8 +5,9 @@ LiveKit voice agent process. Runs separately from the Next.js app.
 ## Setup
 
 1. Copy `.env.example` to `.env.local` in project root.
-2. Set `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `OPENAI_API_KEY`.
-3. Run `pnpm download-files` if using Silero VAD / turn detection (see LiveKit docs).
+2. Set `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`.
+3. Set `OPENAI_API_KEY` — see [docs/openai-api-key.md](../docs/openai-api-key.md) for how to create one.
+4. If using LiveKit Cloud, add `OPENAI_API_KEY` in the project's agent/inference settings.
 
 ## Development
 

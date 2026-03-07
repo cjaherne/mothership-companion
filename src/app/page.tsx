@@ -1,12 +1,28 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { VoiceSession } from "@/components/VoiceSession";
+import {
+  LiveKitRoom,
+  RoomAudioRenderer,
+  VoiceAssistantControlBar,
+  useVoiceAssistant,
+} from "@livekit/components-react";
+
+function VoiceAssistantUI() {
+  const { state, audioTrack } = useVoiceAssistant();
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-neutral-500">Agent: {state}</p>
+      <RoomAudioRenderer />
+      <VoiceAssistantControlBar />
+    </div>
+  );
+}
 
 export default function Home() {
   const [token, setToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string>("");
-  const [connectionState, setConnectionState] = useState<string>("disconnected");
 
   const fetchToken = useCallback(async () => {
     const res = await fetch("/api/livekit/token?room=mothership-warden&participant=player");
@@ -37,19 +53,17 @@ export default function Home() {
             Initialize Session
           </button>
         ) : (
-          <VoiceSession
+          <LiveKitRoom
             serverUrl={serverUrl}
             token={token}
-            roomName="mothership-warden"
-            agentName="mothership-warden"
-            onConnectionStateChange={(state) => setConnectionState(state)}
-          />
+            connect={true}
+            audio={true}
+            video={false}
+            onDisconnected={() => setToken(null)}
+          >
+            <VoiceAssistantUI />
+          </LiveKitRoom>
         )}
-
-        <p className="text-xs text-neutral-500">
-          Status: {connectionState}. Run the LiveKit agent separately to process
-          voice.
-        </p>
       </div>
     </main>
   );

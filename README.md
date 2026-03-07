@@ -52,6 +52,7 @@ mothership-companion/
    ```
 
    > **Security:** `.env.local` contains secrets and is gitignored. Never commit it. See [docs/env-setup.md](docs/env-setup.md) for details.
+   > **OpenAI key:** See [docs/openai-api-key.md](docs/openai-api-key.md) for setup steps.
 
 3. **Run the Next.js app**
 

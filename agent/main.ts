@@ -2,27 +2,27 @@
  * Mothership Companion - LiveKit Voice Agent
  *
  * Long-running process that joins LiveKit rooms and handles voice.
- * Uses VAD (Voice Activity Detection) to know when the player has stopped
- * speaking—no awkward "is it still listening?" silence.
+ * Uses the planned STT → LLM → TTS pipeline (echo mode for initial testing).
  *
- * Run: pnpm agent:dev (development) or pnpm agent:start (production)
+ * Run: npm run agent:dev (development) or npm run agent:start (production)
  *
  * Requires: LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, OPENAI_API_KEY
+ * (OpenAI key is used by LiveKit Cloud Inference for the LLM)
  */
 
-// Placeholder for LiveKit Agents setup.
-// See: https://docs.livekit.io/agents/quickstarts/voice-agent/
-// The agent will:
-// 1. Connect to LiveKit and listen for room dispatch
-// 2. Join rooms when "mothership-warden" agent is requested
-// 3. Use STT -> LLM -> TTS pipeline (or OpenAI Realtime) for voice
-// 4. Inject NPC profiles and puzzle state from the AI orchestration layer
+import { config } from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import { cli, ServerOptions } from "@livekit/agents";
 
-console.log("Mothership Companion agent - scaffolding ready.");
-console.log("To implement: Add @livekit/agents Worker and AgentSession.");
-console.log("See agent/README.md for integration steps.");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Parse CLI for dev/start
-const args = process.argv.slice(2);
-const mode = args[0] ?? "dev";
-console.log(`Mode: ${mode}`);
+// Load .env.local from project root (parent of agent/)
+config({ path: path.resolve(__dirname, "../.env.local") });
+
+cli.runApp(
+  new ServerOptions({
+    agent: path.join(__dirname, "entrypoint.ts"),
+    agentName: "mothership-warden",
+  })
+);
