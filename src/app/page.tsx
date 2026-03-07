@@ -7,9 +7,10 @@ import {
   VoiceAssistantControlBar,
   useVoiceAssistant,
 } from "@livekit/components-react";
+import { DEFAULT_CAMPAIGN_ID } from "@/campaigns";
 
 function VoiceAssistantUI() {
-  const { state, audioTrack } = useVoiceAssistant();
+  const { state } = useVoiceAssistant();
 
   return (
     <div className="flex flex-col gap-4">
@@ -25,7 +26,9 @@ export default function Home() {
   const [serverUrl, setServerUrl] = useState<string>("");
 
   const fetchToken = useCallback(async () => {
-    const res = await fetch("/api/livekit/token?room=mothership-warden&participant=player");
+    const res = await fetch(
+      `/api/livekit/token?campaign=${DEFAULT_CAMPAIGN_ID}&participant=player`
+    );
     const data = await res.json();
     if (data.token && data.serverUrl) {
       setToken(data.token);

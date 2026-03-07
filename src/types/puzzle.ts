@@ -27,6 +27,8 @@ export interface PuzzleState {
 
 /** Global game/session state persisted across voice turns */
 export interface GameState {
+  /** Campaign ID (for multi-campaign support) */
+  campaignId?: string;
   /** Active puzzle IDs and their states */
   puzzles: Record<PuzzleId, PuzzleState>;
   /** Facts the player has learned (affects NPC dialogue) */
