@@ -10,6 +10,7 @@ import { voice } from "@livekit/agents";
 import type { JobContext, JobProcess } from "@livekit/agents";
 import * as openai from "@livekit/agents-plugin-openai";
 import * as silero from "@livekit/agents-plugin-silero";
+import { TrackKind } from "@livekit/rtc-node";
 import { logger } from "./logger";
 
 /** Echo agent: listens and repeats what the user says. */
@@ -59,20 +60,21 @@ export default defineAgent({
         });
       });
       session.on(voice.AgentSessionEventTypes.SpeechCreated, (ev) => {
-        logger.debug("Speech handle created", { speechId: ev.handle?.id });
+        logger.debug("Speech handle created", { speechId: ev.speechHandle?.id });
       });
       session.on(voice.AgentSessionEventTypes.Error, (ev) => {
+        const err = ev.error;
         logger.error("Agent session error event", {
-          message: ev.error?.message,
-          stack: ev.error?.stack,
+          message: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
         });
       });
 
       ctx.room.on("participantConnected", (p: { identity: string }) => {
         logger.debug("Participant connected", { identity: p.identity });
       });
-      ctx.room.on("trackSubscribed", (track: { kind: string }, _pub: unknown, participant: { identity: string }) => {
-        if (track.kind === "audio") {
+      ctx.room.on("trackSubscribed", (track, _pub, participant) => {
+        if (track?.kind === TrackKind.KIND_AUDIO) {
           logger.debug("Audio track subscribed", { identity: participant.identity });
         }
       });
@@ -90,7 +92,7 @@ export default defineAgent({
       await ctx.connect();
       logger.info("Connection established", {
         remoteCount: ctx.room.remoteParticipants.size,
-        participantIdentities: [...ctx.room.remoteParticipants.keys()],
+        participantIdentities: Array.from(ctx.room.remoteParticipants.keys()),
       });
 
       await session.generateReply({

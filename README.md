@@ -22,6 +22,10 @@ mothership-companion/
 │   │   ├── layout.tsx
 │   │   ├── page.tsx
 │   │   └── globals.css
+│   ├── campaigns/              # Multi-campaign support
+│   │   ├── types.ts            # Campaign, World, PlayerSession
+│   │   ├── registry.ts         # getCampaign(), listCampaignIds()
+│   │   └── warden/             # Default Warden campaign
 │   ├── components/
 │   │   └── VoiceSession/       # Client-side audio capture → LiveKit stream
 │   ├── lib/
@@ -81,7 +85,21 @@ Interfaces are defined in `src/types/npc.ts`:
 Defined in `src/types/puzzle.ts`:
 
 - `PuzzleState` – Status, clues, required conditions
-- `GameState` – Puzzles, player knowledge, current scene
+- `GameState` – Puzzles, player knowledge, current scene (optionally scoped by `campaignId`)
+
+## Campaigns
+
+The app supports multiple Mothership campaigns (worlds, NPCs, players). Structure in `src/campaigns/`:
+
+- **CampaignConfig** – id, name, world, npcIds, puzzleIds, roomName
+- **World** – Locations and default scene
+- **PlayerSession** – Per-campaign player state
+- **Registry** – `getCampaign(id)`, `getCampaignOrDefault(id)`, `listCampaignIds()`
+
+The token API accepts `?campaign=warden` (default). To add a campaign:
+
+1. Create `src/campaigns/{id}/index.ts` with a `CampaignConfig`
+2. Register it in `src/campaigns/registry.ts`
 
 ## Next Steps
 

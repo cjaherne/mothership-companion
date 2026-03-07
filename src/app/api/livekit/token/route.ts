@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AccessToken, AgentDispatchClient } from "livekit-server-sdk";
 import { logger } from "@/lib/logger";
+import { getCampaignOrDefault } from "@/campaigns";
 
 /**
  * GET /api/livekit/token
  *
  * Generates a LiveKit JWT for the client to join a room.
  * Explicitly dispatches the voice agent to the room via API.
+ *
+ * Query params:
+ *   - campaign: campaign ID (default: warden)
+ *   - participant: participant name (default: player)
+ *   - room: override room name (optional; normally derived from campaign)
  */
 export async function GET(request: NextRequest) {
   const url = process.env.LIVEKIT_URL;
@@ -21,8 +27,11 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const roomName = searchParams.get("room") ?? "mothership-warden";
+  const campaignId = searchParams.get("campaign");
   const participantName = searchParams.get("participant") ?? "player";
+
+  const campaign = getCampaignOrDefault(campaignId);
+  const roomName = searchParams.get("room") ?? campaign.roomName;
 
   try {
     // Explicitly dispatch agent to room (token-based dispatch was not working for local agent)
