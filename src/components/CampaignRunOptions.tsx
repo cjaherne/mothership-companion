@@ -1,0 +1,97 @@
+"use client";
+
+import { getCampaign } from "@/campaigns";
+import type { CampaignId } from "@/campaigns";
+import { getRunsForCampaign, createRun, type CampaignRun } from "@/lib/runs";
+import { useState } from "react";
+
+interface CampaignRunOptionsProps {
+  campaignId: CampaignId;
+  onStartRun: (campaignId: CampaignId, runId: string) => void;
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export function CampaignRunOptions({
+  campaignId,
+  onStartRun,
+}: CampaignRunOptionsProps) {
+  const campaign = getCampaign(campaignId);
+  const [runs, setRuns] = useState<CampaignRun[]>(() =>
+    getRunsForCampaign(campaignId)
+  );
+
+  const handleCreateNew = () => {
+    const run = createRun(campaignId);
+    setRuns((prev) => [run, ...prev]);
+    onStartRun(campaignId, run.id);
+  };
+
+  const handleResume = (run: CampaignRun) => {
+    onStartRun(campaignId, run.id);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="mb-1 text-xl font-semibold text-white">
+          {campaign.name}
+        </h3>
+        <p className="text-sm text-neutral-400">{campaign.description}</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={handleCreateNew}
+          className="group flex flex-col items-start rounded-lg border border-neon-cyan/30 bg-neon-cyan/5 p-6 text-left transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/10 hover:shadow-neon-cyan"
+        >
+          <span className="mb-2 text-2xl">▶</span>
+          <span className="font-medium text-neon-cyan group-hover:text-neon-cyan">
+            Create New Run
+          </span>
+          <span className="mt-1 text-xs text-neutral-400">
+            Start a fresh session
+          </span>
+        </button>
+
+        <div className="flex flex-col rounded-lg border border-neutral-800 bg-neutral-950/50 p-6">
+          <span className="mb-2 text-2xl text-neutral-600">↻</span>
+          <span className="font-medium text-neutral-300">
+            Resume Previous Run
+          </span>
+          <span className="mt-1 text-xs text-neutral-500">
+            Continue from a saved session
+          </span>
+          {runs.length === 0 ? (
+            <p className="mt-4 text-sm text-neutral-500">
+              No previous runs for this campaign.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-2">
+              {runs.slice(0, 5).map((run) => (
+                <li key={run.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleResume(run)}
+                    className="w-full rounded px-3 py-2 text-left text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                  >
+                    {formatDate(run.lastPlayedAt ?? run.createdAt)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
