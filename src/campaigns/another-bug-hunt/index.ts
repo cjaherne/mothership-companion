@@ -17,6 +17,8 @@ export const anotherBugHuntCampaign: CampaignConfig = {
   description:
     "The Company's abandoned terraforming colony on Samsa VI. Four interconnected scenarios of sci-fi horror.",
   world: anotherBugHuntWorld,
+  scenarios,
+  missions,
   npcIds: ["example-survivor"],
   npcUnlockConditions: {
     "example-survivor": {

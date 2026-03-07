@@ -4,6 +4,7 @@
  * Tracks runs, character creation, and game state for persistence.
  */
 
+import { getCampaign, getScenario } from "@/campaigns";
 import type { RunState, Character } from "@/types/run";
 import { EMPTY_RUN_STATE } from "@/types/run";
 
@@ -12,6 +13,8 @@ const STORAGE_KEY = "mothership-runs";
 export interface CampaignRun {
   id: string;
   campaignId: string;
+  /** Scenario ID for multi-scenario campaigns */
+  scenarioId?: string;
   createdAt: string;
   lastPlayedAt?: string;
   /** Persisted game state */
@@ -45,17 +48,44 @@ export function getRunState(runId: string): RunState {
 
 export function createRun(
   campaignId: string,
+  scenarioId: string | undefined,
   initialState?: Partial<RunState>
 ): CampaignRun {
+  let state = {
+    ...EMPTY_RUN_STATE,
+    ...initialState,
+    turn: initialState?.turn ?? 0,
+  };
+
+  // Resolve starting location from scenario or world default
+  if (typeof window !== "undefined") {
+    try {
+      let startingLocationId: string | undefined;
+      if (scenarioId) {
+        const scenario = getScenario(campaignId, scenarioId);
+        startingLocationId = scenario?.startingLocationId;
+      }
+      if (!startingLocationId) {
+        startingLocationId = getCampaign(campaignId).world.defaultLocationId;
+      }
+      if (startingLocationId) {
+        state = {
+          ...state,
+          currentLocationId: startingLocationId,
+          exploredLocationIds: [startingLocationId],
+        };
+      }
+    } catch {
+      // Campaign module may not be available in SSR
+    }
+  }
+
   const run: CampaignRun = {
     id: `run_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
     campaignId,
+    scenarioId,
     createdAt: new Date().toISOString(),
-    state: {
-      ...EMPTY_RUN_STATE,
-      ...initialState,
-      turn: initialState?.turn ?? 0,
-    },
+    state,
   };
   const runs = getRuns();
   runs.unshift(run);

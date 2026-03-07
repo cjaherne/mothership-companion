@@ -12,4 +12,5 @@ export const scenario3: Scenario = {
   description: "",
   missionId: null,
   locationIds: [],
+  startingLocationId: "airlock",
 };

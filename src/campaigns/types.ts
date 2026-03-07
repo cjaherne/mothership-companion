@@ -8,11 +8,24 @@
 
 export type CampaignId = string;
 
+/** Point of interest within a location (for detailed map) */
+export interface PointOfInterest {
+  id: string;
+  name: string;
+  description?: string;
+  /** IDs of POIs or locations this connects to (e.g. door to another room) */
+  connectedTo?: string[];
+}
+
 /** A location or scene within a world */
 export interface Location {
   id: string;
   name: string;
   description: string;
+  /** Location IDs reachable from here (doors, corridors, vents) */
+  connectedLocationIds?: string[];
+  /** Points of interest within this location (for detailed map) */
+  pointsOfInterest?: PointOfInterest[];
 }
 
 /** World/setting for a campaign (ship, station, planet, etc.) */
@@ -39,6 +52,8 @@ export interface Scenario {
   description: string;
   missionId: string | null;
   locationIds: string[];
+  /** Where the party begins this scenario (must be in locationIds) */
+  startingLocationId: string;
 }
 
 /** Warden Narrator - provides opening backstory/narrative (campaign-specific) */
@@ -66,6 +81,10 @@ export interface CampaignConfig {
   name: string;
   description: string;
   world: World;
+  /** Scenario definitions (for multi-scenario campaigns) */
+  scenarios?: Scenario[];
+  /** Mission definitions (for scenario briefings) */
+  missions?: Mission[];
   /** Scenario NPC profile IDs (excludes Warden and The Company—those are always available) */
   npcIds: string[];
   /** Unlock conditions per NPC: must satisfy to interact (e.g. reach location) */

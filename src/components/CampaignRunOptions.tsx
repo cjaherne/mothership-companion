@@ -38,10 +38,8 @@ export function CampaignRunOptions({
 
   const handleCreateNew = () => {
     const campaign = getCampaign(campaignId);
-    const startingLocation = campaign.world.defaultLocationId;
-    const run = createRun(campaignId, {
-      exploredLocationIds: startingLocation ? [startingLocation] : [],
-    });
+    const scenarioId = campaign.scenarioIds?.[0] ?? undefined;
+    const run = createRun(campaignId, scenarioId);
     setRuns((prev) => [run, ...prev]);
     onSetupRun(campaignId, run);
   };

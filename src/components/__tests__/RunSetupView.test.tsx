@@ -4,7 +4,7 @@ import { createRun } from "@/lib/runs";
 
 describe("RunSetupView", () => {
   const mockRun = () => {
-    const run = createRun("another-bug-hunt");
+    const run = createRun("another-bug-hunt", "1-distress-signals");
     return run;
   };
 

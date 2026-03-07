@@ -19,6 +19,8 @@ export {
 export {
   getCampaign,
   getCampaignOrDefault,
+  getMission,
+  getScenario,
   listCampaignIds,
   DEFAULT_CAMPAIGN_ID,
 } from "./registry";

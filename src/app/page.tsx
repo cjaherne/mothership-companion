@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { BriefingLandingPage } from "@/components/BriefingLandingPage";
 import { CampaignRunOptions } from "@/components/CampaignRunOptions";
 import { RunSetupView } from "@/components/RunSetupView";
 import { VoiceSessionView } from "@/components/VoiceSessionView";
 import type { CampaignId } from "@/campaigns";
 import type { CampaignRun } from "@/lib/runs";
 
-type ViewState = "home" | "campaign" | "setup" | "session";
+type ViewState = "home" | "campaign" | "setup" | "briefing" | "session";
 
 export default function Home() {
   const [selectedCampaignId, setSelectedCampaignId] =
@@ -22,20 +23,39 @@ export default function Home() {
     campaignId: CampaignId;
     runId: string;
   } | null>(null);
+  const [activeBriefingRun, setActiveBriefingRun] = useState<{
+    campaignId: CampaignId;
+    runId: string;
+  } | null>(null);
 
   const handleSetupRun = (campaignId: CampaignId, run: CampaignRun) => {
     setSetupRun({ campaignId, run });
     setViewState("setup");
   };
 
+  const handleStartFromSetup = (campaignId: CampaignId, runId: string) => {
+    setSetupRun(null);
+    setActiveBriefingRun({ campaignId, runId });
+    setViewState("briefing");
+  };
+
   const handleStartRun = (campaignId: CampaignId, runId: string) => {
     setSetupRun(null);
+    setActiveBriefingRun(null);
     setActiveRun({ campaignId, runId });
+    setViewState("session");
+  };
+
+  const handleProceedFromBriefing = () => {
+    if (!activeBriefingRun) return;
+    setActiveRun(activeBriefingRun);
+    setActiveBriefingRun(null);
     setViewState("session");
   };
 
   const handleExitSession = () => {
     setActiveRun(null);
+    setActiveBriefingRun(null);
     setViewState(selectedCampaignId ? "campaign" : "home");
   };
 
@@ -46,7 +66,10 @@ export default function Home() {
         onSelectCampaign={(id) => {
           setSelectedCampaignId(id);
           setViewState(id ? "campaign" : "home");
-          if (!id) setActiveRun(null);
+          if (!id) {
+            setActiveRun(null);
+            setActiveBriefingRun(null);
+          }
         }}
       />
 
@@ -69,11 +92,21 @@ export default function Home() {
               runId={activeRun.runId}
               onExit={handleExitSession}
             />
+          ) : viewState === "briefing" && activeBriefingRun ? (
+            <BriefingLandingPage
+              campaignId={activeBriefingRun.campaignId}
+              runId={activeBriefingRun.runId}
+              onProceed={handleProceedFromBriefing}
+              onBack={() => {
+                setActiveBriefingRun(null);
+                setViewState("campaign");
+              }}
+            />
           ) : viewState === "setup" && setupRun && selectedCampaignId ? (
             <RunSetupView
               campaignId={setupRun.campaignId}
               run={setupRun.run}
-              onStart={() => handleStartRun(setupRun.campaignId, setupRun.run.id)}
+              onStart={() => handleStartFromSetup(setupRun.campaignId, setupRun.run.id)}
               onBack={() => {
                 setSetupRun(null);
                 setViewState("campaign");

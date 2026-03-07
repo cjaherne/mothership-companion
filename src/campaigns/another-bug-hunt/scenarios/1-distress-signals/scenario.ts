@@ -20,6 +20,7 @@ export const distressSignalsScenario: Scenario = {
     "reactor",
     "vents",
   ],
+  startingLocationId: "airlock",
 };
 
 export const puzzleIds = distressSignalsPuzzles.map((p) => p.id);

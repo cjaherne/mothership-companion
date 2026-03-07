@@ -5,7 +5,7 @@
  * registering in CAMPAIGNS.
  */
 
-import type { CampaignConfig, CampaignId } from "./types";
+import type { CampaignConfig, CampaignId, Mission, Scenario } from "./types";
 import { anotherBugHuntCampaign } from "./another-bug-hunt";
 import { wardenCampaign } from "./warden";
 
@@ -44,4 +44,28 @@ export function getCampaignOrDefault(id: CampaignId | null | undefined): Campaig
 /** List all registered campaign IDs */
 export function listCampaignIds(): CampaignId[] {
   return Object.keys(CAMPAIGNS);
+}
+
+/**
+ * Get scenario by ID for a campaign.
+ * Returns undefined if campaign has no scenarios or scenario not found.
+ */
+export function getScenario(
+  campaignId: CampaignId,
+  scenarioId: string
+): Scenario | undefined {
+  const campaign = CAMPAIGNS[campaignId];
+  return campaign?.scenarios?.find((s) => s.id === scenarioId);
+}
+
+/**
+ * Get mission by ID for a campaign.
+ * Returns undefined if campaign has no missions or mission not found.
+ */
+export function getMission(
+  campaignId: CampaignId,
+  missionId: string
+): Mission | undefined {
+  const campaign = CAMPAIGNS[campaignId];
+  return campaign?.missions?.find((m) => m.id === missionId);
 }

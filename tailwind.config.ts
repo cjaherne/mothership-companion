@@ -13,6 +13,7 @@ const config: Config = {
           cyan: "#00fff2",
           green: "#39ff14",
           pink: "#ff006e",
+          blue: "#2563eb",
         },
       },
       boxShadow: {
