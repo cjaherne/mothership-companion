@@ -63,8 +63,14 @@ export interface NPCPersonalityProfile {
   /** Speech patterns: vocabulary level, quirks, catchphrases */
   speechProfile: SpeechProfile;
 
-  /** What this NPC knows; gates information reveals */
+  /** What this NPC knows; gates information reveals (free-form) */
   knowledgeScope: string[];
+
+  /** Fact IDs this NPC knows (from campaign facts DB); structured info gating */
+  knownFactIds?: string[];
+
+  /** Per-fact reveal overrides (minAffability, etc.); use campaign default thresholds if absent */
+  factRevealConditions?: Record<string, { minAffability?: number; minTrust?: number }>;
 
   /** Conditions under which this NPC will/won't help the player */
   motivationHooks: string[];

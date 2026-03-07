@@ -13,3 +13,4 @@ export {
   DEFAULT_CAMPAIGN_ID,
 } from "./registry";
 export { getCampaignContextForAgent } from "./context";
+export type { CampaignContextOptions } from "./context";

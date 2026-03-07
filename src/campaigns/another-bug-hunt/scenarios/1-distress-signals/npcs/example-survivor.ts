@@ -40,6 +40,13 @@ export const exampleSurvivorProfile: NPCPersonalityProfile = {
     "Location of the Carcinid lair",
     "Power restoration sequence",
   ],
+  knownFactIds: [
+    "last_days",
+    "carcinid_garage",
+    "power_sequence",
+    "outbreak_source",
+    "vents_connected",
+  ],
   motivationHooks: [
     "Calming them may increase willingness to share",
     "High stress causes fragmented, unreliable recall",

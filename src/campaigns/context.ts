@@ -1,8 +1,8 @@
 /**
  * Campaign context loader for voice agent
  *
- * Assembles world, scenario, mission, and themes into a string for
- * future agent prompt injection. Not wired to entrypoint in this PR.
+ * Assembles world, scenario, mission, themes, facts, and NPC knowledge
+ * into a string for agent prompt injection.
  */
 
 import { getCampaign } from "./registry";
@@ -10,16 +10,29 @@ import type { CampaignId } from "./types";
 import { anotherBugHuntThemes } from "./another-bug-hunt/themes";
 import { scenarios } from "./another-bug-hunt/scenario";
 import { missions } from "./another-bug-hunt/mission";
+import {
+  getFactsForScenario,
+  getFact,
+} from "./another-bug-hunt/facts";
+import { getNpcProfile } from "./another-bug-hunt/npcs";
+
+export interface CampaignContextOptions {
+  /** Current scenario; defaults to first */
+  scenarioId?: string | null;
+  /** Active NPC (e.g. player is speaking to); includes known facts */
+  activeNpcId?: string | null;
+  /** Fact IDs the player already knows; gates what NPC would repeat */
+  playerKnowledgeFactIds?: string[];
+}
 
 /**
  * Get assembled context string for a campaign (for agent system prompt).
- * @param campaignId - Campaign to load
- * @param scenarioId - Optional; if not provided, uses first scenario
  */
 export function getCampaignContextForAgent(
   campaignId: CampaignId,
-  scenarioId?: string | null
+  options: CampaignContextOptions = {}
 ): string {
+  const { scenarioId, activeNpcId, playerKnowledgeFactIds = [] } = options;
   const campaign = getCampaign(campaignId);
   const parts: string[] = [];
 
@@ -32,8 +45,8 @@ export function getCampaignContextForAgent(
   );
 
   // Scenario (if campaign has scenarios)
-  if (campaign.scenarioIds?.length) {
-    const sid = scenarioId ?? campaign.scenarioIds[0];
+  const sid = scenarioId ?? campaign.scenarioIds?.[0];
+  if (campaign.scenarioIds?.length && sid) {
     const scenario = scenarios.find((s) => s.id === sid);
     if (scenario) {
       parts.push(`\n## Scenario: ${scenario.name}`);
@@ -42,10 +55,8 @@ export function getCampaignContextForAgent(
   }
 
   // Mission (if scenario has one)
-  if (campaign.missionIds?.length) {
-    const scenario = scenarios.find(
-      (s) => s.id === (scenarioId ?? campaign.scenarioIds?.[0])
-    );
+  if (campaign.missionIds?.length && sid) {
+    const scenario = scenarios.find((s) => s.id === sid);
     if (scenario?.missionId) {
       const mission = missions.find((m) => m.id === scenario.missionId);
       if (mission) {
@@ -56,7 +67,40 @@ export function getCampaignContextForAgent(
     }
   }
 
-  // Themes (Another Bug Hunt specific for now)
+  // Facts (Another Bug Hunt)
+  if (campaignId === "another-bug-hunt" && sid) {
+    const facts = getFactsForScenario(sid);
+    if (facts.length > 0) {
+      parts.push("\n## Facts (canonical information)");
+      parts.push(
+        facts.map((f) => `- [${f.id}] (${f.tier}): ${f.text}`).join("\n")
+      );
+    }
+  }
+
+  // Active NPC + known facts (who knows what)
+  if (campaignId === "another-bug-hunt" && activeNpcId) {
+    const npc = getNpcProfile(activeNpcId);
+    if (npc?.knownFactIds?.length) {
+      const knownFacts = npc.knownFactIds
+        .map((fid) => getFact(fid))
+        .filter((f): f is NonNullable<typeof f> => !!f);
+      const alreadyRevealed = knownFacts.filter((f) =>
+        playerKnowledgeFactIds.includes(f.id)
+      );
+      const notYetRevealed = knownFacts.filter(
+        (f) => !playerKnowledgeFactIds.includes(f.id)
+      );
+      parts.push(`\n## Active NPC: ${npc.name}`);
+      parts.push(`Knows ${knownFacts.length} facts. Already told player: ${alreadyRevealed.map((f) => f.id).join(", ") || "none"}.`);
+      parts.push(
+        "Can still reveal: " +
+          notYetRevealed.map((f) => `[${f.id}] ${f.text}`).join(" | ")
+      );
+    }
+  }
+
+  // Themes (Another Bug Hunt specific)
   if (campaignId === "another-bug-hunt") {
     parts.push("\n" + anotherBugHuntThemes);
   }
