@@ -12,6 +12,10 @@ export const distressSignalsScenario: Scenario = {
     "Investigate the abandoned Greta Base. Re-establish power, retrieve samples, survive.",
   missionId: "distress-signals",
   locationIds: [
+    "landing-zone",
+    "greta-base",
+    "heron-station",
+    "mothership",
     "airlock",
     "lockers",
     "mess-hall",
@@ -20,7 +24,7 @@ export const distressSignalsScenario: Scenario = {
     "reactor",
     "vents",
   ],
-  startingLocationId: "airlock",
+  startingLocationId: "landing-zone",
 };
 
 export const puzzleIds = distressSignalsPuzzles.map((p) => p.id);

@@ -13,7 +13,7 @@ export const gretaBaseLocations = [
     name: "Airlock",
     description:
       "Main entry point to Greta Base. Lockers line the walls. A minimap on the wall highlights the ventilation system. The inner door leads into the facility.",
-    connectedLocationIds: ["lockers", "mess-hall"],
+    connectedLocationIds: ["greta-base", "lockers", "mess-hall"],
     pointsOfInterest: [
       { id: "inner-door", name: "Inner door", description: "Leads into the facility" },
       { id: "minimap", name: "Minimap", description: "Wall map highlighting the ventilation system" },
@@ -85,11 +85,64 @@ export const gretaBaseLocations = [
   },
 ];
 
+/** Location IDs that belong to each primary region (for Internal Location Map) */
+export const REGION_INTERNAL_LOCATION_IDS: Record<string, string[]> = {
+  "landing-zone": ["landing-zone"],
+  "greta-base": ["greta-base", "airlock", "lockers", "mess-hall", "medical-lab", "garage", "reactor", "vents"],
+  "heron-station": ["heron-station"],
+  mothership: ["mothership"],
+};
+
+export const samsaVIPlanetMap = {
+  regions: [
+    { id: "landing-zone", name: "Landing Zone", description: "Where the shuttle touched down. A short muddy walk to Greta Base." },
+    { id: "greta-base", name: "Greta Base", description: "Abandoned terraforming facility. Six months of silence." },
+    { id: "heron-station", name: "Heron Station", description: "Secondary research outpost." },
+    { id: "mothership", name: "Mothership", description: "Unknown until discovered." },
+  ],
+  paths: [
+    { id: "path-a", name: "Muddy Path A", fromRegionId: "landing-zone", toRegionId: "greta-base", knownAtStart: true },
+    { id: "path-b", name: "Rough Trail B", fromRegionId: "greta-base", toRegionId: "heron-station", knownAtStart: true },
+    { id: "path-c", name: "Faint Carc Trail C", fromRegionId: "greta-base", toRegionId: "mothership", knownAtStart: false },
+    { id: "path-d", name: "Jungle Hike D", fromRegionId: "heron-station", toRegionId: "mothership", knownAtStart: false },
+    { id: "path-e", name: "The Tunnels E", fromRegionId: "heron-station", toRegionId: "mothership", knownAtStart: false },
+  ],
+  initialKnownRegionIds: ["landing-zone", "greta-base", "heron-station"],
+};
+
 export const anotherBugHuntWorld: World = {
   id: "another-bug-hunt-world",
-  name: "Samsa VI - Greta Base",
+  name: "Samsa VI",
   description:
-    "Abandoned terraforming colony on the jungle planet Samsa VI. Six months of silence. A raging tropical storm blocks radio. The facility is dark, ransacked, and deserted.",
-  locations: gretaBaseLocations,
-  defaultLocationId: "airlock",
+    "Jungle planet. Abandoned terraforming colony. Six months of silence. A raging tropical storm blocks radio.",
+  locations: [
+    {
+      id: "landing-zone",
+      name: "Landing Zone",
+      description: "Where the shuttle touched down. A short muddy walk to Greta Base.",
+      connectedLocationIds: ["greta-base"],
+    },
+    {
+      id: "greta-base",
+      name: "Greta Base",
+      description: "Abandoned terraforming facility. Main entry via airlock.",
+      connectedLocationIds: ["landing-zone", "heron-station", "airlock"],
+    },
+    {
+      id: "heron-station",
+      name: "Heron Station",
+      description: "Secondary research outpost.",
+      connectedLocationIds: ["greta-base"],
+    },
+    {
+      id: "mothership",
+      name: "Mothership",
+      description: "Discovered through exploration.",
+      connectedLocationIds: ["greta-base", "heron-station"],
+    },
+    ...gretaBaseLocations,
+  ],
+  defaultLocationId: "landing-zone",
+  planetMap: samsaVIPlanetMap,
+  regionInternalLocationIds: REGION_INTERNAL_LOCATION_IDS,
 };

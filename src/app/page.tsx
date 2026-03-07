@@ -23,10 +23,6 @@ export default function Home() {
     campaignId: CampaignId;
     runId: string;
   } | null>(null);
-  const [activeBriefingRun, setActiveBriefingRun] = useState<{
-    campaignId: CampaignId;
-    runId: string;
-  } | null>(null);
 
   const handleSetupRun = (campaignId: CampaignId, run: CampaignRun) => {
     setSetupRun({ campaignId, run });
@@ -35,28 +31,22 @@ export default function Home() {
 
   const handleStartFromSetup = (campaignId: CampaignId, runId: string) => {
     setSetupRun(null);
-    setActiveBriefingRun({ campaignId, runId });
+    setActiveRun({ campaignId, runId });
     setViewState("briefing");
   };
 
   const handleStartRun = (campaignId: CampaignId, runId: string) => {
     setSetupRun(null);
-    setActiveBriefingRun(null);
     setActiveRun({ campaignId, runId });
-    setViewState("session");
+    setViewState("briefing");
   };
 
-  const handleProceedFromBriefing = () => {
-    if (!activeBriefingRun) return;
-    setActiveRun(activeBriefingRun);
-    setActiveBriefingRun(null);
+  const handleProceedToSession = () => {
     setViewState("session");
   };
 
   const handleExitSession = () => {
-    setActiveRun(null);
-    setActiveBriefingRun(null);
-    setViewState(selectedCampaignId ? "campaign" : "home");
+    setViewState("briefing");
   };
 
   return (
@@ -66,10 +56,7 @@ export default function Home() {
         onSelectCampaign={(id) => {
           setSelectedCampaignId(id);
           setViewState(id ? "campaign" : "home");
-          if (!id) {
-            setActiveRun(null);
-            setActiveBriefingRun(null);
-          }
+          if (!id) setActiveRun(null);
         }}
       />
 
@@ -92,13 +79,13 @@ export default function Home() {
               runId={activeRun.runId}
               onExit={handleExitSession}
             />
-          ) : viewState === "briefing" && activeBriefingRun ? (
+          ) : viewState === "briefing" && activeRun ? (
             <BriefingLandingPage
-              campaignId={activeBriefingRun.campaignId}
-              runId={activeBriefingRun.runId}
-              onProceed={handleProceedFromBriefing}
+              campaignId={activeRun.campaignId}
+              runId={activeRun.runId}
+              onProceed={handleProceedToSession}
               onBack={() => {
-                setActiveBriefingRun(null);
+                setActiveRun(null);
                 setViewState("campaign");
               }}
             />

@@ -28,6 +28,24 @@ export interface Location {
   pointsOfInterest?: PointOfInterest[];
 }
 
+/** Planet-level region path (connects two regions) */
+export interface RegionPath {
+  id: string;
+  name: string;
+  fromRegionId: string;
+  toRegionId: string;
+  /** Whether players know this path exists at campaign start */
+  knownAtStart: boolean;
+}
+
+/** Planet-level map (e.g. Samsa VI regions) */
+export interface PlanetMap {
+  regions: { id: string; name: string; description?: string }[];
+  paths: RegionPath[];
+  /** Region IDs known at campaign start */
+  initialKnownRegionIds: string[];
+}
+
 /** World/setting for a campaign (ship, station, planet, etc.) */
 export interface World {
   id: string;
@@ -35,6 +53,10 @@ export interface World {
   description: string;
   locations: Location[];
   defaultLocationId: string;
+  /** Optional planet-level map for region overview */
+  planetMap?: PlanetMap;
+  /** Maps primary region IDs to location IDs within that region (for Internal Location Map) */
+  regionInternalLocationIds?: Record<string, string[]>;
 }
 
 /** Mission objectives and briefing */

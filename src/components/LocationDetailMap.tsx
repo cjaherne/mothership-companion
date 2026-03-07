@@ -8,6 +8,10 @@ interface LocationDetailMapProps {
   allLocations?: Location[];
   exploredLocationIds?: string[];
   currentLocationId?: string;
+  /** Callback when user clicks a connected location to navigate */
+  onLocationClick?: (locationId: string) => void;
+  /** Callback to mark the current location as visited */
+  onMarkVisited?: (locationId: string) => void;
   className?: string;
 }
 
@@ -16,6 +20,8 @@ export function LocationDetailMap({
   allLocations = [],
   exploredLocationIds = [],
   currentLocationId,
+  onLocationClick,
+  onMarkVisited,
   className = "",
 }: LocationDetailMapProps) {
   const locMap = new Map(allLocations.map((l) => [l.id, l]));
@@ -36,9 +42,21 @@ export function LocationDetailMap({
     <div
       className={`overflow-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-4 ${className}`}
     >
-      <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-500">
-        {location.name}
-      </h4>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h4 className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+          {location.name}
+        </h4>
+        {onMarkVisited && (
+          <button
+            type="button"
+            onClick={() => onMarkVisited(location.id)}
+            disabled={exploredLocationIds.includes(location.id)}
+            className="rounded border border-neon-green/50 bg-neon-green/10 px-2 py-1 text-[10px] font-medium text-neon-green transition hover:bg-neon-green/20 disabled:opacity-50 disabled:hover:bg-neon-green/10"
+          >
+            {exploredLocationIds.includes(location.id) ? "Visited ✓" : "Mark as Visited"}
+          </button>
+        )}
+      </div>
       <p className="mb-4 text-xs text-neutral-400">{location.description}</p>
 
       {pois.length > 0 ? (
@@ -70,18 +88,24 @@ export function LocationDetailMap({
       {conns.length > 0 && (
         <div className="mt-4 space-y-1.5">
           <p className="text-[10px] font-medium uppercase text-neutral-500">
-            Connected (doors)
+            Connected (click to view)
           </p>
           <div className="flex flex-wrap gap-2">
             {conns.map((id) => {
               const loc = locMap.get(id);
+              const isClickable = !!onLocationClick;
               return (
-                <span
+                <button
                   key={id}
-                  className="rounded border border-neon-pink/50 px-2 py-1 text-xs text-neon-pink/90"
+                  type="button"
+                  onClick={() => onLocationClick?.(id)}
+                  disabled={!isClickable}
+                  className={`rounded border border-neon-pink/50 px-2 py-1 text-left text-xs text-neon-pink/90 transition hover:border-neon-pink hover:bg-neon-pink/10 ${
+                    isClickable ? "cursor-pointer" : "cursor-default"
+                  }`}
                 >
                   {loc?.name ?? id}
-                </span>
+                </button>
               );
             })}
           </div>
