@@ -84,6 +84,9 @@ export interface NPCPersonalityProfile {
   /** Optional: voice ID for TTS (e.g., ElevenLabs, Cartesia) */
   voiceId?: string;
 
+  /** Optional: path to avatar image (e.g. /images/npcs/maas.png) */
+  avatarPath?: string;
+
   /** Optional: message delivered before interaction (e.g. mission briefing). Agent speaks this first. */
   greetingMessage?: string;
 }

@@ -54,6 +54,7 @@ export const maasProfile: NPCPersonalityProfile = {
   ],
   manipulatableAttributes: defaultAttributes,
   attributeThresholds,
+  avatarPath: "/images/npcs/maas.png",
   greetingMessage: `Deliver this briefing in your own dismissive, corporate way. Adapt tone to the player characters' personalities (e.g. if they seem paranoid, brush it off; if tactical, reduce to bullet points). Cover ALL of the following—nothing may be omitted:
 
 THE JOB:

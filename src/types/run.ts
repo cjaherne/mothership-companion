@@ -14,6 +14,8 @@ export interface Character {
   playerName?: string;
   /** Character's in-game name */
   name: string;
+  /** Optional: path to avatar image (e.g. /images/characters/placeholder.png) */
+  avatarPath?: string;
   /** Traits e.g. ["paranoid", "tactical", "loyal"] */
   traits: string[];
   /** Free-form summary for NPC context: personality, background, how to roleplay them */

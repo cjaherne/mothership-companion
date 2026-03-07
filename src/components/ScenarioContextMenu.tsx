@@ -12,6 +12,7 @@ interface ScenarioContextMenuProps {
   runId: string;
   viewState: "briefing" | "session";
   onProceedToSession: () => void;
+  onTalkToNpc?: () => void;
   onScenarioChange?: () => void;
   onBack?: () => void;
 }
@@ -21,6 +22,7 @@ export function ScenarioContextMenu({
   runId,
   viewState,
   onProceedToSession,
+  onTalkToNpc,
   onScenarioChange,
   onBack,
 }: ScenarioContextMenuProps) {
@@ -42,8 +44,7 @@ export function ScenarioContextMenu({
   const npcsInLocation = getNpcsInLocation(campaign, runState, currentLocationId);
   const showTalkToNpc =
     !!runState.activeNpcId &&
-    runState.activeNpcId !== WARDEN_NARRATOR_ID &&
-    npcsInLocation.includes(runState.activeNpcId);
+    runState.activeNpcId !== WARDEN_NARRATOR_ID;
 
   const handleTalkToWarden = () => {
     setActiveNpc(runId, WARDEN_NARRATOR_ID);
@@ -51,7 +52,7 @@ export function ScenarioContextMenu({
   };
 
   const handleTalkToNpc = () => {
-    onProceedToSession();
+    onTalkToNpc?.() ?? onProceedToSession();
   };
 
   const handleDepartForSamsa = () => {

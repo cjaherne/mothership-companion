@@ -26,6 +26,8 @@ export default function Home() {
     runId: string;
   } | null>(null);
   const [scenarioRefreshKey, setScenarioRefreshKey] = useState(0);
+  const [selectionVersion, setSelectionVersion] = useState(0);
+  const [inlineNpcVoiceActive, setInlineNpcVoiceActive] = useState(false);
   const [pdfOverlay, setPdfOverlay] = useState<{
     src: string;
     title: string;
@@ -94,10 +96,12 @@ export default function Home() {
             runId={activeRun.runId}
             viewState={viewState}
             onProceedToSession={handleProceedToSession}
+            onTalkToNpc={() => setInlineNpcVoiceActive(true)}
             onScenarioChange={() => setScenarioRefreshKey((k) => k + 1)}
             onBack={() => {
               setActiveRun(null);
               setViewState("campaign");
+              setInlineNpcVoiceActive(false);
             }}
           />
         )}
@@ -116,6 +120,9 @@ export default function Home() {
               campaignId={activeRun.campaignId}
               runId={activeRun.runId}
               onProceed={handleProceedToSession}
+              onNpcSelect={() => setSelectionVersion((v) => v + 1)}
+              showInlineNpcVoice={inlineNpcVoiceActive}
+              onEndNpcVoice={() => setInlineNpcVoiceActive(false)}
             />
           ) : viewState === "setup" && setupRun && selectedCampaignId ? (
             <RunSetupView
