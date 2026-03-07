@@ -3,21 +3,33 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { CampaignRunOptions } from "@/components/CampaignRunOptions";
+import { RunSetupView } from "@/components/RunSetupView";
 import { VoiceSessionView } from "@/components/VoiceSessionView";
 import type { CampaignId } from "@/campaigns";
+import type { CampaignRun } from "@/lib/runs";
 
-type ViewState = "home" | "campaign" | "session";
+type ViewState = "home" | "campaign" | "setup" | "session";
 
 export default function Home() {
   const [selectedCampaignId, setSelectedCampaignId] =
     useState<CampaignId | null>(null);
   const [viewState, setViewState] = useState<ViewState>("home");
+  const [setupRun, setSetupRun] = useState<{
+    campaignId: CampaignId;
+    run: CampaignRun;
+  } | null>(null);
   const [activeRun, setActiveRun] = useState<{
     campaignId: CampaignId;
     runId: string;
   } | null>(null);
 
+  const handleSetupRun = (campaignId: CampaignId, run: CampaignRun) => {
+    setSetupRun({ campaignId, run });
+    setViewState("setup");
+  };
+
   const handleStartRun = (campaignId: CampaignId, runId: string) => {
+    setSetupRun(null);
     setActiveRun({ campaignId, runId });
     setViewState("session");
   };
@@ -57,10 +69,21 @@ export default function Home() {
               runId={activeRun.runId}
               onExit={handleExitSession}
             />
+          ) : viewState === "setup" && setupRun && selectedCampaignId ? (
+            <RunSetupView
+              campaignId={setupRun.campaignId}
+              run={setupRun.run}
+              onStart={() => handleStartRun(setupRun.campaignId, setupRun.run.id)}
+              onBack={() => {
+                setSetupRun(null);
+                setViewState("campaign");
+              }}
+            />
           ) : viewState === "campaign" && selectedCampaignId ? (
             <CampaignRunOptions
               campaignId={selectedCampaignId}
               onStartRun={handleStartRun}
+              onSetupRun={handleSetupRun}
             />
           ) : (
             <HomeContent />

@@ -15,6 +15,7 @@ import {
   getFact,
 } from "./another-bug-hunt/facts";
 import { getNpcProfile } from "./another-bug-hunt/npcs";
+import type { RunState } from "@/types/run";
 
 export interface CampaignContextOptions {
   /** Current scenario; defaults to first */
@@ -23,6 +24,8 @@ export interface CampaignContextOptions {
   activeNpcId?: string | null;
   /** Fact IDs the player already knows; gates what NPC would repeat */
   playerKnowledgeFactIds?: string[];
+  /** Full run state: characters, explored, NPC attributes, etc. */
+  runState?: RunState | null;
 }
 
 /**
@@ -32,7 +35,13 @@ export function getCampaignContextForAgent(
   campaignId: CampaignId,
   options: CampaignContextOptions = {}
 ): string {
-  const { scenarioId, activeNpcId, playerKnowledgeFactIds = [] } = options;
+  const {
+    scenarioId,
+    activeNpcId,
+    playerKnowledgeFactIds = [],
+    runState,
+  } = options;
+  const playerKnowledge = runState?.playerKnowledgeFactIds ?? playerKnowledgeFactIds;
   const campaign = getCampaign(campaignId);
   const parts: string[] = [];
 
@@ -86,10 +95,10 @@ export function getCampaignContextForAgent(
         .map((fid) => getFact(fid))
         .filter((f): f is NonNullable<typeof f> => !!f);
       const alreadyRevealed = knownFacts.filter((f) =>
-        playerKnowledgeFactIds.includes(f.id)
+        playerKnowledge.includes(f.id)
       );
       const notYetRevealed = knownFacts.filter(
-        (f) => !playerKnowledgeFactIds.includes(f.id)
+        (f) => !playerKnowledge.includes(f.id)
       );
       parts.push(`\n## Active NPC: ${npc.name}`);
       parts.push(`Knows ${knownFacts.length} facts. Already told player: ${alreadyRevealed.map((f) => f.id).join(", ") || "none"}.`);
@@ -98,6 +107,33 @@ export function getCampaignContextForAgent(
           notYetRevealed.map((f) => `[${f.id}] ${f.text}`).join(" | ")
       );
     }
+  }
+
+  // Player characters (for NPC interaction context)
+  if (runState?.characters?.length) {
+    parts.push("\n## Player characters");
+    runState.characters.forEach((c) => {
+      parts.push(
+        `- ${c.name}: ${c.traits.join(", ")}. ${c.personalitySummary}`
+      );
+    });
+  }
+
+  // Explored locations
+  if (runState?.exploredLocationIds?.length) {
+    parts.push(
+      "\nExplored: " + runState.exploredLocationIds.join(", ")
+    );
+  }
+
+  // NPC attribute state (how NPCs feel about players)
+  if (runState?.npcAttributeState && Object.keys(runState.npcAttributeState).length > 0) {
+    parts.push("\n## NPC attitudes toward players");
+    Object.entries(runState.npcAttributeState).forEach(([npcId, attrs]) => {
+      parts.push(
+        `- ${npcId}: fear=${attrs.fear.toFixed(2)}, stress=${attrs.stress.toFixed(2)}, affability=${attrs.affability.toFixed(2)}`
+      );
+    });
   }
 
   // Themes (Another Bug Hunt specific)

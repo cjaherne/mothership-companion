@@ -2,12 +2,18 @@
 
 import { getCampaign } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
-import { getRunsForCampaign, createRun, type CampaignRun } from "@/lib/runs";
+import {
+  getRunsForCampaign,
+  createRun,
+  getRunState,
+  type CampaignRun,
+} from "@/lib/runs";
 import { useState } from "react";
 
 interface CampaignRunOptionsProps {
   campaignId: CampaignId;
   onStartRun: (campaignId: CampaignId, runId: string) => void;
+  onSetupRun: (campaignId: CampaignId, run: import("@/lib/runs").CampaignRun) => void;
 }
 
 function formatDate(iso: string): string {
@@ -23,6 +29,7 @@ function formatDate(iso: string): string {
 export function CampaignRunOptions({
   campaignId,
   onStartRun,
+  onSetupRun,
 }: CampaignRunOptionsProps) {
   const campaign = getCampaign(campaignId);
   const [runs, setRuns] = useState<CampaignRun[]>(() =>
@@ -32,7 +39,7 @@ export function CampaignRunOptions({
   const handleCreateNew = () => {
     const run = createRun(campaignId);
     setRuns((prev) => [run, ...prev]);
-    onStartRun(campaignId, run.id);
+    onSetupRun(campaignId, run);
   };
 
   const handleResume = (run: CampaignRun) => {
@@ -84,7 +91,16 @@ export function CampaignRunOptions({
                     onClick={() => handleResume(run)}
                     className="w-full rounded px-3 py-2 text-left text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
                   >
-                    {formatDate(run.lastPlayedAt ?? run.createdAt)}
+                    <span className="block">
+                      {formatDate(run.lastPlayedAt ?? run.createdAt)}
+                    </span>
+                    {getRunState(run.id).characters.length > 0 && (
+                      <span className="mt-0.5 block text-xs text-neutral-500">
+                        {getRunState(run.id).characters
+                          .map((c) => c.name)
+                          .join(", ")}
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}

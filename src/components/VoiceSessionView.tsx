@@ -10,6 +10,7 @@ import {
 import { getCampaign } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
 import { updateRunLastPlayed } from "@/lib/runs";
+import { RunStatePanel } from "./RunStatePanel";
 
 interface VoiceSessionViewProps {
   campaignId: CampaignId;
@@ -89,16 +90,19 @@ export function VoiceSessionView({
           Connect to Warden
         </button>
       ) : (
-        <LiveKitRoom
-          serverUrl={serverUrl}
-          token={token}
-          connect={true}
-          audio={true}
-          video={false}
-          onDisconnected={handleDisconnected}
-        >
-          <VoiceAssistantUI onExit={handleDisconnected} />
-        </LiveKitRoom>
+        <div className="space-y-6">
+          <LiveKitRoom
+            serverUrl={serverUrl}
+            token={token}
+            connect={true}
+            audio={true}
+            video={false}
+            onDisconnected={handleDisconnected}
+          >
+            <VoiceAssistantUI onExit={handleDisconnected} />
+          </LiveKitRoom>
+          <RunStatePanel runId={runId} campaignId={campaignId} />
+        </div>
       )}
     </div>
   );

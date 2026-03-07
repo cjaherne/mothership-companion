@@ -1,16 +1,21 @@
 /**
  * Campaign run storage (localStorage)
  *
- * Tracks previous runs for Resume functionality.
+ * Tracks runs, character creation, and game state for persistence.
  */
+
+import type { RunState, Character } from "@/types/run";
+import { EMPTY_RUN_STATE } from "@/types/run";
 
 const STORAGE_KEY = "mothership-runs";
 
 export interface CampaignRun {
   id: string;
   campaignId: string;
-  createdAt: string; // ISO
-  lastPlayedAt?: string; // ISO
+  createdAt: string;
+  lastPlayedAt?: string;
+  /** Persisted game state */
+  state?: RunState;
 }
 
 export function getRuns(): CampaignRun[] {
@@ -25,27 +30,110 @@ export function getRuns(): CampaignRun[] {
   }
 }
 
+export function getRun(runId: string): CampaignRun | undefined {
+  return getRuns().find((r) => r.id === runId);
+}
+
 export function getRunsForCampaign(campaignId: string): CampaignRun[] {
   return getRuns().filter((r) => r.campaignId === campaignId);
 }
 
-export function createRun(campaignId: string): CampaignRun {
+export function getRunState(runId: string): RunState {
+  const run = getRun(runId);
+  return run?.state ? { ...EMPTY_RUN_STATE, ...run.state } : { ...EMPTY_RUN_STATE };
+}
+
+export function createRun(
+  campaignId: string,
+  initialState?: Partial<RunState>
+): CampaignRun {
   const run: CampaignRun = {
     id: `run_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
     campaignId,
     createdAt: new Date().toISOString(),
+    state: {
+      ...EMPTY_RUN_STATE,
+      ...initialState,
+      turn: initialState?.turn ?? 0,
+    },
   };
   const runs = getRuns();
   runs.unshift(run);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(runs));
+  syncRunStateToApi(run.id);
   return run;
 }
 
 export function updateRunLastPlayed(runId: string): void {
+  updateRun(runId, { lastPlayedAt: new Date().toISOString() });
+}
+
+export function updateRun(
+  runId: string,
+  patch: Partial<Pick<CampaignRun, "lastPlayedAt" | "state">>
+): void {
   const runs = getRuns();
   const idx = runs.findIndex((r) => r.id === runId);
   if (idx >= 0) {
-    runs[idx] = { ...runs[idx], lastPlayedAt: new Date().toISOString() };
+    if (patch.state) {
+      const current = runs[idx].state ?? { ...EMPTY_RUN_STATE };
+      runs[idx] = {
+        ...runs[idx],
+        ...patch,
+        state: deepMergeRunState(current, patch.state),
+      };
+    } else {
+      runs[idx] = { ...runs[idx], ...patch };
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(runs));
   }
+}
+
+export function saveRunState(runId: string, statePatch: Partial<RunState>): void {
+  const current = getRunState(runId);
+  const merged = deepMergeRunState(current, statePatch);
+  updateRun(runId, { state: merged });
+  syncRunStateToApi(runId);
+}
+
+/** Sync localStorage state to API so agent can read it */
+function syncRunStateToApi(runId: string): void {
+  if (typeof window === "undefined") return;
+  const state = getRunState(runId);
+  fetch("/api/run/state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ runId, state }),
+  }).catch(() => {});
+}
+
+function deepMergeRunState(
+  current: RunState,
+  patch: Partial<RunState>
+): RunState {
+  return {
+    ...current,
+    ...patch,
+    characters: patch.characters ?? current.characters,
+    npcAttributeState: {
+      ...current.npcAttributeState,
+      ...(patch.npcAttributeState ?? {}),
+    },
+    exploredLocationIds: patch.exploredLocationIds ?? current.exploredLocationIds,
+    interactedNpcIds: patch.interactedNpcIds ?? current.interactedNpcIds,
+    playerKnowledgeFactIds:
+      patch.playerKnowledgeFactIds ?? current.playerKnowledgeFactIds,
+  };
+}
+
+export function addCharacter(runId: string, character: Character): void {
+  const state = getRunState(runId);
+  const chars = [...state.characters, character];
+  saveRunState(runId, { characters: chars });
+}
+
+export function removeCharacter(runId: string, characterId: string): void {
+  const state = getRunState(runId);
+  const chars = state.characters.filter((c) => c.id !== characterId);
+  saveRunState(runId, { characters: chars });
 }
