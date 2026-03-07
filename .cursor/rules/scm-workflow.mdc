@@ -1,0 +1,30 @@
+---
+description: Source code management workflow (Git, GitHub, branching)
+alwaysApply: true
+---
+
+# SCM Workflow
+
+## Branching
+
+- **Default branch:** `main`
+- **Workflow:** GitFlow with semantic versioning
+- **Feature work:** Always on feature branches created from `main`
+
+## Feature Branches
+
+- Work off feature branches (e.g. `feature/add-npc-profiles`) created from `main`
+- **Before starting new work:** Ask the user if they want to create a new feature branch
+- **When merging:** On user request, push to `main` and delete the feature branch
+
+## Semantic Versioning
+
+- Use [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`
+- Bump version in `package.json` when releasing
+- Tag releases: `git tag v1.0.0`
+
+## Workflow Summary
+
+1. Create feature branch from `main` when starting new work (ask first)
+2. Work and commit on the feature branch
+3. On user request: merge to `main`, push, delete feature branch
