@@ -37,13 +37,16 @@ export function BriefingLandingPage({
   const scenarioId = run?.scenarioId;
   const scenario = scenarioId ? getScenario(campaignId, scenarioId) : undefined;
 
-  const missionBriefing =
-    scenario?.missionId &&
-    getMission(campaignId, scenario.missionId)?.briefing;
+  const mission = scenario?.missionId
+    ? getMission(campaignId, scenario.missionId)
+    : undefined;
+  const briefingPages = mission?.briefingPages;
   const briefingText =
-    campaign.wardenNarrator?.narrative ??
-    missionBriefing ??
-    "No briefing available.";
+    briefingPages?.length
+      ? briefingPages[0]?.content
+      : campaign.wardenNarrator?.narrative ??
+        mission?.briefing ??
+        "No briefing available.";
 
   const currentLocationId =
     runState.currentLocationId ?? campaign.world.defaultLocationId;
@@ -138,6 +141,7 @@ export function BriefingLandingPage({
           </h4>
           <BriefingSection
             text={briefingText}
+            pages={briefingPages}
             className="min-h-[180px] flex-1 overflow-y-auto"
           />
         </div>

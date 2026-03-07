@@ -59,12 +59,20 @@ export interface World {
   regionInternalLocationIds?: Record<string, string[]>;
 }
 
+/** Single page of a paginated briefing */
+export interface BriefingPage {
+  title: string;
+  content: string;
+}
+
 /** Mission objectives and briefing */
 export interface Mission {
   id: string;
   name: string;
   objectives: string[];
   briefing: string;
+  /** Paginated briefing (Timeline, Overview, Prologue). When set, used instead of single briefing. */
+  briefingPages?: BriefingPage[];
 }
 
 /** A scenario within a campaign (e.g. Distress Signals) */

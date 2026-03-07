@@ -1,17 +1,28 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import type { BriefingPage } from "@/campaigns/types";
 
 interface BriefingSectionProps {
-  /** Scenario briefing text (from warden narrative or mission) */
+  /** Scenario briefing text (fallback when no pages) */
   text: string;
+  /** Paginated briefing pages. When set, used instead of text. */
+  pages?: BriefingPage[];
   className?: string;
 }
 
-export function BriefingSection({ text, className = "" }: BriefingSectionProps) {
+export function BriefingSection({ text, pages, className = "" }: BriefingSectionProps) {
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const effectivePages: BriefingPage[] =
+    pages?.length ? pages : [{ title: "Briefing", content: text }];
+  const currentPage = effectivePages[currentPageIndex];
+  const displayText = currentPage?.content ?? text;
+  const canGoBack = currentPageIndex > 0;
+  const canGoForward = currentPageIndex < effectivePages.length - 1;
 
   const stop = useCallback(() => {
     if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -26,7 +37,7 @@ export function BriefingSection({ text, className = "" }: BriefingSectionProps) 
   }, [stop]);
 
   const play = useCallback(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis || !text) return;
+    if (typeof window === "undefined" || !window.speechSynthesis || !displayText) return;
 
     if (isPaused) {
       window.speechSynthesis.resume();
@@ -38,7 +49,7 @@ export function BriefingSection({ text, className = "" }: BriefingSectionProps) 
     if (isPlaying) return;
 
     stop();
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(displayText);
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utteranceRef.current = utterance;
@@ -54,7 +65,15 @@ export function BriefingSection({ text, className = "" }: BriefingSectionProps) 
 
     window.speechSynthesis.speak(utterance);
     setIsPlaying(true);
-  }, [text, isPlaying, isPaused, stop]);
+  }, [displayText, isPlaying, isPaused, stop]);
+
+  const goToPage = useCallback(
+    (index: number) => {
+      stop();
+      setCurrentPageIndex(Math.max(0, Math.min(index, effectivePages.length - 1)));
+    },
+    [stop, effectivePages.length]
+  );
 
   const pause = useCallback(() => {
     if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -72,12 +91,40 @@ export function BriefingSection({ text, className = "" }: BriefingSectionProps) 
 
   return (
     <div className={`flex flex-col gap-4 ${className}`}>
+      <div className="flex items-center justify-between gap-2">
+        <h5 className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+          {currentPage?.title ?? "Briefing"}
+        </h5>
+        {effectivePages.length > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => goToPage(currentPageIndex - 1)}
+              disabled={!canGoBack}
+              className="rounded border border-neutral-600 px-2 py-1 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
+            >
+              ← Page Back
+            </button>
+            <span className="text-[10px] text-neutral-600">
+              {currentPageIndex + 1} / {effectivePages.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => goToPage(currentPageIndex + 1)}
+              disabled={!canGoForward}
+              className="rounded border border-neutral-600 px-2 py-1 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
+            >
+              Page Forward →
+            </button>
+          </div>
+        )}
+      </div>
       <div className="flex-1 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-6">
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-300">
-          {text}
+          {displayText}
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={play}
