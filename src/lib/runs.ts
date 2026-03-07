@@ -137,3 +137,14 @@ export function removeCharacter(runId: string, characterId: string): void {
   const chars = state.characters.filter((c) => c.id !== characterId);
   saveRunState(runId, { characters: chars });
 }
+
+/** Mark a location as explored (unlocks NPCs with location-based conditions) */
+export function addExploredLocation(runId: string, locationId: string): void {
+  const state = getRunState(runId);
+  const ids = state.exploredLocationIds ?? [];
+  if (!ids.includes(locationId)) {
+    saveRunState(runId, {
+      exploredLocationIds: [...ids, locationId],
+    });
+  }
+}

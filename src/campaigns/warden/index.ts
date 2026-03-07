@@ -24,7 +24,7 @@ export const wardenCampaign: CampaignConfig = {
     ],
     defaultLocationId: "bridge",
   },
-  npcIds: ["warden-narrator", "the-company"],
+  npcIds: [],
   puzzleIds: [],
   roomName: "mothership-warden",
   wardenNarrator: {

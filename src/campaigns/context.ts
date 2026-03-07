@@ -1,12 +1,18 @@
 /**
  * Campaign context loader for voice agent
  *
- * Assembles world, scenario, mission, themes, facts, and NPC knowledge
+ * Assembles world, scenario, mission, themes, facts, and voice availability
  * into a string for agent prompt injection.
+ *
+ * Voice interaction model:
+ * 1. Warden Narrator - always available, narration
+ * 2. Scenario NPCs - unlocked when conditions met (e.g. reach location)
+ * 3. The Company - always available for hints when asked
  */
 
 import { getCampaign } from "./registry";
 import type { CampaignId } from "./types";
+import { getAvailableVoices } from "./voices";
 import { anotherBugHuntThemes } from "./another-bug-hunt/themes";
 import { scenarios } from "./another-bug-hunt/scenario";
 import { missions } from "./another-bug-hunt/mission";
@@ -43,22 +49,55 @@ export function getCampaignContextForAgent(
   } = options;
   const playerKnowledge = runState?.playerKnowledgeFactIds ?? playerKnowledgeFactIds;
   const campaign = getCampaign(campaignId);
+  const voices = getAvailableVoices(campaign, runState);
   const parts: string[] = [];
 
-  // Warden Narrator (opening backstory - deliver at session start)
+  // Voice interaction model
+  parts.push("## Voice Interaction Model");
+  parts.push(
+    "Players can interact with three voice types. Switch persona based on what the player addresses:"
+  );
+  parts.push("");
+  parts.push("1. WARDEN (always available): Program-wide narrator. Use when players ask for narration, scene-setting, or 'Warden'. Deliver opening narrative at session start.");
+  parts.push(
+    "2. SCENARIO NPCs (unlocked when conditions met): In-universe characters. Only use NPCs that are unlocked. See list below."
+  );
+  parts.push(
+    "3. THE COMPANY (always available): For hints. Use when players explicitly ask for a hint, help, or 'Company'. Cold, corporate voice."
+  );
+  parts.push("");
+
+  // Available voices
+  parts.push("### Available now");
+  parts.push("- Warden: yes");
+  parts.push(`- Unlocked NPCs: ${voices.npcs.length ? voices.npcs.join(", ") : "none"}`);
+  parts.push("- The Company: yes (when player asks for hint)");
+  if (voices.lockedNpcs.length > 0) {
+    parts.push("");
+    parts.push("### Locked (not yet reachable)");
+    voices.lockedNpcs.forEach(({ npcId, condition }) => {
+      parts.push(
+        `- ${npcId}: requires exploring ${condition.locationIds.join(" or ")}`
+      );
+    });
+  }
+
+  // Warden Narrator (opening backstory)
   if (campaign.wardenNarrator?.narrative) {
+    parts.push("");
     parts.push("## Warden Narrator (opening narrative)");
     parts.push(
-      "Deliver this narrative at session start to set the scene. Atmospheric, authoritative."
+      "Deliver this at session start to set the scene. Atmospheric, authoritative."
     );
     parts.push(`\n${campaign.wardenNarrator.narrative}`);
   }
 
-  // The Company (hints - when players explicitly ask for help)
+  // The Company (hints)
   if (campaign.theCompany?.hints?.length) {
-    parts.push("\n## The Company (hints)");
+    parts.push("");
+    parts.push("## The Company (hints)");
     parts.push(
-      "When players ask for a hint or help, offer these in order. Escalate gradually—don't give everything at once. Stay in character: cold, corporate."
+      "When players ask for a hint: offer these in order. Escalate gradually."
     );
     campaign.theCompany.hints.forEach((hint, i) => {
       parts.push(`- Hint ${i + 1}: ${hint}`);
@@ -96,6 +135,28 @@ export function getCampaignContextForAgent(
     }
   }
 
+  // Unlocked scenario NPCs (personas available for dialogue)
+  if (voices.npcs.length > 0 && campaignId === "another-bug-hunt") {
+    parts.push("\n## Unlocked NPCs (roleplay when player addresses them)");
+    for (const npcId of voices.npcs) {
+      const npc = getNpcProfile(npcId);
+      if (npc) {
+        const knownFacts = (npc.knownFactIds ?? [])
+          .map((fid) => getFact(fid))
+          .filter((f): f is NonNullable<typeof f> => !!f);
+        const notYetRevealed = knownFacts.filter(
+          (f) => !playerKnowledge.includes(f.id)
+        );
+        parts.push(`\n### ${npc.name} (${npcId})`);
+        parts.push(`Archetype: ${npc.archetype}`);
+        parts.push(`Traits: ${npc.traits.join(", ")}`);
+        parts.push(
+          `Can reveal: ${notYetRevealed.map((f) => f.text).join(" | ") || "nothing new"}`
+        );
+      }
+    }
+  }
+
   // Facts (Another Bug Hunt)
   if (campaignId === "another-bug-hunt" && sid) {
     const facts = getFactsForScenario(sid);
@@ -107,8 +168,12 @@ export function getCampaignContextForAgent(
     }
   }
 
-  // Active NPC + known facts (who knows what)
-  if (campaignId === "another-bug-hunt" && activeNpcId) {
+  // Active NPC + known facts (only for unlocked scenario NPCs)
+  if (
+    campaignId === "another-bug-hunt" &&
+    activeNpcId &&
+    voices.npcs.includes(activeNpcId)
+  ) {
     const npc = getNpcProfile(activeNpcId);
     if (npc?.knownFactIds?.length) {
       const knownFacts = npc.knownFactIds

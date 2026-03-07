@@ -13,6 +13,10 @@ export {
   theCompanyProfile,
 } from "./shared/meta-npcs";
 export {
+  getAvailableVoices,
+  type AvailableVoices,
+} from "./voices";
+export {
   getCampaign,
   getCampaignOrDefault,
   listCampaignIds,

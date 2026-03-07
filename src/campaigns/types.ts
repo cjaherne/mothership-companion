@@ -53,14 +53,23 @@ export interface TheCompanyConfig {
   hints: string[];
 }
 
+/** Unlock condition for scenario NPCs (e.g. must reach a location) */
+export interface NpcUnlockCondition {
+  type: "location";
+  /** NPC unlocks when player has explored any of these locations */
+  locationIds: string[];
+}
+
 /** Campaign configuration - defines the scenario structure */
 export interface CampaignConfig {
   id: CampaignId;
   name: string;
   description: string;
   world: World;
-  /** NPC profile IDs available in this campaign */
+  /** Scenario NPC profile IDs (excludes Warden and The Company—those are always available) */
   npcIds: string[];
+  /** Unlock conditions per NPC: must satisfy to interact (e.g. reach location) */
+  npcUnlockConditions?: Record<string, NpcUnlockCondition>;
   /** Puzzle IDs in this campaign */
   puzzleIds: string[];
   /** Scenario IDs in this campaign */
