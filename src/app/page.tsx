@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { PdfViewerOverlay } from "@/components/PdfViewerOverlay";
+import { ScenarioContextMenu } from "@/components/ScenarioContextMenu";
 import { BriefingLandingPage } from "@/components/BriefingLandingPage";
 import { CampaignRunOptions } from "@/components/CampaignRunOptions";
 import { RunSetupView } from "@/components/RunSetupView";
@@ -22,6 +24,13 @@ export default function Home() {
   const [activeRun, setActiveRun] = useState<{
     campaignId: CampaignId;
     runId: string;
+  } | null>(null);
+  const [scenarioRefreshKey, setScenarioRefreshKey] = useState(0);
+  const [selectionVersion, setSelectionVersion] = useState(0);
+  const [inlineNpcVoiceActive, setInlineNpcVoiceActive] = useState(false);
+  const [pdfOverlay, setPdfOverlay] = useState<{
+    src: string;
+    title: string;
   } | null>(null);
 
   const handleSetupRun = (campaignId: CampaignId, run: CampaignRun) => {
@@ -50,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-black text-neutral-200 scanlines">
+    <div className="flex h-screen overflow-hidden bg-neutral-950 text-amber-50/95 scanlines">
       <Sidebar
         selectedCampaignId={selectedCampaignId}
         onSelectCampaign={(id) => {
@@ -58,36 +67,62 @@ export default function Home() {
           setViewState(id ? "campaign" : "home");
           if (!id) setActiveRun(null);
         }}
+        onOpenPdf={(src, title) => setPdfOverlay({ src, title })}
       />
 
+      {pdfOverlay && (
+        <PdfViewerOverlay
+          src={pdfOverlay.src}
+          title={pdfOverlay.title}
+          onClose={() => setPdfOverlay(null)}
+        />
+      )}
+
       <main className="flex flex-1 flex-col overflow-y-auto">
-        <header className="border-b border-neutral-800 px-8 py-6">
+        <header className="border-b border-amber-950/50 px-8 py-6">
           <h1 className="text-2xl font-bold tracking-tight">
-            <span className="text-neon-cyan">MOTHER</span>
-            <span className="text-white">SHIP</span>
-            <span className="text-neon-cyan"> COMPANION</span>
+            <span className="text-amber-400">MOTHER</span>
+            <span className="text-amber-100">SHIP</span>
+            <span className="text-amber-400"> COMPANION</span>
           </h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-amber-800/80">
             Voice-interactive Warden for Mothership RPG scenarios
           </p>
         </header>
 
+        {(viewState === "briefing" || viewState === "session") && activeRun && (
+          <ScenarioContextMenu
+            campaignId={activeRun.campaignId}
+            runId={activeRun.runId}
+            viewState={viewState}
+            onProceedToSession={handleProceedToSession}
+            onTalkToNpc={() => setInlineNpcVoiceActive(true)}
+            onScenarioChange={() => setScenarioRefreshKey((k) => k + 1)}
+            onBack={() => {
+              setActiveRun(null);
+              setViewState("campaign");
+              setInlineNpcVoiceActive(false);
+            }}
+          />
+        )}
+
         <div className="flex-1 p-8">
           {viewState === "session" && activeRun ? (
             <VoiceSessionView
+              key={`session-${activeRun.runId}-${scenarioRefreshKey}`}
               campaignId={activeRun.campaignId}
               runId={activeRun.runId}
               onExit={handleExitSession}
             />
           ) : viewState === "briefing" && activeRun ? (
             <BriefingLandingPage
+              key={`briefing-${activeRun.runId}-${scenarioRefreshKey}`}
               campaignId={activeRun.campaignId}
               runId={activeRun.runId}
               onProceed={handleProceedToSession}
-              onBack={() => {
-                setActiveRun(null);
-                setViewState("campaign");
-              }}
+              onNpcSelect={() => setSelectionVersion((v) => v + 1)}
+              showInlineNpcVoice={inlineNpcVoiceActive}
+              onEndNpcVoice={() => setInlineNpcVoiceActive(false)}
             />
           ) : viewState === "setup" && setupRun && selectedCampaignId ? (
             <RunSetupView
@@ -118,7 +153,7 @@ function HomeContent() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-neon-cyan">
+        <h2 className="mb-4 text-lg font-semibold text-amber-400">
           What is this?
         </h2>
         <p className="leading-relaxed text-neutral-300">
@@ -131,7 +166,7 @@ function HomeContent() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-neon-cyan">
+        <h2 className="mb-4 text-lg font-semibold text-amber-400">
           Implemented Campaigns
         </h2>
         <p className="mb-6 text-sm text-neutral-500">

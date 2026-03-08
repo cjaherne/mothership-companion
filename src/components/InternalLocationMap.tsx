@@ -84,7 +84,7 @@ export function InternalLocationMap({
                 y1={from.y}
                 x2={to.x}
                 y2={to.y}
-                stroke="var(--neon-pink, #ff006e)"
+                stroke="var(--ms-amber, #f59e0b)"
                 strokeWidth={2}
                 strokeOpacity={0.7}
               />
@@ -146,23 +146,23 @@ export function InternalLocationMap({
       </svg>
       <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-neutral-500">
         <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-neon-green" /> Current
+          <span className="h-2 w-2 rounded-full bg-amber-400" /> Current
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-neon-blue" /> Visited
+          <span className="h-2 w-2 rounded-full bg-amber-700/80" /> Visited
         </span>
         <span className="flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-neutral-500" /> Unexplored
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-0.5 w-3 bg-neon-pink" /> Path
+          <span className="h-0.5 w-3 bg-amber-500" /> Path
         </span>
         {selectedLocationId && onMarkVisited && (
           <button
             type="button"
             onClick={() => onMarkVisited(selectedLocationId)}
             disabled={exploredLocationIds.includes(selectedLocationId)}
-            className="ml-auto rounded border border-neon-green/50 bg-neon-green/10 px-2 py-1 text-[10px] font-medium text-neon-green transition hover:bg-neon-green/20 disabled:opacity-50 disabled:hover:bg-neon-green/10"
+            className="ml-auto rounded border border-amber-500/50 bg-amber-500/10 px-2 py-1 text-[10px] font-medium text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-50 disabled:hover:bg-amber-500/10"
           >
             {exploredLocationIds.includes(selectedLocationId) ? "Visited ✓" : "Mark as Visited"}
           </button>

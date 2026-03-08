@@ -70,10 +70,10 @@ export function CampaignRunOptions({
         <button
           type="button"
           onClick={handleCreateNew}
-          className="group flex flex-col items-start rounded-lg border border-neon-cyan/30 bg-neon-cyan/5 p-6 text-left transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/10 hover:shadow-neon-cyan"
+          className="group flex flex-col items-start rounded-lg border border-amber-500/30 bg-amber-500/5 p-6 text-left transition-all hover:border-amber-500/60 hover:bg-amber-500/10 hover:shadow-ms-amber"
         >
           <span className="mb-2 text-2xl">▶</span>
-          <span className="font-medium text-neon-cyan group-hover:text-neon-cyan">
+          <span className="font-medium text-amber-400 group-hover:text-amber-400">
             Create New Run
           </span>
           <span className="mt-1 text-xs text-neutral-400">
@@ -81,7 +81,7 @@ export function CampaignRunOptions({
           </span>
         </button>
 
-        <div className="flex flex-col rounded-lg border border-neutral-800 bg-neutral-950/50 p-6">
+        <div className="flex flex-col rounded-lg border border-amber-900/40 bg-amber-950/20 p-6">
           <span className="mb-2 text-2xl text-neutral-600">↻</span>
           <span className="font-medium text-neutral-300">
             Resume Previous Run

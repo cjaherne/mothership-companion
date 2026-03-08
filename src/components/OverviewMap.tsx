@@ -81,7 +81,7 @@ export function OverviewMap({
                 y1={from.y}
                 x2={to.x}
                 y2={to.y}
-                stroke="var(--neon-pink, #ff006e)"
+                stroke="var(--ms-amber, #f59e0b)"
                 strokeWidth={2}
                 strokeOpacity={0.7}
               />
@@ -146,16 +146,16 @@ export function OverviewMap({
       </svg>
       <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-neutral-500">
         <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-neon-green" /> Current
+          <span className="h-2 w-2 rounded-full bg-amber-400" /> Current
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-neon-blue" /> Visited
+          <span className="h-2 w-2 rounded-full bg-amber-700/80" /> Visited
         </span>
         <span className="flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-neutral-500" /> Unexplored
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-0.5 w-3 bg-neon-pink" /> Path
+          <span className="h-0.5 w-3 bg-amber-500" /> Path
         </span>
       </div>
     </div>

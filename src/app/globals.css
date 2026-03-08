@@ -3,8 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --foreground: 240 240 240;
-  --background: 0 0 0;
+  --foreground: 251 245 235;
+  --background: 20 14 0;
+  /* Mothership PDF-inspired warm industrial palette */
+  --ms-amber: #f59e0b;
+  --ms-amber-dim: #b45309;
+  --ms-bg: #0f0a00;
+  --ms-panel: rgba(69, 26, 3, 0.3);
   --neon-cyan: #00fff2;
   --neon-green: #39ff14;
   --neon-blue: #2563eb;
@@ -13,7 +18,7 @@
 
 body {
   color: rgb(var(--foreground));
-  background: rgb(var(--background));
+  background: var(--ms-bg, #0f0a00);
 }
 
 /* Sci-fi scanline overlay (optional subtle effect) */
