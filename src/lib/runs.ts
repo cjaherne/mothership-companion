@@ -184,6 +184,19 @@ export function removeCharacter(runId: string, characterId: string): void {
   saveRunState(runId, { characters: chars });
 }
 
+/** Update a character by ID (e.g. set avatarPath) */
+export function updateCharacter(
+  runId: string,
+  characterId: string,
+  patch: Partial<Character>
+): void {
+  const state = getRunState(runId);
+  const chars = state.characters.map((c) =>
+    c.id === characterId ? { ...c, ...patch } : c
+  );
+  saveRunState(runId, { characters: chars });
+}
+
 /** Mark a location as explored (unlocks NPCs with location-based conditions) */
 export function addExploredLocation(runId: string, locationId: string): void {
   const state = getRunState(runId);

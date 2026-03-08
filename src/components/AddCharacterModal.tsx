@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { addCharacter } from "@/lib/runs";
 import { AddCharacterForm } from "./AddCharacterForm";
+import { CharacterArtworkModal } from "./CharacterArtworkModal";
 import type { Character } from "@/types/run";
 
 interface AddCharacterModalProps {
@@ -15,10 +17,30 @@ export function AddCharacterModal({
   onClose,
   onAdded,
 }: AddCharacterModalProps) {
-  const handleAdded = (_char: Character) => {
-    onAdded();
-    onClose();
+  const [pendingCharacter, setPendingCharacter] = useState<Character | null>(null);
+
+  const handleFormSubmit = (char: Character) => {
+    setPendingCharacter(char);
   };
+
+  const handleAccept = useCallback(
+    (avatarPath: string) => {
+      if (pendingCharacter) {
+        addCharacter(runId, { ...pendingCharacter, avatarPath });
+        onAdded();
+        onClose();
+      }
+    },
+    [runId, pendingCharacter, onAdded, onClose]
+  );
+
+  const handleSkip = useCallback(() => {
+    if (pendingCharacter) {
+      addCharacter(runId, pendingCharacter);
+      onAdded();
+      onClose();
+    }
+  }, [runId, pendingCharacter, onAdded, onClose]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -31,6 +53,18 @@ export function AddCharacterModal({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  if (pendingCharacter) {
+    return (
+      <CharacterArtworkModal
+        character={pendingCharacter}
+        runId={runId}
+        onAccept={handleAccept}
+        onSkip={handleSkip}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
     <div
@@ -57,7 +91,7 @@ export function AddCharacterModal({
         </div>
         <AddCharacterForm
           runId={runId}
-          onSubmit={handleAdded}
+          onSubmit={handleFormSubmit}
           submitLabel="Add character"
         />
       </div>

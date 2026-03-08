@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { addCharacter } from "@/lib/runs";
 import type { Character } from "@/types/run";
 import {
   createRandomMothershipCharacter,
@@ -64,7 +63,6 @@ export function AddCharacterForm({
       mothership: mothership ?? undefined,
     };
 
-    addCharacter(runId, char);
     onSubmit(char);
     setPlayerName("");
     setName("");

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { getCampaign } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
 import {
   getRunState,
+  addCharacter,
   removeCharacter as removeCharacterFromRun,
   type CampaignRun,
 } from "@/lib/runs";
 import type { Character } from "@/types/run";
 import { CLASS_NAMES } from "@/lib/mothership";
 import { AddCharacterForm } from "./AddCharacterForm";
+import { CharacterArtworkModal } from "./CharacterArtworkModal";
 
 interface RunSetupViewProps {
   campaignId: CampaignId;
@@ -29,10 +31,34 @@ export function RunSetupView({
   const [characters, setCharacters] = useState<Character[]>(
     () => getRunState(run.id).characters
   );
+  const [pendingCharacter, setPendingCharacter] = useState<Character | null>(null);
 
-  const handleAddCharacter = (char: Character) => {
-    setCharacters([...characters, char]);
+  const refreshCharacters = useCallback(() => {
+    setCharacters(getRunState(run.id).characters);
+  }, [run.id]);
+
+  const handleFormSubmit = (char: Character) => {
+    setPendingCharacter(char);
   };
+
+  const handleAccept = useCallback(
+    (avatarPath: string) => {
+      if (pendingCharacter) {
+        addCharacter(run.id, { ...pendingCharacter, avatarPath });
+        refreshCharacters();
+        setPendingCharacter(null);
+      }
+    },
+    [run.id, pendingCharacter, refreshCharacters]
+  );
+
+  const handleSkip = useCallback(() => {
+    if (pendingCharacter) {
+      addCharacter(run.id, pendingCharacter);
+      refreshCharacters();
+      setPendingCharacter(null);
+    }
+  }, [run.id, pendingCharacter, refreshCharacters]);
 
   const handleRemoveCharacter = (characterId: string) => {
     removeCharacterFromRun(run.id, characterId);
@@ -61,10 +87,20 @@ export function RunSetupView({
         details. Mothership stats and loadout can be rolled randomly.
       </p>
 
+      {pendingCharacter ? (
+        <CharacterArtworkModal
+          character={pendingCharacter}
+          runId={run.id}
+          onAccept={handleAccept}
+          onSkip={handleSkip}
+          onClose={() => setPendingCharacter(null)}
+        />
+      ) : null}
+
       <div className="rounded-lg border border-amber-900/40 bg-amber-950/20 p-6">
         <AddCharacterForm
           runId={run.id}
-          onSubmit={handleAddCharacter}
+          onSubmit={handleFormSubmit}
           submitLabel="Add player"
         />
       </div>
