@@ -27,11 +27,21 @@ async function fetchRunState(runId: string): Promise<Record<string, unknown> | n
   }
 }
 
-function parseRoomContext(roomName: string | undefined): { campaignId: string; runId: string } | null {
+interface RoomContext {
+  campaignId: string;
+  runId: string;
+  /** NPC ID embedded in the room name — set at token time, no HTTP dependency */
+  npcId?: string;
+}
+
+function parseRoomContext(roomName: string | undefined): RoomContext | null {
   if (!roomName || !roomName.includes("__run__")) return null;
   const parts = roomName.split("__run__");
   if (parts.length !== 2) return null;
-  return { campaignId: parts[0], runId: parts[1] };
+  const [campaignId, rest] = parts;
+  // room name may be "runId" or "runId__npc__npcId"
+  const npcParts = rest.split("__npc__");
+  return { campaignId, runId: npcParts[0], npcId: npcParts[1] };
 }
 
 export default defineAgent({
@@ -50,8 +60,15 @@ export default defineAgent({
     let ttsVoice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer" = "alloy";
 
     if (roomCtx) {
+      // npcId from room name is the authoritative source — set at token-request
+      // time by the frontend, no HTTP round-trip needed and no race condition.
+      if (roomCtx.npcId) {
+        activeNpcId = roomCtx.npcId;
+      }
+
       runState = await fetchRunState(roomCtx.runId);
-      if (runState) {
+      // Only fall back to run-state activeNpcId if the room name didn't carry one
+      if (!activeNpcId && runState) {
         activeNpcId = runState.activeNpcId as string | undefined;
       }
       if (!activeNpcId) {

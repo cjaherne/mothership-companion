@@ -166,6 +166,7 @@ function deepMergeRunState(
       ...(patch.npcAttributeState ?? {}),
     },
     exploredLocationIds: patch.exploredLocationIds ?? current.exploredLocationIds,
+    exploredPoiIds: patch.exploredPoiIds ?? current.exploredPoiIds ?? [],
     interactedNpcIds: patch.interactedNpcIds ?? current.interactedNpcIds,
     playerKnowledgeFactIds:
       patch.playerKnowledgeFactIds ?? current.playerKnowledgeFactIds,
@@ -197,15 +198,48 @@ export function updateCharacter(
   saveRunState(runId, { characters: chars });
 }
 
-/** Mark a location as explored (unlocks NPCs with location-based conditions) */
+/** Mark a point of interest as inspected (may unlock hidden NPCs) */
+export function addExploredPoi(runId: string, poiId: string): void {
+  const state = getRunState(runId);
+  const ids = state.exploredPoiIds ?? [];
+  if (!ids.includes(poiId)) {
+    saveRunState(runId, { exploredPoiIds: [...ids, poiId] });
+  }
+}
+
+/** Un-mark a point of interest (toggle off) */
+export function removeExploredPoi(runId: string, poiId: string): void {
+  const state = getRunState(runId);
+  saveRunState(runId, {
+    exploredPoiIds: (state.exploredPoiIds ?? []).filter((id) => id !== poiId),
+  });
+}
+
+/** Parent-only regions (not physical locations); never set as currentLocationId */
+const PARENT_ONLY_LOCATION_IDS = ["greta-base"];
+
+/** Mark a location as explored and set it as the current location */
 export function addExploredLocation(runId: string, locationId: string): void {
   const state = getRunState(runId);
   const ids = state.exploredLocationIds ?? [];
-  if (!ids.includes(locationId)) {
-    saveRunState(runId, {
-      exploredLocationIds: [...ids, locationId],
-    });
+  const patch: Partial<import("@/types/run").RunState> = {};
+  if (!PARENT_ONLY_LOCATION_IDS.includes(locationId)) {
+    patch.currentLocationId = locationId;
   }
+  if (!ids.includes(locationId)) {
+    patch.exploredLocationIds = [...ids, locationId];
+  }
+  saveRunState(runId, patch);
+}
+
+/** Un-mark a location as explored (toggle off) */
+export function removeExploredLocation(runId: string, locationId: string): void {
+  const state = getRunState(runId);
+  saveRunState(runId, {
+    exploredLocationIds: (state.exploredLocationIds ?? []).filter(
+      (id) => id !== locationId
+    ),
+  });
 }
 
 /** Set active NPC for voice session */

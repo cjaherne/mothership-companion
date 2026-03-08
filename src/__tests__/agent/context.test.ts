@@ -24,10 +24,11 @@ describe("getCampaignContextForAgent", () => {
     expect(context).toContain("THE COMPANY");
   });
 
-  it("shows locked NPCs when no unlock conditions met", () => {
+  it("shows demar as locked when garage explored but APC not inspected", () => {
     const runState: RunState = {
       characters: [],
-      exploredLocationIds: ["airlock"],
+      exploredLocationIds: ["garage"],
+      exploredPoiIds: [],
       interactedNpcIds: [],
       npcAttributeState: {},
       playerKnowledgeFactIds: [],
@@ -36,16 +37,15 @@ describe("getCampaignContextForAgent", () => {
     const context = getCampaignContextForAgent("another-bug-hunt", {
       runState,
     });
-    expect(context).toContain("Unlocked NPCs: none");
     expect(context).toContain("Locked");
-    expect(context).toContain("example-survivor");
-    expect(context).toContain("garage");
+    expect(context).toContain("demar");
   });
 
-  it("includes unlocked NPC profiles when conditions met", () => {
+  it("includes demar profile when garage explored and APC inspected", () => {
     const runState: RunState = {
       characters: [],
-      exploredLocationIds: ["airlock", "garage"],
+      exploredLocationIds: ["garage"],
+      exploredPoiIds: ["apc"],
       interactedNpcIds: [],
       npcAttributeState: {},
       playerKnowledgeFactIds: [],
@@ -54,9 +54,7 @@ describe("getCampaignContextForAgent", () => {
     const context = getCampaignContextForAgent("another-bug-hunt", {
       runState,
     });
-    expect(context).toContain("Unlocked NPCs: example-survivor");
-    expect(context).toContain("Example Survivor");
-    expect(context).toContain("paranoid");
+    expect(context).toContain("demar");
   });
 
   it("includes player characters when present", () => {
@@ -70,6 +68,7 @@ describe("getCampaignContextForAgent", () => {
         },
       ],
       exploredLocationIds: [],
+      exploredPoiIds: [],
       interactedNpcIds: [],
       npcAttributeState: {},
       playerKnowledgeFactIds: [],

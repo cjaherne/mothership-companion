@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getCampaign,
   getMission,
@@ -12,6 +12,9 @@ import {
   getRun,
   getRunState,
   addExploredLocation,
+  removeExploredLocation,
+  addExploredPoi,
+  removeExploredPoi,
   setActiveNpc,
 } from "@/lib/runs";
 import { BriefingSection } from "./BriefingSection";
@@ -21,33 +24,34 @@ import { InternalLocationMap } from "./InternalLocationMap";
 import { LocationDetailMap } from "./LocationDetailMap";
 import { NpcSelector } from "./NpcSelector";
 import { NpcVoicePanel } from "./NpcVoicePanel";
-import { THE_METAMORPHOSIS_ID } from "@/campaigns/another-bug-hunt/world";
-import { WARDEN_NARRATOR_ID } from "@/campaigns/shared/meta-npcs";
-
-const REGION_IDS = ["landing-zone", "greta-base", "heron-station", "mothership"];
+import {
+  THE_METAMORPHOSIS_ID,
+  GRETA_BASE_ENTRY_POIS,
+} from "@/campaigns/another-bug-hunt/world";
+const REGION_IDS = [
+  THE_METAMORPHOSIS_ID,
+  "landing-zone",
+  "greta-base",
+  "heron-station",
+  "mothership",
+];
 
 /** Maps a location ID to its region ID (for planet map) */
 function locationToRegionId(locationId: string): string {
   if (REGION_IDS.includes(locationId)) return locationId;
-  return "greta-base"; // Facility rooms (airlock, lockers, etc.) are in Greta Base
+  return "greta-base"; // Facility rooms (airlock, commissary, etc.) are in Greta Base
 }
 
 interface BriefingLandingPageProps {
   campaignId: CampaignId;
   runId: string;
   onProceed: () => void;
-  onNpcSelect?: () => void;
-  showInlineNpcVoice?: boolean;
-  onEndNpcVoice?: () => void;
 }
 
 export function BriefingLandingPage({
   campaignId,
   runId,
   onProceed,
-  onNpcSelect,
-  showInlineNpcVoice,
-  onEndNpcVoice,
 }: BriefingLandingPageProps) {
   const campaign = getCampaign(campaignId);
   const run = getRun(runId);
@@ -84,6 +88,8 @@ export function BriefingLandingPage({
   const [selectedPrimaryRegionId, setSelectedPrimaryRegionId] = useState<string | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [, forceRefresh] = useState(0);
+  // Local NPC selection — not persisted until Connect is pressed; resets on location change
+  const [selectedNpcId, setSelectedNpcId] = useState<string | null>(null);
 
   const primaryRegionId =
     selectedPrimaryRegionId ?? currentRegionId ?? "landing-zone";
@@ -103,11 +109,29 @@ export function BriefingLandingPage({
     planetMap?.regions.find((r) => r.id === primaryRegionId)?.name ?? primaryRegionId;
 
   const isPrologue = currentLocationId === THE_METAMORPHOSIS_ID;
+
+  // NPC panel uses the location the user is currently VIEWING, not just the
+  // game-state current location, so NPCs appear as you browse into a room.
+  const npcPanelLocationId = viewedLocationId ?? currentLocationId;
   const npcsInLocation = getNpcsInLocation(
     campaign,
-    runState,
-    currentLocationId
+    // Re-read run state so post-inspect refreshes pick up updated exploredPoiIds
+    getRunState(runId),
+    npcPanelLocationId
   );
+
+  // Reset NPC highlight whenever the viewed location changes
+  useEffect(() => {
+    setSelectedNpcId(null);
+    setActiveNpc(runId, undefined);
+  }, [npcPanelLocationId, runId]);
+
+  // Clear activeNpcId when the briefing page unmounts (e.g. navigating back to campaign)
+  useEffect(() => {
+    return () => {
+      setActiveNpc(runId, undefined);
+    };
+  }, [runId]);
 
   const handleSelectPrimaryRegion = (regionId: string) => {
     setSelectedPrimaryRegionId(regionId);
@@ -115,135 +139,206 @@ export function BriefingLandingPage({
   };
 
   const handleSelectLocation = (locationId: string) => {
-    if (REGION_IDS.includes(locationId) && regionInternalIds[locationId]) {
-      setSelectedPrimaryRegionId(locationId);
+    // Switch to the region that contains this location (e.g. outside-airlock is in greta-base)
+    for (const [regionId, locIds] of Object.entries(regionInternalIds)) {
+      if (locIds.includes(locationId)) {
+        setSelectedPrimaryRegionId(regionId);
+        break;
+      }
     }
     setSelectedLocationId(locationId);
   };
 
   const handleMarkVisited = (locationId: string) => {
-    addExploredLocation(runId, locationId);
+    const alreadyExplored = (getRunState(runId).exploredLocationIds ?? []).includes(locationId);
+    if (alreadyExplored) {
+      removeExploredLocation(runId, locationId);
+    } else {
+      addExploredLocation(runId, locationId);
+    }
+    forceRefresh((x) => x + 1);
+  };
+
+  const handleMarkPoiExplored = (poiId: string) => {
+    const state = getRunState(runId);
+    const alreadyInspected = (state.exploredPoiIds ?? []).includes(poiId);
+    if (alreadyInspected) {
+      removeExploredPoi(runId, poiId);
+    } else {
+      addExploredPoi(runId, poiId);
+      // Implicitly mark the viewed location as explored when a POI is inspected —
+      // you must physically be there to inspect it.
+      if (viewedLocationId) {
+        addExploredLocation(runId, viewedLocationId);
+      }
+    }
     forceRefresh((x) => x + 1);
   };
 
   const handleMarkRegionVisited = (regionId: string) => {
-    addExploredLocation(runId, regionId);
+    const alreadyExplored = (getRunState(runId).exploredLocationIds ?? []).includes(regionId);
+    if (alreadyExplored) {
+      removeExploredLocation(runId, regionId);
+    } else {
+      addExploredLocation(runId, regionId);
+    }
     forceRefresh((x) => x + 1);
   };
 
   const currentLocation = locations.find((l) => l.id === currentLocationId);
   const currentLocationName = currentLocation?.name ?? currentLocationId ?? "Unknown";
+  const baseName = viewedLocation?.name ?? currentLocationName;
+  const headerLocationName =
+    currentRegionId === "greta-base"
+      ? `Greta Base — ${baseName}`
+      : baseName;
+
+  const scenarioLabel = scenario ? `${campaign.name} — ${scenario.name}` : campaign.name;
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      {/* Large neon current location */}
-      <div className="shrink-0 border-b border-neutral-800 pb-4">
-        <p className="text-2xl font-bold tracking-widest text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)] sm:text-3xl">
-          {currentLocationName.toUpperCase()}
+    <div className="flex h-full min-h-0 flex-col gap-2">
+      {/* Compact header: location | campaign — scenario */}
+      <div className="shrink-0 border-b border-neutral-800 pb-2">
+        <p className="text-base font-semibold tracking-wide text-amber-400 sm:text-lg">
+          {headerLocationName.toUpperCase()}
+          <span className="mx-2 text-neutral-600">|</span>
+          <span className="text-amber-200/90">{scenarioLabel}</span>
         </p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <h3 className="text-lg font-semibold text-white">
-          {campaign.name}
-          {scenario && ` — ${scenario.name}`}
-        </h3>
-        {showInlineNpcVoice &&
-          runState.activeNpcId &&
-          runState.activeNpcId !== WARDEN_NARRATOR_ID &&
-          onEndNpcVoice && (
-            <NpcVoicePanel
-              campaignId={campaignId}
-              runId={runId}
-              activeNpcId={runState.activeNpcId}
-              onEnd={onEndNpcVoice}
-            />
-          )}
-      </div>
-
-      {/* Top 50%: 2x2 grid - Briefing/NPCs left, Players/Samsa VI right */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-2 gap-4 overflow-hidden lg:grid-cols-2">
-        {/* Left column: Briefing (25% vertical) */}
-        <div className="flex min-h-0 flex-col overflow-hidden">
+      {/* 3-column layout: Left (Briefing + NPCs) | Center (Maps) | Right (Players + Location) */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_auto_auto_auto] gap-3 overflow-hidden lg:grid-cols-[1fr_1.8fr_1.2fr] lg:grid-rows-[1fr_1fr]">
+        {/* Left col: Briefing */}
+        <div className="flex min-h-[140px] flex-col overflow-hidden lg:min-h-0">
           <h4 className="mb-1 shrink-0 text-xs font-medium text-amber-400">
             Scenario Briefing
           </h4>
           <BriefingSection
             text={briefingText}
             pages={briefingPages}
-            className="min-h-0 flex-1 overflow-y-auto"
+            compact
+            className="min-h-0 flex-1 overflow-hidden"
           />
         </div>
 
-        {/* Right column: Players (25% vertical) */}
-        <div className="flex min-h-0 flex-col overflow-hidden">
-          <CharacterList
-            characters={runState.characters ?? []}
-            className="h-full min-h-0"
-          />
-        </div>
-
-        {/* Left column row 2: NPCs (25% vertical) */}
-        <div className="flex min-h-0 flex-col overflow-hidden">
-          <NpcSelector
-            campaignId={campaignId}
-            npcIds={npcsInLocation}
-            activeNpcId={runState.activeNpcId}
-              onSelectNpc={(id) => {
-                setActiveNpc(runId, id);
-                forceRefresh((x) => x + 1);
-                onNpcSelect?.();
-              }}
-            className="h-full min-h-0"
-          />
-        </div>
-
-        {/* Right column row 2: Samsa VI map (25% vertical) or empty during prologue */}
-        <div className="flex min-h-0 flex-col overflow-hidden">
+        {/* Center col row 1: Samsa VI map */}
+        <div className="flex min-h-[100px] flex-col overflow-hidden lg:min-h-0">
           {!isPrologue && planetMap ? (
             <SamsaVIMap
               planetMap={planetMap}
               currentRegionId={currentRegionId}
               exploredRegionIds={exploredRegionIds}
+              exploredPoiIds={runState.exploredPoiIds ?? []}
               selectedRegionId={primaryRegionId}
               onRegionClick={handleSelectPrimaryRegion}
               onMarkVisited={handleMarkRegionVisited}
               className="h-full min-h-0"
             />
           ) : (
-            <div className="flex h-full min-h-[120px] items-center justify-center rounded-lg border border-amber-900/40 bg-amber-950/10 text-xs text-amber-700/70">
+            <div className="flex h-full min-h-[80px] items-center justify-center rounded-lg border border-amber-900/40 bg-amber-950/10 text-xs text-amber-700/70">
               Depart for Samsa VI to reveal the planet map
             </div>
           )}
         </div>
-      </div>
 
-      {/* Bottom 50%: Internal Location map + Location detail (hidden during prologue) */}
-      {!isPrologue && (
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-2">
-          <div className="min-h-0 overflow-hidden">
+        {/* Right col row 1: Players */}
+        <div className="flex min-h-0 flex-col overflow-hidden">
+          <CharacterList
+            characters={runState.characters ?? []}
+            compact
+            className="h-full min-h-0"
+          />
+        </div>
+
+        {/* Left col row 2: NPCs + voice */}
+        <div className="flex min-h-0 flex-col gap-2 overflow-hidden">
+          <NpcSelector
+            campaignId={campaignId}
+            npcIds={npcsInLocation}
+            activeNpcId={selectedNpcId ?? undefined}
+            onSelectNpc={(id) => {
+              const next = selectedNpcId === id ? null : id;
+              setSelectedNpcId(next);
+              setActiveNpc(runId, next ?? undefined);
+            }}
+            compact
+            className="min-h-0 flex-1"
+          />
+          {selectedNpcId && (
+            <NpcVoicePanel
+              campaignId={campaignId}
+              runId={runId}
+              activeNpcId={selectedNpcId}
+              onEnd={() => {
+                setActiveNpc(runId, undefined);
+                forceRefresh((x) => x + 1);
+              }}
+            />
+          )}
+        </div>
+
+        {/* Center col row 2: Internal map (hidden during prologue) */}
+        <div className="hidden min-h-0 overflow-hidden lg:block">
+          {!isPrologue && (
             <InternalLocationMap
               locations={internalLocations}
               currentLocationId={currentLocationId}
               exploredLocationIds={runState.exploredLocationIds ?? []}
+              exploredPoiIds={runState.exploredPoiIds ?? []}
               selectedLocationId={viewedLocationId ?? undefined}
               onLocationClick={handleSelectLocation}
               onMarkVisited={handleMarkVisited}
               regionName={regionName}
+              primaryRegionId={primaryRegionId}
+              compact
               className="h-full"
             />
-          </div>
-          <div className="min-h-0 overflow-hidden">
+          )}
+        </div>
+
+        {/* Right col row 2: Location detail */}
+        <div className="flex min-h-0 flex-col overflow-hidden">
+          {!isPrologue ? (
             <LocationDetailMap
               location={viewedLocation}
               allLocations={locations}
               currentLocationId={currentLocationId}
               exploredLocationIds={runState.exploredLocationIds ?? []}
+              exploredPoiIds={runState.exploredPoiIds ?? []}
               onLocationClick={handleSelectLocation}
               onMarkVisited={handleMarkVisited}
-              className="h-full"
+              onMarkPoiExplored={handleMarkPoiExplored}
+              entryConfig={GRETA_BASE_ENTRY_POIS}
+              onEnterInterior={(targetId) => {
+                addExploredLocation(runId, targetId);
+                forceRefresh((x) => x + 1);
+              }}
+              className="h-full min-h-0 overflow-y-auto"
             />
-          </div>
+          ) : (
+            <div className="flex h-full min-h-[100px] items-center justify-center rounded-lg border border-neutral-800 text-xs text-neutral-500">
+              Depart for Samsa VI to explore locations
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Narrow screens: show Internal Map as extra row */}
+      {!isPrologue && (
+        <div className="flex min-h-[120px] flex-col overflow-hidden lg:hidden">
+          <InternalLocationMap
+            locations={internalLocations}
+            currentLocationId={currentLocationId}
+            exploredLocationIds={runState.exploredLocationIds ?? []}
+            exploredPoiIds={runState.exploredPoiIds ?? []}
+            selectedLocationId={viewedLocationId ?? undefined}
+            onLocationClick={handleSelectLocation}
+            onMarkVisited={handleMarkVisited}
+            regionName={regionName}
+            primaryRegionId={primaryRegionId}
+            compact
+            className="h-full"
+          />
         </div>
       )}
     </div>

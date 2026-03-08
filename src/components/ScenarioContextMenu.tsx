@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getCampaign, getScenario, getNpcsInLocation } from "@/campaigns";
+import { getCampaign, getScenario } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
 import { completePrologue, setActiveNpc, getRunState, getRun } from "@/lib/runs";
 import { AddCharacterModal } from "./AddCharacterModal";
@@ -12,7 +12,6 @@ interface ScenarioContextMenuProps {
   runId: string;
   viewState: "briefing" | "session";
   onProceedToSession: () => void;
-  onTalkToNpc?: () => void;
   onScenarioChange?: () => void;
   onBack?: () => void;
 }
@@ -22,7 +21,6 @@ export function ScenarioContextMenu({
   runId,
   viewState,
   onProceedToSession,
-  onTalkToNpc,
   onScenarioChange,
   onBack,
 }: ScenarioContextMenuProps) {
@@ -41,18 +39,10 @@ export function ScenarioContextMenu({
   const isPrologue =
     !!scenario?.startingLocationId &&
     currentLocationId === scenario.startingLocationId;
-  const npcsInLocation = getNpcsInLocation(campaign, runState, currentLocationId);
-  const showTalkToNpc =
-    !!runState.activeNpcId &&
-    runState.activeNpcId !== WARDEN_NARRATOR_ID;
 
   const handleTalkToWarden = () => {
     setActiveNpc(runId, WARDEN_NARRATOR_ID);
     onProceedToSession();
-  };
-
-  const handleTalkToNpc = () => {
-    onTalkToNpc?.() ?? onProceedToSession();
   };
 
   const handleDepartForSamsa = () => {
@@ -104,15 +94,6 @@ export function ScenarioContextMenu({
           >
             Talk to Warden
           </button>
-          {showTalkToNpc && (
-            <button
-              type="button"
-              onClick={handleTalkToNpc}
-              className="rounded border border-amber-500/50 bg-amber-500/5 px-3 py-1.5 text-xs font-medium text-amber-400 hover:bg-amber-500/10"
-            >
-              Talk to NPC
-            </button>
-          )}
         </div>
       </div>
 

@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
   const current = stateStore.get(runId) ?? {
     characters: [],
     exploredLocationIds: [],
+    exploredPoiIds: [],
     interactedNpcIds: [],
     npcAttributeState: {},
     playerKnowledgeFactIds: [],
@@ -47,6 +48,8 @@ export async function POST(request: NextRequest) {
     characters: statePatch.characters ?? current.characters,
     exploredLocationIds:
       statePatch.exploredLocationIds ?? current.exploredLocationIds,
+    exploredPoiIds:
+      statePatch.exploredPoiIds ?? current.exploredPoiIds ?? [],
     interactedNpcIds: statePatch.interactedNpcIds ?? current.interactedNpcIds,
     npcAttributeState: {
       ...current.npcAttributeState,

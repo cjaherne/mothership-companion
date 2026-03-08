@@ -1,18 +1,26 @@
 "use client";
 
 import type { Location } from "@/campaigns/types";
+import { GretaBaseFloorplan } from "./GretaBaseFloorplan";
+import { GRETA_BASE_FLOORPLAN } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
 
 interface InternalLocationMapProps {
   /** Locations within the current primary region only */
   locations: Location[];
   currentLocationId?: string;
   exploredLocationIds: string[];
+  /** POI IDs the party has inspected (reveals doors/vents on Greta Base minimap) */
+  exploredPoiIds?: string[];
   /** Location being viewed in detail */
   selectedLocationId?: string;
   onLocationClick?: (locationId: string) => void;
   onMarkVisited?: (locationId: string) => void;
   /** Name of the primary region (for header) */
   regionName?: string;
+  /** Primary region ID (e.g. "greta-base") to choose minimap style */
+  primaryRegionId?: string;
+  /** Compact mode: smaller container, abbreviated legend */
+  compact?: boolean;
   className?: string;
 }
 
@@ -32,13 +40,37 @@ export function InternalLocationMap({
   locations,
   currentLocationId,
   exploredLocationIds,
+  exploredPoiIds = [],
   selectedLocationId,
   onLocationClick,
   onMarkVisited,
   regionName = "Internal",
+  primaryRegionId,
+  compact,
   className = "",
 }: InternalLocationMapProps) {
   const ids = locations.map((l) => l.id);
+  const idSet = new Set(ids);
+
+  if (primaryRegionId === "greta-base") {
+    const floorplanRooms = GRETA_BASE_FLOORPLAN.rooms.filter((r) => idSet.has(r.id));
+    if (floorplanRooms.length > 0) {
+      return (
+        <GretaBaseFloorplan
+          rooms={floorplanRooms}
+          currentLocationId={currentLocationId}
+          exploredLocationIds={exploredLocationIds}
+          exploredPoiIds={exploredPoiIds}
+          selectedLocationId={selectedLocationId}
+          onLocationClick={onLocationClick}
+          onMarkVisited={onMarkVisited}
+          compact={compact}
+          className={className}
+        />
+      );
+    }
+  }
+
   const locMap = new Map(locations.map((l) => [l.id, l]));
   const positions = layoutNodes(ids);
 
@@ -57,14 +89,14 @@ export function InternalLocationMap({
 
   return (
     <div
-      className={`overflow-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-4 ${className}`}
+      className={`overflow-auto rounded-lg border border-neutral-800 bg-neutral-950/50 ${compact ? "p-2" : "p-4"} ${className}`}
     >
-      <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
+      <h4 className={`text-xs font-medium uppercase tracking-wider text-neutral-500 ${compact ? "mb-1" : "mb-3"}`}>
         {regionName} — Internal Map
       </h4>
       <svg
         viewBox="0 0 400 250"
-        className="h-full min-h-[200px] w-full"
+        className={`h-full w-full ${compact ? "min-h-[120px]" : "min-h-[200px]"}`}
         preserveAspectRatio="xMidYMid meet"
       >
         {ids.map((id) => {
@@ -161,10 +193,13 @@ export function InternalLocationMap({
           <button
             type="button"
             onClick={() => onMarkVisited(selectedLocationId)}
-            disabled={exploredLocationIds.includes(selectedLocationId)}
-            className="ml-auto rounded border border-amber-500/50 bg-amber-500/10 px-2 py-1 text-[10px] font-medium text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-50 disabled:hover:bg-amber-500/10"
+            className={`ml-auto rounded border px-2 py-1 text-[10px] font-medium transition ${
+              exploredLocationIds.includes(selectedLocationId)
+                ? "border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                : "border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+            }`}
           >
-            {exploredLocationIds.includes(selectedLocationId) ? "Visited ✓" : "Mark as Visited"}
+            {exploredLocationIds.includes(selectedLocationId) ? "Visited ✓ (undo)" : "Mark as Visited"}
           </button>
         )}
       </div>
