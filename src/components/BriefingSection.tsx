@@ -8,10 +8,12 @@ interface BriefingSectionProps {
   text: string;
   /** Paginated briefing pages. When set, used instead of text. */
   pages?: BriefingPage[];
+  /** Compact mode: smaller text, tighter padding, inline controls */
+  compact?: boolean;
   className?: string;
 }
 
-export function BriefingSection({ text, pages, className = "" }: BriefingSectionProps) {
+export function BriefingSection({ text, pages, compact, className = "" }: BriefingSectionProps) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -89,54 +91,67 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
     };
   }, [stop]);
 
+  const textClass = compact ? "text-[11px] leading-snug" : "text-xs leading-relaxed";
+  const padClass = compact ? "p-2" : "p-4";
+  const btnClass = compact
+    ? "rounded border px-2 py-1 text-[10px]"
+    : "rounded border px-3 py-1.5 text-xs";
+  const playBtnClass = compact
+    ? "rounded border border-amber-500/50 px-2 py-1 text-[10px] font-medium text-amber-400 hover:bg-amber-500/10"
+    : "rounded border border-amber-500/50 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/10";
+
   return (
-    <div className={`flex min-h-0 flex-col gap-2 ${className}`}>
-      <div className="flex shrink-0 items-center justify-between gap-2">
-        <h5 className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+    <div className={`flex min-h-0 flex-col ${compact ? "gap-1" : "gap-2"} ${className}`}>
+      <div className="flex shrink-0 items-center justify-between gap-1">
+        <h5
+          className={
+            compact
+              ? "text-[10px] font-medium uppercase tracking-wider text-neutral-500"
+              : "text-xs font-medium uppercase tracking-wider text-neutral-500"
+          }
+        >
           {currentPage?.title ?? "Briefing"}
         </h5>
         {effectivePages.length > 1 && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               type="button"
               onClick={() => goToPage(currentPageIndex - 1)}
               disabled={!canGoBack}
-              className="rounded border border-neutral-600 px-2 py-1 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
+              className="rounded border border-neutral-600 px-1.5 py-0.5 text-[10px] text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
             >
-              ← Page Back
+              ←
             </button>
-            <span className="text-[10px] text-neutral-600">
-              {currentPageIndex + 1} / {effectivePages.length}
+            <span className="px-1 text-[10px] text-neutral-600">
+              {currentPageIndex + 1}/{effectivePages.length}
             </span>
             <button
               type="button"
               onClick={() => goToPage(currentPageIndex + 1)}
               disabled={!canGoForward}
-              className="rounded border border-neutral-600 px-2 py-1 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
+              className="rounded border border-neutral-600 px-1.5 py-0.5 text-[10px] text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
             >
-              Page Forward →
+              →
             </button>
           </div>
         )}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-amber-900/40 bg-amber-950/20 p-4">
-        <p className="whitespace-pre-wrap text-xs leading-relaxed text-neutral-300">
+      <div
+        className={`min-h-0 flex-1 overflow-y-auto rounded border border-amber-900/40 bg-amber-950/20 ${padClass}`}
+      >
+        <p className={`whitespace-pre-wrap ${textClass} text-neutral-300`}>
           {displayText}
         </p>
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-1">
-        <button
-          type="button"
-          onClick={play}
-          className="rounded border border-amber-500/50 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/10"
-        >
+        <button type="button" onClick={play} className={playBtnClass}>
           {isPaused ? "Resume" : "Play"}
         </button>
         <button
           type="button"
           onClick={pause}
           disabled={!isPlaying}
-          className="rounded border border-neutral-600 px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50"
+          className={`${btnClass} border-neutral-600 text-neutral-400 hover:bg-neutral-800 disabled:opacity-50`}
         >
           Pause
         </button>
@@ -144,16 +159,16 @@ export function BriefingSection({ text, pages, className = "" }: BriefingSection
           type="button"
           onClick={stop}
           disabled={!isPlaying && !isPaused}
-          className="rounded border border-neutral-600 px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800 disabled:opacity-50"
+          className={`${btnClass} border-neutral-600 text-neutral-400 hover:bg-neutral-800 disabled:opacity-50`}
         >
           Stop
         </button>
         <button
           type="button"
           onClick={rewind}
-          className="rounded border border-neutral-600 px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800"
+          className={`${btnClass} border-neutral-600 text-neutral-400 hover:bg-neutral-800`}
         >
-          Rewind to Start
+          Rewind
         </button>
       </div>
     </div>

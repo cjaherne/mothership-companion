@@ -25,6 +25,7 @@ export function getAvailableVoices(
   runState: RunState | null | undefined
 ): AvailableVoices {
   const exploredIds = new Set(runState?.exploredLocationIds ?? []);
+  const exploredPoiIds = new Set(runState?.exploredPoiIds ?? []);
   const npcIds = campaign.npcIds ?? [];
   const conditions = campaign.npcUnlockConditions ?? {};
 
@@ -40,6 +41,18 @@ export function getAvailableVoices(
     if (cond.type === "location") {
       const satisfied = cond.locationIds.some((locId) => exploredIds.has(locId));
       if (satisfied) {
+        unlockedNpcs.push(npcId);
+      } else {
+        lockedNpcs.push({ npcId, condition: cond });
+      }
+    } else if (cond.type === "poi") {
+      // Must be in one of the required locations AND all required POIs must be inspected
+      const inLocation = cond.locationIds.some((locId) => exploredIds.has(locId));
+      const poisSatisfied =
+        !cond.requiredPoiIds ||
+        cond.requiredPoiIds.length === 0 ||
+        cond.requiredPoiIds.every((poiId) => exploredPoiIds.has(poiId));
+      if (inLocation && poisSatisfied) {
         unlockedNpcs.push(npcId);
       } else {
         lockedNpcs.push({ npcId, condition: cond });
@@ -70,8 +83,14 @@ export function getNpcsInLocation(
   const conditions = campaign.npcUnlockConditions ?? {};
   return voices.npcs.filter((npcId) => {
     const cond = conditions[npcId];
-    if (!cond || cond.type !== "location") return true;
-    return cond.locationIds.includes(currentLocationId);
+    if (!cond) return true;
+    if (cond.type === "location") {
+      return cond.locationIds.includes(currentLocationId);
+    }
+    if (cond.type === "poi") {
+      return cond.locationIds.includes(currentLocationId);
+    }
+    return true;
   });
 }
 

@@ -6,22 +6,26 @@ import type { Character } from "@/types/run";
 import { CLASS_NAMES } from "@/lib/mothership";
 
 const AVATAR_SIZE = 32;
+const AVATAR_SIZE_COMPACT = 24;
 const VISIBLE_ROWS = 4;
+const VISIBLE_ROWS_COMPACT = 3;
 const ROW_HEIGHT = 44;
+const ROW_HEIGHT_COMPACT = 32;
 
 interface CharacterListProps {
   characters: Character[];
+  compact?: boolean;
   className?: string;
 }
 
-function CharacterAvatar({ char }: { char: Character }) {
+function CharacterAvatar({ char, size = 32 }: { char: Character; size?: number }) {
   if (char.avatarPath) {
     return (
       <Image
         src={char.avatarPath}
         alt=""
-        width={AVATAR_SIZE}
-        height={AVATAR_SIZE}
+        width={size}
+        height={size}
         className="shrink-0 rounded-full object-cover"
       />
     );
@@ -30,7 +34,8 @@ function CharacterAvatar({ char }: { char: Character }) {
   const initial = (char.name || "?").charAt(0).toUpperCase();
   return (
     <div
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-900/50 text-xs font-medium text-amber-600"
+      className="flex shrink-0 items-center justify-center rounded-full bg-amber-900/50 text-xs font-medium text-amber-600"
+      style={{ width: size, height: size }}
       aria-hidden
     >
       {initial}
@@ -38,22 +43,26 @@ function CharacterAvatar({ char }: { char: Character }) {
   );
 }
 
-export function CharacterList({ characters, className = "" }: CharacterListProps) {
+export function CharacterList({ characters, compact, className = "" }: CharacterListProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const avatarSize = compact ? AVATAR_SIZE_COMPACT : AVATAR_SIZE;
+  const maxH = compact
+    ? VISIBLE_ROWS_COMPACT * ROW_HEIGHT_COMPACT
+    : VISIBLE_ROWS * ROW_HEIGHT;
 
   return (
     <div
       className={`flex flex-col overflow-hidden rounded-lg border border-amber-900/40 bg-amber-950/20 ${className}`}
     >
-      <h4 className="shrink-0 border-b border-amber-900/40 px-4 py-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
+      <h4 className={`shrink-0 border-b border-amber-900/40 text-xs font-medium uppercase tracking-wider text-neutral-500 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
         Players
       </h4>
       <ul
-        className="flex-1 overflow-y-auto p-2"
-        style={{ maxHeight: characters.length > 0 ? VISIBLE_ROWS * ROW_HEIGHT : undefined }}
+        className="flex-1 overflow-y-auto p-1"
+        style={{ maxHeight: characters.length > 0 ? maxH : undefined }}
       >
         {characters.length === 0 ? (
-          <li className="px-2 py-4 text-center text-sm text-neutral-500">
+          <li className={`px-2 text-center text-sm text-neutral-500 ${compact ? "py-2" : "py-4"}`}>
             No players yet
           </li>
         ) : (
@@ -62,9 +71,11 @@ export function CharacterList({ characters, className = "" }: CharacterListProps
               <button
                 type="button"
                 onClick={() => setSelectedCharacter(char)}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-neutral-200 transition hover:bg-neutral-800/80"
+                className={`flex w-full items-center gap-2 rounded text-left text-neutral-200 transition hover:bg-neutral-800/80 ${
+                  compact ? "px-1.5 py-1 text-xs" : "px-2 py-1.5 text-sm"
+                }`}
               >
-                <CharacterAvatar char={char} />
+                <CharacterAvatar char={char} size={avatarSize} />
                 <span className="min-w-0 truncate">
                   {char.playerName ? (
                     <>
@@ -95,7 +106,7 @@ export function CharacterList({ characters, className = "" }: CharacterListProps
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <CharacterAvatar char={selectedCharacter} />
+                <CharacterAvatar char={selectedCharacter} size={AVATAR_SIZE} />
                 <div>
                   <h5 className="text-lg font-semibold text-white">
                     {selectedCharacter.name}

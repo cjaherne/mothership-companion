@@ -26,8 +26,6 @@ export default function Home() {
     runId: string;
   } | null>(null);
   const [scenarioRefreshKey, setScenarioRefreshKey] = useState(0);
-  const [selectionVersion, setSelectionVersion] = useState(0);
-  const [inlineNpcVoiceActive, setInlineNpcVoiceActive] = useState(false);
   const [pdfOverlay, setPdfOverlay] = useState<{
     src: string;
     title: string;
@@ -78,7 +76,11 @@ export default function Home() {
         />
       )}
 
-      <main className="flex flex-1 flex-col overflow-y-auto">
+      <main
+        className={`flex flex-1 flex-col ${
+          viewState === "briefing" ? "overflow-hidden min-h-0" : "overflow-y-auto"
+        }`}
+      >
         <header className="border-b border-amber-950/50 px-8 py-6">
           <h1 className="text-2xl font-bold tracking-tight">
             <span className="text-amber-400">MOTHER</span>
@@ -96,17 +98,19 @@ export default function Home() {
             runId={activeRun.runId}
             viewState={viewState}
             onProceedToSession={handleProceedToSession}
-            onTalkToNpc={() => setInlineNpcVoiceActive(true)}
             onScenarioChange={() => setScenarioRefreshKey((k) => k + 1)}
             onBack={() => {
               setActiveRun(null);
               setViewState("campaign");
-              setInlineNpcVoiceActive(false);
             }}
           />
         )}
 
-        <div className="flex-1 p-8">
+        <div
+          className={`flex-1 p-8 ${
+            viewState === "briefing" ? "min-h-0 overflow-hidden flex flex-col" : ""
+          }`}
+        >
           {viewState === "session" && activeRun ? (
             <VoiceSessionView
               key={`session-${activeRun.runId}-${scenarioRefreshKey}`}
@@ -115,15 +119,14 @@ export default function Home() {
               onExit={handleExitSession}
             />
           ) : viewState === "briefing" && activeRun ? (
+            <div className="min-h-0 flex-1 flex flex-col">
             <BriefingLandingPage
               key={`briefing-${activeRun.runId}-${scenarioRefreshKey}`}
               campaignId={activeRun.campaignId}
               runId={activeRun.runId}
               onProceed={handleProceedToSession}
-              onNpcSelect={() => setSelectionVersion((v) => v + 1)}
-              showInlineNpcVoice={inlineNpcVoiceActive}
-              onEndNpcVoice={() => setInlineNpcVoiceActive(false)}
             />
+            </div>
           ) : viewState === "setup" && setupRun && selectedCampaignId ? (
             <RunSetupView
               campaignId={setupRun.campaignId}

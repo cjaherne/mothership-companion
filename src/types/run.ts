@@ -30,6 +30,8 @@ export interface RunState {
   characters: Character[];
   /** Location IDs the team has explored */
   exploredLocationIds: string[];
+  /** Point-of-interest IDs the team has inspected */
+  exploredPoiIds: string[];
   /** NPC IDs the team has interacted with */
   interactedNpcIds: string[];
   /** Current NPC attribute values (how they feel about the players) */
@@ -47,6 +49,7 @@ export interface RunState {
 export const EMPTY_RUN_STATE: RunState = {
   characters: [],
   exploredLocationIds: [],
+  exploredPoiIds: [],
   interactedNpcIds: [],
   npcAttributeState: {},
   playerKnowledgeFactIds: [],

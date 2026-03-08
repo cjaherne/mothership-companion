@@ -39,12 +39,19 @@ export async function GET(request: NextRequest) {
   const campaignId = searchParams.get("campaign");
   const runId = searchParams.get("runId");
   const participantName = searchParams.get("participant") ?? "player";
+  // npcId is embedded in the room name so the agent can read it without an
+  // HTTP round-trip, eliminating the race condition on first connect.
+  const npcId = searchParams.get("npcId");
 
   const campaign = getCampaignOrDefault(campaignId);
   const effectiveCampaignId = campaignId ?? campaign.id;
   const roomName =
     searchParams.get("room") ??
-    (runId ? `${effectiveCampaignId}__run__${runId}` : campaign.roomName);
+    (runId
+      ? npcId
+        ? `${effectiveCampaignId}__run__${runId}__npc__${npcId}`
+        : `${effectiveCampaignId}__run__${runId}`
+      : campaign.roomName);
 
   try {
     // Explicitly dispatch agent to room (token-based dispatch was not working for local agent)

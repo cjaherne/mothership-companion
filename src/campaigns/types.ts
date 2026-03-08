@@ -15,6 +15,12 @@ export interface PointOfInterest {
   description?: string;
   /** IDs of POIs or locations this connects to (e.g. door to another room) */
   connectedTo?: string[];
+  /** Inspectable items/loot found at this POI */
+  items?: string[];
+  /** Requires active searching to discover (not immediately visible) */
+  isHidden?: boolean;
+  /** NPC IDs associated with / physically present at this POI */
+  npcsPresent?: string[];
 }
 
 /** A location or scene within a world */
@@ -26,6 +32,16 @@ export interface Location {
   connectedLocationIds?: string[];
   /** Points of interest within this location (for detailed map) */
   pointsOfInterest?: PointOfInterest[];
+  /** Whether this location starts locked (keycard, strength check, etc.) */
+  isLocked?: boolean;
+  /** Human-readable note on how to unlock (e.g. "Requires keycard") */
+  lockNote?: string;
+  /** Not shown on the map until discovered/unlocked */
+  isHiddenAtStart?: boolean;
+  /** If set, this is a sub-location nested inside the given location ID */
+  parentLocationId?: string;
+  /** Nested sub-locations (e.g. a locked room within a room) */
+  subLocations?: Location[];
 }
 
 /** Planet-level region path (connects two regions) */
@@ -36,6 +52,8 @@ export interface RegionPath {
   toRegionId: string;
   /** Whether players know this path exists at campaign start */
   knownAtStart: boolean;
+  /** If set, path is only reachable once this POI has been inspected (e.g. "trail-fork" to reveal fork route) */
+  requiredPoiId?: string;
 }
 
 /** Planet-level map (e.g. Samsa VI regions) */
@@ -98,11 +116,21 @@ export interface TheCompanyConfig {
   hints: string[];
 }
 
-/** Unlock condition for scenario NPCs (e.g. must reach a location) */
+/** Unlock condition for scenario NPCs (e.g. must reach a location or inspect a POI) */
 export interface NpcUnlockCondition {
-  type: "location";
+  type: "location" | "poi";
   /** NPC unlocks when player has explored any of these locations */
   locationIds: string[];
+  /**
+   * If set, the NPC is present in the location but hidden until these POI IDs
+   * have been inspected. Once inspected the NPC becomes visible in the location list.
+   */
+  requiredPoiIds?: string[];
+  /**
+   * When true the NPC is hidden in the location until requiredPoiIds are satisfied.
+   * When false (default) the NPC is immediately visible on arrival.
+   */
+  isHidden?: boolean;
 }
 
 /** Campaign configuration - defines the scenario structure */

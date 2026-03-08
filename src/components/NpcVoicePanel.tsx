@@ -9,7 +9,7 @@ import {
 } from "@livekit/components-react";
 import { getNpcProfile } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
-import { syncRunStateToApiAsync } from "@/lib/runs";
+import { syncRunStateToApiAsync, setActiveNpc } from "@/lib/runs";
 
 interface NpcVoicePanelProps {
   campaignId: CampaignId;
@@ -68,9 +68,14 @@ export function NpcVoicePanel({
     setConnecting(true);
     setError(null);
     try {
+      // Re-assert the NPC immediately before syncing — guards against any stale
+      // activeNpcId left over from a previous Warden or NPC session.
+      setActiveNpc(runId, activeNpcId);
       await syncRunStateToApiAsync(runId);
+      // Pass npcId in the token request so the room name encodes it — the agent
+      // reads it directly from the room name, avoiding any HTTP race condition.
       const res = await fetch(
-        `/api/livekit/token?campaign=${encodeURIComponent(campaignId)}&runId=${encodeURIComponent(runId)}&participant=player`
+        `/api/livekit/token?campaign=${encodeURIComponent(campaignId)}&runId=${encodeURIComponent(runId)}&participant=player&npcId=${encodeURIComponent(activeNpcId)}`
       );
       const data = await res.json();
       if (data.error) {
@@ -88,7 +93,7 @@ export function NpcVoicePanel({
     } finally {
       setConnecting(false);
     }
-  }, [campaignId, runId]);
+  }, [campaignId, runId, activeNpcId]);
 
   const handleDisconnected = useCallback(() => {
     setToken(null);

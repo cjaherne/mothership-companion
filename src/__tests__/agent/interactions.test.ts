@@ -32,35 +32,35 @@ describe("Company interaction", () => {
 });
 
 describe("NPC interaction", () => {
-  it("context excludes locked NPC from dialogue when not unlocked", () => {
+  it("demar is locked when garage explored but APC not inspected", () => {
     const runState: RunState = {
       characters: [],
-      exploredLocationIds: ["airlock"],
+      exploredLocationIds: ["garage"],
+      exploredPoiIds: [],
       interactedNpcIds: [],
       npcAttributeState: {},
       playerKnowledgeFactIds: [],
       turn: 0,
     };
     const voices = getAvailableVoices(getCampaign("another-bug-hunt"), runState);
-    expect(voices.npcs).not.toContain("example-survivor");
+    expect(voices.npcs).not.toContain("demar");
     const context = getCampaignContextForAgent("another-bug-hunt", { runState });
-    expect(context).not.toMatch(/Unlocked NPCs: example-survivor/);
+    expect(context).toContain("Locked");
   });
 
-  it("context includes NPC facts when unlocked - puzzle info can be revealed", () => {
+  it("demar is unlocked when garage explored AND apc POI inspected", () => {
     const runState: RunState = {
       characters: [{ id: "c1", name: "Vasquez", traits: [], personalitySummary: "" }],
-      exploredLocationIds: ["airlock", "garage"],
+      exploredLocationIds: ["garage"],
+      exploredPoiIds: ["apc"],
       interactedNpcIds: [],
       npcAttributeState: {},
       playerKnowledgeFactIds: [],
       turn: 0,
     };
+    const voices = getAvailableVoices(getCampaign("another-bug-hunt"), runState);
+    expect(voices.npcs).toContain("demar");
     const context = getCampaignContextForAgent("another-bug-hunt", { runState });
-    expect(context).toContain("example-survivor");
-    expect(context).toContain("power_sequence");
-    expect(context).toContain("carcinid_garage");
-    expect(context).toContain("garage");
-    expect(context).toContain("reactor");
+    expect(context).toContain("demar");
   });
 });
