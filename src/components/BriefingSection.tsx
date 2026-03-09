@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { useWardenTts } from "@/hooks/useWardenTts";
 import type { BriefingPage } from "@/campaigns/types";
 
 interface BriefingSectionProps {
@@ -10,14 +11,20 @@ interface BriefingSectionProps {
   pages?: BriefingPage[];
   /** Compact mode: smaller text, tighter padding, inline controls */
   compact?: boolean;
+  /** Show TTS controls. Default true. */
+  useWardenVoice?: boolean;
   className?: string;
 }
 
-export function BriefingSection({ text, pages, compact, className = "" }: BriefingSectionProps) {
+export function BriefingSection({
+  text,
+  pages,
+  compact,
+  useWardenVoice = true,
+  className = "",
+}: BriefingSectionProps) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [errorDismissed, setErrorDismissed] = useState(false);
 
   const effectivePages: BriefingPage[] =
     pages?.length ? pages : [{ title: "Briefing", content: text }];
@@ -26,70 +33,55 @@ export function BriefingSection({ text, pages, compact, className = "" }: Briefi
   const canGoBack = currentPageIndex > 0;
   const canGoForward = currentPageIndex < effectivePages.length - 1;
 
+  const wardenTts = useWardenTts();
+
+  useEffect(() => {
+    if (wardenTts.error) setErrorDismissed(false);
+  }, [wardenTts.error]);
+
+  const isPlaying = wardenTts.isPlaying;
+  const isPaused = wardenTts.isPaused;
+  const isLoading = wardenTts.isLoading;
+  const showErrorPopup = wardenTts.error && !errorDismissed;
+
   const stop = useCallback(() => {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    setIsPlaying(false);
-    setIsPaused(false);
-  }, []);
+    wardenTts.stop();
+  }, [wardenTts]);
 
   const rewind = useCallback(() => {
-    stop();
-  }, [stop]);
+    wardenTts.rewind();
+  }, [wardenTts]);
+
+  const pause = useCallback(() => {
+    wardenTts.pause();
+  }, [wardenTts]);
 
   const play = useCallback(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis || !displayText) return;
+    if (!displayText) return;
+    setErrorDismissed(false);
+    wardenTts.play(displayText);
+  }, [displayText, wardenTts]);
 
-    if (isPaused) {
-      window.speechSynthesis.resume();
-      setIsPaused(false);
-      setIsPlaying(true);
-      return;
-    }
-
-    if (isPlaying) return;
-
-    stop();
-    const utterance = new SpeechSynthesisUtterance(displayText);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utteranceRef.current = utterance;
-
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-    };
-    utterance.onerror = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-    };
-
-    window.speechSynthesis.speak(utterance);
-    setIsPlaying(true);
-  }, [displayText, isPlaying, isPaused, stop]);
+  const dismissError = useCallback(() => {
+    setErrorDismissed(true);
+  }, []);
 
   const goToPage = useCallback(
     (index: number) => {
       stop();
+      setErrorDismissed(false);
       setCurrentPageIndex(Math.max(0, Math.min(index, effectivePages.length - 1)));
     },
     [stop, effectivePages.length]
   );
 
-  const pause = useCallback(() => {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.pause();
-      setIsPaused(true);
-      setIsPlaying(false);
-    }
-  }, []);
-
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
   useEffect(() => {
     return () => {
-      stop();
+      stopRef.current();
     };
-  }, [stop]);
+  }, []);
 
   const textClass = compact ? "text-[11px] leading-snug" : "text-xs leading-relaxed";
   const padClass = compact ? "p-2" : "p-4";
@@ -97,8 +89,8 @@ export function BriefingSection({ text, pages, compact, className = "" }: Briefi
     ? "rounded border px-2 py-1 text-[10px]"
     : "rounded border px-3 py-1.5 text-xs";
   const playBtnClass = compact
-    ? "rounded border border-amber-500/50 px-2 py-1 text-[10px] font-medium text-amber-400 hover:bg-amber-500/10"
-    : "rounded border border-amber-500/50 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/10";
+    ? "rounded border border-amber-500/50 px-2 py-1 text-[10px] font-medium text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 disabled:hover:bg-transparent"
+    : "rounded border border-amber-500/50 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 disabled:hover:bg-transparent";
 
   return (
     <div className={`flex min-h-0 flex-col ${compact ? "gap-1" : "gap-2"} ${className}`}>
@@ -143,9 +135,40 @@ export function BriefingSection({ text, pages, compact, className = "" }: Briefi
           {displayText}
         </p>
       </div>
+      {showErrorPopup && useWardenVoice && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="tts-error-title"
+        >
+          <div className="max-w-sm rounded border border-amber-900/60 bg-neutral-900 p-4 shadow-xl">
+            <h3 id="tts-error-title" className="mb-2 font-medium text-red-400">
+              Voice playback failed
+            </h3>
+            <p className="mb-3 text-sm text-neutral-300">{wardenTts.error}</p>
+            <p className="mb-4 text-sm text-neutral-400">
+              Please read through the briefing instead.
+            </p>
+            <button
+              type="button"
+              onClick={dismissError}
+              className="rounded border border-neutral-600 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+      {useWardenVoice && (
       <div className="flex shrink-0 flex-wrap items-center gap-1">
-        <button type="button" onClick={play} className={playBtnClass}>
-          {isPaused ? "Resume" : "Play"}
+        <button
+          type="button"
+          onClick={play}
+          disabled={isLoading || !displayText}
+          className={playBtnClass}
+        >
+          {isLoading ? "Loading…" : isPaused ? "Resume" : "Play"}
         </button>
         <button
           type="button"
@@ -171,6 +194,7 @@ export function BriefingSection({ text, pages, compact, className = "" }: Briefi
           Rewind
         </button>
       </div>
+      )}
     </div>
   );
 }
