@@ -99,7 +99,7 @@ export function GretaBaseFloorplan({
   };
 
   return (
-    <div className={`overflow-auto rounded-lg border border-neutral-800 bg-neutral-950/50 ${compact ? "p-2" : "p-4"} ${className}`}>
+    <div className={`overflow-auto rounded-lg border border-neutral-300 bg-neutral-50 ${compact ? "p-2" : "p-4"} ${className}`}>
       <h4 className={`text-xs font-medium uppercase tracking-wider text-neutral-500 ${compact ? "mb-1" : "mb-3"}`}>
         Greta Base — Minimap
       </h4>
@@ -235,7 +235,7 @@ export function GretaBaseFloorplan({
             className={`rounded border px-2 py-1 text-[10px] font-medium transition ${compact ? "mt-1" : "mt-2"} ${
               exploredLocationIds.includes(selectedLocationId)
                 ? "border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                : "border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                : "border-neutral-400 bg-neutral-200 text-neutral-800 hover:bg-neutral-300"
             }`}
           >
             {exploredLocationIds.includes(selectedLocationId) ? "Visited ✓ (undo)" : "Mark as Visited"}

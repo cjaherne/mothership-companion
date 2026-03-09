@@ -63,12 +63,13 @@ export function BriefingLandingPage({
     ? getMission(campaignId, scenario.missionId)
     : undefined;
   const briefingPages = mission?.briefingPages;
-  const briefingText =
-    briefingPages?.length
-      ? briefingPages[0]?.content
-      : campaign.wardenNarrator?.narrative ??
-        mission?.briefing ??
-        "No briefing available.";
+  const prologuePage = briefingPages?.find((p) => p.title === "Prologue");
+  const backgroundText =
+    prologuePage?.content ??
+    briefingPages?.[0]?.content ??
+    campaign.wardenNarrator?.narrative ??
+    mission?.briefing ??
+    "No background available.";
 
   const currentLocationId =
     runState.currentLocationId ?? campaign.world.defaultLocationId;
@@ -198,24 +199,23 @@ export function BriefingLandingPage({
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
       {/* Compact header: location | campaign — scenario */}
-      <div className="shrink-0 border-b border-neutral-800 pb-2">
-        <p className="text-base font-semibold tracking-wide text-amber-400 sm:text-lg">
+      <div className="shrink-0 border-b border-neutral-300 pb-2">
+        <p className="text-base font-semibold tracking-wide text-neutral-900 sm:text-lg">
           {headerLocationName.toUpperCase()}
-          <span className="mx-2 text-neutral-600">|</span>
-          <span className="text-amber-200/90">{scenarioLabel}</span>
+          <span className="mx-2 text-neutral-400">|</span>
+          <span className="text-neutral-600">{scenarioLabel}</span>
         </p>
       </div>
 
       {/* 3-column layout: Left (Briefing + NPCs) | Center (Maps) | Right (Players + Location) */}
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_auto_auto_auto] gap-3 overflow-hidden lg:grid-cols-[1fr_1.8fr_1.2fr] lg:grid-rows-[1fr_1fr]">
-        {/* Left col: Briefing */}
+        {/* Left col: Background */}
         <div className="flex min-h-[140px] flex-col overflow-hidden lg:min-h-0">
-          <h4 className="mb-1 shrink-0 text-xs font-medium text-amber-400">
-            Scenario Briefing
+          <h4 className="mb-1 shrink-0 text-sm font-medium text-neutral-700">
+            Background
           </h4>
           <BriefingSection
-            text={briefingText}
-            pages={briefingPages}
+            text={backgroundText}
             compact
             useWardenVoice
             className="min-h-0 flex-1 overflow-hidden"
@@ -236,8 +236,18 @@ export function BriefingLandingPage({
               className="h-full min-h-0"
             />
           ) : (
-            <div className="flex h-full min-h-[80px] items-center justify-center rounded-lg border border-amber-900/40 bg-amber-950/10 text-xs text-amber-700/70">
-              Depart for Samsa VI to reveal the planet map
+            <div
+              className="relative flex h-full min-h-[80px] items-center justify-center overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 text-xs text-neutral-600"
+              style={{
+                backgroundImage: "url(/images/ui/planet-map-placeholder.png)",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="absolute inset-0 bg-black/30" aria-hidden />
+              <span className="relative z-10 px-4 text-center font-medium text-white drop-shadow-md">
+                Depart for Samsa VI to reveal the planet map
+              </span>
             </div>
           )}
         </div>
@@ -317,8 +327,18 @@ export function BriefingLandingPage({
               className="h-full min-h-0 overflow-y-auto"
             />
           ) : (
-            <div className="flex h-full min-h-[100px] items-center justify-center rounded-lg border border-neutral-800 text-xs text-neutral-500">
-              Depart for Samsa VI to explore locations
+            <div
+              className="relative flex h-full min-h-[100px] items-center justify-center overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 text-xs text-neutral-600"
+              style={{
+                backgroundImage: "url(/images/ui/locations-placeholder.png)",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="absolute inset-0 bg-black/30" aria-hidden />
+              <span className="relative z-10 px-4 text-center font-medium text-white drop-shadow-md">
+                Depart for Samsa VI to explore locations
+              </span>
             </div>
           )}
         </div>

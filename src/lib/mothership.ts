@@ -24,8 +24,15 @@ export interface MothershipStats {
 export interface MothershipCharacterData {
   class: MothershipClass;
   stats: MothershipStats;
+  /** Maximum health; current health when tracking damage (defaults to health if undefined) */
   health: number;
   maxWounds: number;
+  /** Current wounds (default 0) */
+  currentWounds?: number;
+  /** Current stress (default 0) */
+  stressCurrent?: number;
+  /** Maximum stress (default 10) */
+  stressMax?: number;
   /** Full loadout description from class table */
   loadout: string;
   trinket: string;

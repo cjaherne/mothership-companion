@@ -80,7 +80,7 @@ export function InternalLocationMap({
   if (ids.length === 0) {
     return (
       <div
-        className={`flex flex-col items-center justify-center rounded-lg border border-neutral-800 bg-neutral-950/50 p-6 text-neutral-500 ${className}`}
+        className={`flex flex-col items-center justify-center rounded-lg border border-neutral-300 bg-neutral-50 p-6 text-neutral-600 ${className}`}
       >
         <p className="text-sm">No internal locations</p>
       </div>
@@ -89,9 +89,9 @@ export function InternalLocationMap({
 
   return (
     <div
-      className={`overflow-auto rounded-lg border border-neutral-800 bg-neutral-950/50 ${compact ? "p-2" : "p-4"} ${className}`}
+      className={`overflow-auto rounded-lg border border-neutral-300 bg-neutral-50 ${compact ? "p-2" : "p-4"} ${className}`}
     >
-      <h4 className={`text-xs font-medium uppercase tracking-wider text-neutral-500 ${compact ? "mb-1" : "mb-3"}`}>
+      <h4 className={`text-xs font-medium uppercase tracking-wider text-neutral-600 ${compact ? "mb-1" : "mb-3"}`}>
         {regionName} — Internal Map
       </h4>
       <svg
@@ -176,18 +176,18 @@ export function InternalLocationMap({
           );
         })}
       </svg>
-      <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-neutral-500">
+      <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-neutral-600">
         <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-amber-400" /> Current
+          <span className="h-2 w-2 rounded-full bg-green-500" /> Current
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-amber-700/80" /> Visited
+          <span className="h-2 w-2 rounded-full bg-blue-500" /> Visited
         </span>
         <span className="flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-neutral-500" /> Unexplored
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-0.5 w-3 bg-amber-500" /> Path
+          <span className="h-0.5 w-3 bg-neutral-500" /> Path
         </span>
         {selectedLocationId && onMarkVisited && (
           <button
@@ -195,8 +195,8 @@ export function InternalLocationMap({
             onClick={() => onMarkVisited(selectedLocationId)}
             className={`ml-auto rounded border px-2 py-1 text-[10px] font-medium transition ${
               exploredLocationIds.includes(selectedLocationId)
-                ? "border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                : "border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                ? "border-green-600 bg-green-100 text-green-800 hover:bg-green-200"
+                : "border-neutral-400 bg-neutral-200 text-neutral-800 hover:bg-neutral-300"
             }`}
           >
             {exploredLocationIds.includes(selectedLocationId) ? "Visited ✓ (undo)" : "Mark as Visited"}

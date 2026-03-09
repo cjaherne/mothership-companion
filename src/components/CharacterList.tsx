@@ -5,12 +5,12 @@ import Image from "next/image";
 import type { Character } from "@/types/run";
 import { CLASS_NAMES } from "@/lib/mothership";
 
-const AVATAR_SIZE = 32;
-const AVATAR_SIZE_COMPACT = 24;
+const AVATAR_SIZE = 72;
+const AVATAR_SIZE_COMPACT = 56;
 const VISIBLE_ROWS = 4;
 const VISIBLE_ROWS_COMPACT = 3;
-const ROW_HEIGHT = 44;
-const ROW_HEIGHT_COMPACT = 32;
+const ROW_HEIGHT = 120;
+const ROW_HEIGHT_COMPACT = 100;
 
 interface CharacterListProps {
   characters: Character[];
@@ -19,26 +19,111 @@ interface CharacterListProps {
 }
 
 function CharacterAvatar({ char, size = 32 }: { char: Character; size?: number }) {
-  if (char.avatarPath) {
+  const [imgError, setImgError] = useState(false);
+  const initial = (char.name || "?").charAt(0).toUpperCase();
+
+  if (char.avatarPath && !imgError) {
+    const isExternal = char.avatarPath.startsWith("http");
+    if (isExternal) {
+      return (
+        <img
+          src={char.avatarPath}
+          alt=""
+          width={size}
+          height={size}
+          referrerPolicy="no-referrer"
+          onError={() => setImgError(true)}
+          className="shrink-0 overflow-hidden rounded-full object-cover"
+          style={{ width: size, height: size }}
+        />
+      );
+    }
     return (
       <Image
         src={char.avatarPath}
         alt=""
         width={size}
         height={size}
-        className="shrink-0 rounded-full object-cover"
+        unoptimized
+        onError={() => setImgError(true)}
+        className="shrink-0 overflow-hidden rounded-full object-cover"
       />
     );
   }
 
-  const initial = (char.name || "?").charAt(0).toUpperCase();
   return (
     <div
-      className="flex shrink-0 items-center justify-center rounded-full bg-amber-900/50 text-xs font-medium text-amber-600"
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-300 text-lg font-semibold text-neutral-600"
       style={{ width: size, height: size }}
       aria-hidden
     >
       {initial}
+    </div>
+  );
+}
+
+/** Single stat value in a circle */
+function StatBadge({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-neutral-800 bg-white text-xs font-bold text-neutral-900">
+        {value}
+      </div>
+      <span className="mt-0.5 text-[10px] font-medium uppercase text-neutral-600">{label}</span>
+    </div>
+  );
+}
+
+function CharacterStatsInline({ m }: { m: NonNullable<Character["mothership"]> }) {
+  const wounds = m.currentWounds ?? 0;
+  const stressCur = m.stressCurrent ?? 0;
+  const stressMax = m.stressMax ?? 10;
+
+  return (
+    <div className="flex shrink-0 flex-wrap gap-1.5">
+      <div className="rounded border border-neutral-400 bg-white px-1.5 py-0.5">
+        <div className="text-[9px] font-semibold uppercase text-neutral-500">Stats</div>
+        <div className="flex gap-0.5">
+          <StatBadge label="STR" value={m.stats.strength} />
+          <StatBadge label="SPD" value={m.stats.speed} />
+          <StatBadge label="INT" value={m.stats.intellect} />
+          <StatBadge label="CBT" value={m.stats.combat} />
+        </div>
+      </div>
+      <div className="rounded border border-neutral-400 bg-white px-1.5 py-0.5">
+        <div className="text-[9px] font-semibold uppercase text-neutral-500">Saves</div>
+        <div className="flex gap-0.5">
+          <StatBadge label="SAN" value={m.stats.sanity} />
+          <StatBadge label="FEAR" value={m.stats.fear} />
+          <StatBadge label="BOD" value={m.stats.body} />
+        </div>
+      </div>
+      <div className="rounded border border-neutral-400 bg-white px-1.5 py-0.5">
+        <div className="text-[9px] font-semibold uppercase text-neutral-500">Health</div>
+        <div className="mt-0.5 flex gap-2">
+          <div className="flex flex-col items-center">
+            <div className="rounded-full border-2 border-neutral-800 bg-white px-2 py-0.5 text-xs font-bold">
+              {m.health}/{m.health}
+            </div>
+            <span className="mt-0.5 text-[9px] text-neutral-600">Health</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="rounded-full border-2 border-neutral-800 bg-white px-2 py-0.5 text-xs font-bold">
+              {wounds}/{m.maxWounds ?? 2}
+            </div>
+            <span className="mt-0.5 text-[9px] text-neutral-600">Wounds</span>
+          </div>
+        </div>
+      </div>
+      <div className="rounded border border-neutral-400 bg-white px-1.5 py-0.5">
+        <div className="text-[9px] font-semibold uppercase text-neutral-500">Gain</div>
+        <div className="mt-0.5 flex flex-col items-center">
+          <div className="rounded-full border-2 border-neutral-800 bg-white px-2 py-0.5 text-xs font-bold">
+            {stressCur}/{stressMax}
+          </div>
+          <span className="mt-0.5 text-[9px] text-neutral-600">Stress</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -52,9 +137,9 @@ export function CharacterList({ characters, compact, className = "" }: Character
 
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-lg border border-amber-900/40 bg-amber-950/20 ${className}`}
+      className={`flex flex-col overflow-hidden rounded-lg border border-neutral-300 bg-neutral-50 ${className}`}
     >
-      <h4 className={`shrink-0 border-b border-amber-900/40 text-xs font-medium uppercase tracking-wider text-neutral-500 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
+      <h4 className={`shrink-0 border-b border-neutral-300 text-lg font-semibold uppercase tracking-wider text-neutral-700 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
         Players
       </h4>
       <ul
@@ -62,30 +147,36 @@ export function CharacterList({ characters, compact, className = "" }: Character
         style={{ maxHeight: characters.length > 0 ? maxH : undefined }}
       >
         {characters.length === 0 ? (
-          <li className={`px-2 text-center text-sm text-neutral-500 ${compact ? "py-2" : "py-4"}`}>
+          <li className={`px-2 text-center text-sm text-neutral-600 ${compact ? "py-2" : "py-4"}`}>
             No players yet
           </li>
         ) : (
           characters.map((char) => (
-            <li key={char.id}>
+            <li key={char.id} className="min-h-0 shrink-0">
               <button
                 type="button"
                 onClick={() => setSelectedCharacter(char)}
-                className={`flex w-full items-center gap-2 rounded text-left text-neutral-200 transition hover:bg-neutral-800/80 ${
-                  compact ? "px-1.5 py-1 text-xs" : "px-2 py-1.5 text-sm"
+                className={`flex min-h-[112px] w-full items-center gap-4 rounded text-left transition hover:bg-neutral-200 ${
+                  compact ? "px-2 py-2" : "px-3 py-3"
                 }`}
               >
                 <CharacterAvatar char={char} size={avatarSize} />
-                <span className="min-w-0 truncate">
-                  {char.playerName ? (
-                    <>
-                      <span className="font-medium">{char.playerName}</span>
-                      <span className="text-neutral-500"> → {char.name}</span>
-                    </>
-                  ) : (
-                    char.name
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-semibold text-neutral-900">{char.name}</span>
+                    {char.mothership && (
+                      <span className="text-xs font-medium uppercase text-neutral-500">
+                        {CLASS_NAMES[char.mothership.class]}
+                      </span>
+                    )}
+                  </div>
+                  {char.playerName && (
+                    <div className="text-base text-neutral-600">Player: {char.playerName}</div>
                   )}
-                </span>
+                </div>
+                {char.mothership && (
+                  <CharacterStatsInline m={char.mothership} />
+                )}
               </button>
             </li>
           ))
@@ -101,18 +192,18 @@ export function CharacterList({ characters, compact, className = "" }: Character
           onClick={() => setSelectedCharacter(null)}
         >
           <div
-            className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-900 p-6 shadow-xl"
+            className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-lg border border-neutral-300 bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <CharacterAvatar char={selectedCharacter} size={AVATAR_SIZE} />
+                <CharacterAvatar char={selectedCharacter} size={48} />
                 <div>
-                  <h5 className="text-lg font-semibold text-white">
+                  <h5 className="text-lg font-semibold text-neutral-900">
                     {selectedCharacter.name}
                   </h5>
                   {selectedCharacter.playerName && (
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-neutral-600">
                       Player: {selectedCharacter.playerName}
                     </p>
                   )}
@@ -121,61 +212,102 @@ export function CharacterList({ characters, compact, className = "" }: Character
               <button
                 type="button"
                 onClick={() => setSelectedCharacter(null)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                className="rounded p-1 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900"
                 aria-label="Close"
               >
                 ×
               </button>
             </div>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
               {selectedCharacter.mothership && (
-                <div className="rounded border border-amber-900/50 bg-amber-950/20 p-3">
-                  <h6 className="mb-2 text-xs font-medium text-amber-400">
-                    Mothership stats
-                  </h6>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                    <span className="text-amber-800/80">Class:</span>
-                    <span>{CLASS_NAMES[selectedCharacter.mothership.class]}</span>
-                    <span className="text-amber-800/80">STR/SPD/INT/CBT:</span>
-                    <span>
-                      {selectedCharacter.mothership.stats.strength} /{" "}
-                      {selectedCharacter.mothership.stats.speed} /{" "}
-                      {selectedCharacter.mothership.stats.intellect} /{" "}
-                      {selectedCharacter.mothership.stats.combat}
-                    </span>
-                    <span className="text-amber-800/80">SAN/FEAR/BOD:</span>
-                    <span>
-                      {selectedCharacter.mothership.stats.sanity} /{" "}
-                      {selectedCharacter.mothership.stats.fear} /{" "}
-                      {selectedCharacter.mothership.stats.body}
-                    </span>
-                    <span className="text-amber-800/80">Health:</span>
-                    <span>{selectedCharacter.mothership.health}</span>
-                    <span className="text-amber-800/80">Wounds:</span>
-                    <span>0/{selectedCharacter.mothership.maxWounds ?? 2}</span>
-                    <span className="text-amber-800/80">Credits:</span>
-                    <span>{selectedCharacter.mothership.credits} cr</span>
+                <>
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
+                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Class</h6>
+                    <p className="text-base font-medium text-neutral-900">
+                      {CLASS_NAMES[selectedCharacter.mothership.class]}
+                    </p>
                   </div>
-                  <p className="mt-2 text-xs text-amber-700/90">
-                    {selectedCharacter.mothership.loadout}
-                  </p>
-                  <p className="mt-1 text-xs text-amber-800/70">
-                    Trinket: {selectedCharacter.mothership.trinket} | Patch:{" "}
-                    {selectedCharacter.mothership.patch}
-                  </p>
-                </div>
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
+                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Stats</h6>
+                    <div className="flex flex-wrap gap-3">
+                      <StatBadge label="STR" value={selectedCharacter.mothership.stats.strength} />
+                      <StatBadge label="SPD" value={selectedCharacter.mothership.stats.speed} />
+                      <StatBadge label="INT" value={selectedCharacter.mothership.stats.intellect} />
+                      <StatBadge label="CBT" value={selectedCharacter.mothership.stats.combat} />
+                    </div>
+                  </div>
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
+                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Saves</h6>
+                    <div className="flex flex-wrap gap-3">
+                      <StatBadge label="SAN" value={selectedCharacter.mothership.stats.sanity} />
+                      <StatBadge label="FEAR" value={selectedCharacter.mothership.stats.fear} />
+                      <StatBadge label="BOD" value={selectedCharacter.mothership.stats.body} />
+                    </div>
+                  </div>
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
+                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Health</h6>
+                    <div className="flex flex-wrap gap-6">
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
+                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.health}</span>
+                          <span className="text-neutral-400">/</span>
+                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.health}</span>
+                        </div>
+                        <div className="mt-1 flex justify-between gap-4 text-xs text-neutral-600">
+                          <span>Current</span>
+                          <span>Maximum</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
+                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.currentWounds ?? 0}</span>
+                          <span className="text-neutral-400">/</span>
+                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.maxWounds ?? 2}</span>
+                        </div>
+                        <div className="mt-1 flex justify-between gap-4 text-xs text-neutral-600">
+                          <span>Current</span>
+                          <span>Maximum</span>
+                        </div>
+                        <span className="mt-0.5 text-xs text-neutral-500">Starts at 2.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
+                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Gain</h6>
+                    <div className="flex flex-col">
+                      <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
+                        <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.stressCurrent ?? 0}</span>
+                        <span className="text-neutral-400">/</span>
+                        <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.stressMax ?? 10}</span>
+                      </div>
+                      <div className="mt-1 flex justify-between gap-4 text-xs text-neutral-600">
+                        <span>Current</span>
+                        <span>Maximum</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
+                    <p className="text-xs text-neutral-600">
+                      {selectedCharacter.mothership.loadout}
+                    </p>
+                    <p className="mt-1 text-xs text-neutral-600">
+                      Trinket: {selectedCharacter.mothership.trinket} | Patch:{" "}
+                      {selectedCharacter.mothership.patch} | Credits: {selectedCharacter.mothership.credits} cr
+                    </p>
+                  </div>
+                </>
               )}
               {selectedCharacter.traits.length > 0 && (
                 <div>
-                  <span className="text-neutral-500">Traits: </span>
-                  <span className="text-neutral-200">
+                  <span className="text-neutral-600">Traits: </span>
+                  <span className="text-neutral-800">
                     {selectedCharacter.traits.join(", ")}
                   </span>
                 </div>
               )}
               <div>
-                <span className="text-neutral-500">Personality & background:</span>
-                <p className="mt-1 text-neutral-300">
+                <span className="text-neutral-600">Personality & background:</span>
+                <p className="mt-1 text-neutral-800">
                   {selectedCharacter.personalitySummary}
                 </p>
               </div>

@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --foreground: 251 245 235;
-  --background: 20 14 0;
-  /* Mothership PDF-inspired warm industrial palette */
+  --foreground: 245 245 245;
+  --background: 10 10 10;
+  /* Monochrome + neon accents */
   --ms-amber: #f59e0b;
   --ms-amber-dim: #b45309;
-  --ms-bg: #0f0a00;
-  --ms-panel: rgba(69, 26, 3, 0.3);
+  --ms-bg: #0a0a0a;
+  --ms-panel: rgba(38, 38, 38, 0.5);
   --neon-cyan: #00fff2;
   --neon-green: #39ff14;
   --neon-blue: #2563eb;
@@ -19,6 +19,11 @@
 body {
   color: rgb(var(--foreground));
   background: var(--ms-bg, #0f0a00);
+}
+
+/* Background image containers - place images in public/images/ui/ */
+.bg-panel-atmosphere {
+  background-image: radial-gradient(ellipse at 20% 80%, rgba(255, 0, 110, 0.03) 0%, transparent 50%);
 }
 
 /* Sci-fi scanline overlay (optional subtle effect) */

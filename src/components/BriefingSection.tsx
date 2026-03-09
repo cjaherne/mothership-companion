@@ -5,9 +5,9 @@ import { useWardenTts } from "@/hooks/useWardenTts";
 import type { BriefingPage } from "@/campaigns/types";
 
 interface BriefingSectionProps {
-  /** Scenario briefing text (fallback when no pages) */
+  /** Background text (single pane, no pagination) */
   text: string;
-  /** Paginated briefing pages. When set, used instead of text. */
+  /** @deprecated Pagination removed; use text only */
   pages?: BriefingPage[];
   /** Compact mode: smaller text, tighter padding, inline controls */
   compact?: boolean;
@@ -18,20 +18,12 @@ interface BriefingSectionProps {
 
 export function BriefingSection({
   text,
-  pages,
   compact,
   useWardenVoice = true,
   className = "",
 }: BriefingSectionProps) {
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [errorDismissed, setErrorDismissed] = useState(false);
-
-  const effectivePages: BriefingPage[] =
-    pages?.length ? pages : [{ title: "Briefing", content: text }];
-  const currentPage = effectivePages[currentPageIndex];
-  const displayText = currentPage?.content ?? text;
-  const canGoBack = currentPageIndex > 0;
-  const canGoForward = currentPageIndex < effectivePages.length - 1;
+  const displayText = text;
 
   const wardenTts = useWardenTts();
 
@@ -66,15 +58,6 @@ export function BriefingSection({
     setErrorDismissed(true);
   }, []);
 
-  const goToPage = useCallback(
-    (index: number) => {
-      stop();
-      setErrorDismissed(false);
-      setCurrentPageIndex(Math.max(0, Math.min(index, effectivePages.length - 1)));
-    },
-    [stop, effectivePages.length]
-  );
-
   const stopRef = useRef(stop);
   stopRef.current = stop;
   useEffect(() => {
@@ -83,55 +66,18 @@ export function BriefingSection({
     };
   }, []);
 
-  const textClass = compact ? "text-[11px] leading-snug" : "text-xs leading-relaxed";
+  const textClass = compact ? "text-sm leading-relaxed" : "text-base leading-relaxed";
   const padClass = compact ? "p-2" : "p-4";
-  const btnClass = compact
-    ? "rounded border px-2 py-1 text-[10px]"
-    : "rounded border px-3 py-1.5 text-xs";
-  const playBtnClass = compact
-    ? "rounded border border-amber-500/50 px-2 py-1 text-[10px] font-medium text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 disabled:hover:bg-transparent"
-    : "rounded border border-amber-500/50 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 disabled:hover:bg-transparent";
+  const iconSize = compact ? 14 : 16;
+  const iconBtnClass =
+    "rounded border border-neutral-300 p-1.5 text-neutral-600 transition hover:bg-neutral-200 hover:text-neutral-900 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-neutral-600";
 
   return (
     <div className={`flex min-h-0 flex-col ${compact ? "gap-1" : "gap-2"} ${className}`}>
-      <div className="flex shrink-0 items-center justify-between gap-1">
-        <h5
-          className={
-            compact
-              ? "text-[10px] font-medium uppercase tracking-wider text-neutral-500"
-              : "text-xs font-medium uppercase tracking-wider text-neutral-500"
-          }
-        >
-          {currentPage?.title ?? "Briefing"}
-        </h5>
-        {effectivePages.length > 1 && (
-          <div className="flex items-center gap-0.5">
-            <button
-              type="button"
-              onClick={() => goToPage(currentPageIndex - 1)}
-              disabled={!canGoBack}
-              className="rounded border border-neutral-600 px-1.5 py-0.5 text-[10px] text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
-            >
-              ←
-            </button>
-            <span className="px-1 text-[10px] text-neutral-600">
-              {currentPageIndex + 1}/{effectivePages.length}
-            </span>
-            <button
-              type="button"
-              onClick={() => goToPage(currentPageIndex + 1)}
-              disabled={!canGoForward}
-              className="rounded border border-neutral-600 px-1.5 py-0.5 text-[10px] text-neutral-400 hover:bg-neutral-800 disabled:opacity-50 disabled:hover:bg-transparent"
-            >
-              →
-            </button>
-          </div>
-        )}
-      </div>
       <div
-        className={`min-h-0 flex-1 overflow-y-auto rounded border border-amber-900/40 bg-amber-950/20 ${padClass}`}
+        className={`min-h-0 flex-1 overflow-y-auto rounded border border-neutral-300 bg-neutral-50 ${padClass}`}
       >
-        <p className={`whitespace-pre-wrap ${textClass} text-neutral-300`}>
+        <p className={`whitespace-pre-wrap ${textClass} text-neutral-800`}>
           {displayText}
         </p>
       </div>
@@ -142,18 +88,18 @@ export function BriefingSection({
           aria-modal="true"
           aria-labelledby="tts-error-title"
         >
-          <div className="max-w-sm rounded border border-amber-900/60 bg-neutral-900 p-4 shadow-xl">
+          <div className="max-w-sm rounded border border-neutral-700 bg-neutral-900 p-4 shadow-xl">
             <h3 id="tts-error-title" className="mb-2 font-medium text-red-400">
               Voice playback failed
             </h3>
-            <p className="mb-3 text-sm text-neutral-300">{wardenTts.error}</p>
-            <p className="mb-4 text-sm text-neutral-400">
+            <p className="mb-3 text-sm text-neutral-600">{wardenTts.error}</p>
+            <p className="mb-4 text-sm text-neutral-600">
               Please read through the briefing instead.
             </p>
             <button
               type="button"
               onClick={dismissError}
-              className="rounded border border-neutral-600 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
+              className="rounded border border-neutral-400 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-200"
             >
               OK
             </button>
@@ -161,37 +107,61 @@ export function BriefingSection({
         </div>
       )}
       {useWardenVoice && (
-      <div className="flex shrink-0 flex-wrap items-center gap-1">
+      <div className="flex shrink-0 items-center gap-1" role="group" aria-label="Background audio player">
         <button
           type="button"
           onClick={play}
           disabled={isLoading || !displayText}
-          className={playBtnClass}
+          className={iconBtnClass}
+          title={isLoading ? "Loading…" : isPaused ? "Resume" : "Play"}
+          aria-label={isLoading ? "Loading" : isPaused ? "Resume" : "Play"}
         >
-          {isLoading ? "Loading…" : isPaused ? "Resume" : "Play"}
+          {isLoading ? (
+            <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="currentColor" className="animate-pulse" aria-hidden>
+              <circle cx="8" cy="12" r="1.5" />
+              <circle cx="12" cy="12" r="1.5" />
+              <circle cx="16" cy="12" r="1.5" />
+            </svg>
+          ) : (
+            <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          )}
         </button>
         <button
           type="button"
           onClick={pause}
           disabled={!isPlaying}
-          className={`${btnClass} border-neutral-600 text-neutral-400 hover:bg-neutral-800 disabled:opacity-50`}
+          className={iconBtnClass}
+          title="Pause"
+          aria-label="Pause"
         >
-          Pause
+          <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+          </svg>
         </button>
         <button
           type="button"
           onClick={stop}
           disabled={!isPlaying && !isPaused}
-          className={`${btnClass} border-neutral-600 text-neutral-400 hover:bg-neutral-800 disabled:opacity-50`}
+          className={iconBtnClass}
+          title="Stop"
+          aria-label="Stop"
         >
-          Stop
+          <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M6 6h12v12H6z" />
+          </svg>
         </button>
         <button
           type="button"
           onClick={rewind}
-          className={`${btnClass} border-neutral-600 text-neutral-400 hover:bg-neutral-800`}
+          className={iconBtnClass}
+          title="Rewind"
+          aria-label="Rewind"
         >
-          Rewind
+          <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" />
+          </svg>
         </button>
       </div>
       )}
