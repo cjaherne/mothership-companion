@@ -217,6 +217,7 @@ export function BriefingLandingPage({
             text={briefingText}
             pages={briefingPages}
             compact
+            useWardenVoice
             className="min-h-0 flex-1 overflow-hidden"
           />
         </div>
