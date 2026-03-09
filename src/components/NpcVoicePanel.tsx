@@ -31,8 +31,8 @@ function NpcVoiceControls({ onEnd }: { onEnd: () => void }) {
           : state ?? "Connecting";
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-900/50 bg-amber-950/20 px-4 py-2">
-      <span className="text-xs font-medium text-amber-400">
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2">
+      <span className="text-xs font-medium text-neutral-700">
         {stateLabel}
       </span>
       <div className="flex items-center gap-2">
@@ -41,7 +41,7 @@ function NpcVoiceControls({ onEnd }: { onEnd: () => void }) {
         <button
           type="button"
           onClick={onEnd}
-          className="rounded border border-amber-800/50 px-2 py-1 text-xs text-amber-600 hover:bg-amber-950/50 hover:text-amber-400"
+          className="rounded border border-neutral-400 px-2 py-1 text-xs text-neutral-700 hover:bg-neutral-200"
         >
           End conversation
         </button>
@@ -107,13 +107,13 @@ export function NpcVoicePanel({
 
   if (!token) {
     return (
-      <div className="rounded-lg border border-amber-900/50 bg-amber-950/20 p-4">
+      <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-amber-200">
+            <p className="text-sm font-medium text-neutral-900">
               Talk to {npcName}
             </p>
-            <p className="text-xs text-amber-700/80">
+            <p className="text-xs text-neutral-600">
               Connect to start a voice conversation
             </p>
           </div>
@@ -121,7 +121,7 @@ export function NpcVoicePanel({
             type="button"
             onClick={fetchToken}
             disabled={connecting}
-            className="shrink-0 rounded border border-amber-500/50 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/10 disabled:opacity-50"
+            className="shrink-0 rounded border border-neon-pink/50 px-4 py-2 text-sm font-medium text-neon-pink hover:bg-neon-pink/10 disabled:opacity-50"
           >
             {connecting ? "Connecting…" : "Connect"}
           </button>
@@ -134,8 +134,8 @@ export function NpcVoicePanel({
   }
 
   return (
-    <div className="rounded-lg border border-amber-900/50 bg-amber-950/20 p-2">
-      <p className="mb-2 text-xs font-medium text-amber-700/90">
+    <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-2">
+      <p className="mb-2 text-xs font-medium text-neutral-700">
         Speaking with {npcName}
       </p>
       <LiveKitRoom

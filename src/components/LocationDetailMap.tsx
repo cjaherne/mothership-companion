@@ -40,7 +40,7 @@ export function LocationDetailMap({
   if (!location) {
     return (
       <div
-        className={`flex items-center justify-center rounded-lg border border-neutral-800 bg-neutral-950/50 p-6 text-neutral-500 ${className}`}
+        className={`flex items-center justify-center rounded-lg border border-neutral-300 bg-neutral-50 p-6 text-neutral-600 ${className}`}
       >
         <p className="text-sm">No location selected</p>
       </div>
@@ -52,10 +52,10 @@ export function LocationDetailMap({
 
   return (
     <div
-      className={`flex min-h-0 flex-col overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-4 ${className}`}
+      className={`flex min-h-0 flex-col overflow-y-auto rounded-lg border border-neutral-300 bg-neutral-50 p-4 ${className}`}
     >
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h4 className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+        <h4 className="text-xs font-medium uppercase tracking-wider text-neutral-600">
           {location.name}
         </h4>
         {onMarkVisited && (
@@ -64,15 +64,15 @@ export function LocationDetailMap({
             onClick={() => onMarkVisited(location.id)}
             className={`rounded border px-2 py-1 text-[10px] font-medium transition ${
               exploredLocationIds.includes(location.id)
-                ? "border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                : "border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                ? "border-green-600 bg-green-100 text-green-800 hover:bg-green-200"
+                : "border-neutral-400 bg-neutral-200 text-neutral-800 hover:bg-neutral-300"
             }`}
           >
             {exploredLocationIds.includes(location.id) ? "Visited ✓ (undo)" : "Mark as Visited"}
           </button>
         )}
       </div>
-      <p className="mb-4 text-xs text-neutral-400">{location.description}</p>
+      <p className="mb-4 text-xs text-neutral-700">{location.description}</p>
 
       {entryConfig &&
         onEnterInterior &&
@@ -88,7 +88,7 @@ export function LocationDetailMap({
               <button
                 type="button"
                 onClick={() => onEnterInterior(entry.targetLocationId)}
-                className="w-full rounded border-2 border-emerald-500/60 bg-emerald-500/20 px-3 py-2 text-sm font-medium text-emerald-300 transition hover:border-emerald-400 hover:bg-emerald-500/30"
+                className="w-full rounded border-2 border-emerald-600 bg-emerald-100 px-3 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-200"
               >
                 Enter {targetName}
               </button>
@@ -98,7 +98,7 @@ export function LocationDetailMap({
 
       {pois.length > 0 ? (
         <div className="space-y-2">
-          <p className="text-[10px] font-medium uppercase text-neutral-500">
+          <p className="text-[10px] font-medium uppercase text-neutral-600">
             Points of interest
           </p>
           <ul className="space-y-1.5">
@@ -107,19 +107,19 @@ export function LocationDetailMap({
               return (
                 <li
                   key={poi.id}
-                  className="rounded border border-neutral-800 bg-black/30 px-3 py-2"
+                  className="rounded border border-neutral-300 bg-white px-3 py-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2 min-w-0">
                       <span
                         className={`h-1.5 w-1.5 shrink-0 rounded-full mt-1.5 ${
-                          isInspected ? "bg-green-400/80" : "bg-amber-400/80"
+                          isInspected ? "bg-green-500" : "bg-neutral-500"
                         }`}
                       />
                       <div className="min-w-0">
                         <span
                           className={`text-sm ${
-                            isInspected ? "text-neutral-400" : "text-neutral-200"
+                            isInspected ? "text-neutral-600" : "text-neutral-900"
                           }`}
                         >
                           {poi.name}
@@ -135,7 +135,7 @@ export function LocationDetailMap({
                         {poi.items && poi.items.length > 0 && isInspected && (
                           <ul className="mt-1 space-y-0.5">
                             {poi.items.map((item) => (
-                              <li key={item} className="text-[10px] text-amber-300/70">
+                              <li key={item} className="text-[10px] text-neutral-600">
                                 + {item}
                               </li>
                             ))}
@@ -163,7 +163,7 @@ export function LocationDetailMap({
           </ul>
         </div>
       ) : (
-        <p className="text-sm text-neutral-500">You are here.</p>
+        <p className="text-sm text-neutral-600">You are here.</p>
       )}
 
       {conns.length > 0 && (
@@ -181,7 +181,7 @@ export function LocationDetailMap({
                   type="button"
                   onClick={() => onLocationClick?.(id)}
                   disabled={!isClickable}
-                  className={`rounded border border-amber-600/50 px-2 py-1 text-left text-xs text-amber-300/90 transition hover:border-amber-500 hover:bg-amber-500/10 ${
+                  className={`rounded border border-neutral-400 px-2 py-1 text-left text-xs text-neutral-800 transition hover:bg-neutral-200 ${
                     isClickable ? "cursor-pointer" : "cursor-default"
                   }`}
                 >
@@ -193,8 +193,8 @@ export function LocationDetailMap({
         </div>
       )}
 
-      <div className="mt-3 flex items-center gap-1.5 text-[10px] text-neutral-500">
-        <span className="h-1.5 w-1.5 rounded-full bg-amber-400/80" />
+      <div className="mt-3 flex items-center gap-1.5 text-[10px] text-neutral-600">
+        <span className="h-1.5 w-1.5 rounded-full bg-neutral-500" />
         Door / connection
       </div>
     </div>

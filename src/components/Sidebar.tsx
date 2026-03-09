@@ -18,9 +18,9 @@ export function Sidebar({ selectedCampaignId, onSelectCampaign, onOpenPdf }: Sid
   const campaignIds = listCampaignIds().filter((id) => id !== "warden");
 
   return (
-    <aside className="flex h-full w-56 flex-col border-r border-amber-950/50 bg-black/80">
-      <div className="border-b border-amber-950/50 p-4">
-        <h2 className="text-xs font-medium uppercase tracking-widest text-amber-800/80">
+    <aside className="flex h-full w-56 flex-col border-r border-neutral-800 bg-black">
+      <div className="border-b border-neutral-800 p-4">
+        <h2 className="text-xs font-medium uppercase tracking-widest text-neutral-400">
           Campaigns
         </h2>
       </div>
@@ -35,8 +35,8 @@ export function Sidebar({ selectedCampaignId, onSelectCampaign, onOpenPdf }: Sid
               onClick={() => onSelectCampaign(isSelected ? null : id)}
               className={`w-full rounded px-3 py-2.5 text-left text-sm transition-all ${
                 isSelected
-                  ? "bg-amber-950/50 text-amber-200 ring-1 ring-amber-700/50"
-                  : "text-amber-900/90 hover:bg-amber-950/30 hover:text-amber-200"
+                  ? "bg-neutral-800 text-white"
+                  : "text-neutral-300 hover:bg-neutral-800/50 hover:text-white"
               }`}
             >
               {campaign.name}
@@ -44,8 +44,8 @@ export function Sidebar({ selectedCampaignId, onSelectCampaign, onOpenPdf }: Sid
           );
         })}
       </nav>
-      <div className="border-t border-amber-950/50 p-4 space-y-2">
-        <h3 className="text-[10px] font-medium uppercase tracking-widest text-amber-800/60">
+      <div className="space-y-2 border-t border-neutral-800 p-4">
+        <h3 className="text-[10px] font-medium uppercase tracking-widest text-neutral-400">
           Rules
         </h3>
         {PDF_DOCS.map((doc) => (
@@ -53,7 +53,7 @@ export function Sidebar({ selectedCampaignId, onSelectCampaign, onOpenPdf }: Sid
             key={doc.src}
             type="button"
             onClick={() => onOpenPdf?.(doc.src, doc.title)}
-            className="block w-full rounded px-2 py-1.5 text-left text-xs text-amber-700/90 hover:bg-amber-950/30 hover:text-amber-200"
+            className="block w-full rounded px-2 py-1.5 text-left text-xs text-neutral-300 hover:bg-neutral-800/50 hover:text-white"
           >
             {doc.title}
           </button>
@@ -61,7 +61,7 @@ export function Sidebar({ selectedCampaignId, onSelectCampaign, onOpenPdf }: Sid
         <button
           type="button"
           onClick={() => onSelectCampaign(null)}
-          className="mt-2 block text-xs text-amber-800/60 hover:text-amber-600"
+          className="mt-2 block text-xs text-neutral-500 hover:text-neutral-300"
         >
           Clear selection
         </button>

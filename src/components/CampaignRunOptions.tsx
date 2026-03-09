@@ -60,33 +60,33 @@ export function CampaignRunOptions({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="mb-1 text-xl font-semibold text-white">
+        <h3 className="mb-1 text-xl font-semibold text-neutral-900">
           {campaign.name}
         </h3>
-        <p className="text-sm text-neutral-400">{campaign.description}</p>
+        <p className="text-sm text-neutral-600">{campaign.description}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <button
           type="button"
           onClick={handleCreateNew}
-          className="group flex flex-col items-start rounded-lg border border-amber-500/30 bg-amber-500/5 p-6 text-left transition-all hover:border-amber-500/60 hover:bg-amber-500/10 hover:shadow-ms-amber"
+          className="group flex flex-col items-start rounded-lg border border-neutral-400 bg-neutral-100 p-6 text-left transition-all hover:border-neutral-500 hover:bg-neutral-200"
         >
           <span className="mb-2 text-2xl">▶</span>
-          <span className="font-medium text-amber-400 group-hover:text-amber-400">
+          <span className="font-medium text-neutral-900 group-hover:text-neutral-900">
             Create New Run
           </span>
-          <span className="mt-1 text-xs text-neutral-400">
+          <span className="mt-1 text-xs text-neutral-600">
             Start a fresh session
           </span>
         </button>
 
-        <div className="flex flex-col rounded-lg border border-amber-900/40 bg-amber-950/20 p-6">
-          <span className="mb-2 text-2xl text-neutral-600">↻</span>
-          <span className="font-medium text-neutral-300">
+        <div className="flex flex-col rounded-lg border border-neutral-300 bg-neutral-50 p-6">
+          <span className="mb-2 text-2xl text-neutral-500">↻</span>
+          <span className="font-medium text-neutral-900">
             Resume Previous Run
           </span>
-          <span className="mt-1 text-xs text-neutral-500">
+          <span className="mt-1 text-xs text-neutral-600">
             Continue from a saved session
           </span>
           {runs.length === 0 ? (
@@ -100,7 +100,7 @@ export function CampaignRunOptions({
                   <button
                     type="button"
                     onClick={() => handleResume(run)}
-                    className="min-w-0 flex-1 rounded px-3 py-2 text-left text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                    className="min-w-0 flex-1 rounded px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900"
                   >
                     <span className="block">
                       {formatDate(run.lastPlayedAt ?? run.createdAt)}
@@ -116,7 +116,7 @@ export function CampaignRunOptions({
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, run)}
-                    className="shrink-0 rounded px-2 py-1 text-xs text-neutral-500 opacity-0 transition hover:bg-red-950/50 hover:text-red-400 group-hover:opacity-100"
+                    className="shrink-0 rounded px-2 py-1 text-xs text-neutral-500 opacity-0 transition hover:bg-red-100 hover:text-red-600 group-hover:opacity-100"
                     title="Delete run"
                   >
                     Delete

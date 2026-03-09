@@ -56,8 +56,8 @@ export function ScenarioContextMenu({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 border-b border-amber-950/50 bg-amber-950/10 px-8 py-3">
-        <span className="text-sm font-medium text-amber-200/90">
+      <div className="flex flex-wrap items-center gap-2 border-b border-neutral-800 bg-neutral-900/50 px-8 py-3">
+        <span className="text-sm font-medium text-neutral-300">
           {campaign.name}
           {scenario && ` — ${scenario.name}`}
         </span>
@@ -74,7 +74,7 @@ export function ScenarioContextMenu({
           <button
             type="button"
             onClick={() => setShowAddCharacter(true)}
-            className="rounded border border-amber-500/50 px-3 py-1.5 text-xs font-medium text-amber-400 hover:bg-amber-500/10"
+            className="rounded border border-neon-pink/50 px-3 py-1.5 text-xs font-medium text-neon-pink hover:bg-neon-pink/10"
           >
             New Character
           </button>
@@ -82,7 +82,7 @@ export function ScenarioContextMenu({
             <button
               type="button"
               onClick={handleDepartForSamsa}
-              className="rounded border border-amber-500/50 bg-amber-500/5 px-3 py-1.5 text-xs font-medium text-amber-400 hover:bg-amber-500/10"
+              className="rounded border border-neon-pink/50 bg-neon-pink/5 px-3 py-1.5 text-xs font-medium text-neon-pink hover:bg-neon-pink/10"
             >
               Depart for Samsa VI
             </button>

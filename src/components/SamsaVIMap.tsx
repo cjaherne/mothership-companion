@@ -121,9 +121,9 @@ export function SamsaVIMap({
 
   return (
     <div
-      className={`overflow-auto rounded-lg border border-neutral-800 bg-neutral-950/50 p-2 ${className}`}
+      className={`overflow-auto rounded-lg border border-neutral-300 bg-neutral-50 p-2 ${className}`}
     >
-      <h4 className="mb-1 text-[10px] font-medium uppercase tracking-wider text-neutral-500">
+      <h4 className="mb-1 text-[10px] font-medium uppercase tracking-wider text-neutral-600">
         Samsa VI
       </h4>
       <svg
@@ -233,7 +233,7 @@ export function SamsaVIMap({
       </svg>
 
       {/* Legend */}
-      <div className="mt-1 flex flex-wrap items-center gap-2 text-[9px] text-neutral-500">
+      <div className="mt-1 flex flex-wrap items-center gap-2 text-[9px] text-neutral-600">
         <span className="flex items-center gap-1">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Current
         </span>
@@ -244,7 +244,7 @@ export function SamsaVIMap({
           <span className="h-1.5 w-1.5 rounded-full bg-neutral-500" /> Unexplored
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Path
+          <span className="h-1.5 w-1.5 rounded-full bg-neutral-500" /> Path
         </span>
         {selectedRegionId && onMarkVisited && reachableRegionIds.has(selectedRegionId) && (
           <button
@@ -252,8 +252,8 @@ export function SamsaVIMap({
             onClick={() => onMarkVisited(selectedRegionId)}
             className={`rounded border px-1.5 py-0.5 text-[9px] font-medium transition ${
               exploredRegionIds.includes(selectedRegionId)
-                ? "border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                : "border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                ? "border-green-600 bg-green-100 text-green-800 hover:bg-green-200"
+                : "border-neutral-400 bg-neutral-200 text-neutral-800 hover:bg-neutral-300"
             }`}
           >
             {exploredRegionIds.includes(selectedRegionId) ? "Visited ✓ (undo)" : "Mark as Visited"}

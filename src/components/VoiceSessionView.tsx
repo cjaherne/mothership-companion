@@ -24,13 +24,13 @@ function VoiceAssistantUI({ onExit }: { onExit: () => void }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-neutral-500">
-          Agent: <span className="text-amber-400">{state}</span>
+        <p className="text-sm text-neutral-600">
+          Agent: <span className="text-neutral-900 font-medium">{state}</span>
         </p>
         <button
           type="button"
           onClick={onExit}
-          className="text-xs text-neutral-500 hover:text-red-400"
+          className="text-xs text-neutral-600 hover:text-red-600"
         >
           Exit session
         </button>
@@ -85,11 +85,11 @@ export function VoiceSessionView({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-neutral-900">
           {campaign.name} — Voice Session
         </h3>
         {!token && (
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-600">
             Run the LiveKit agent separately to process voice.
           </p>
         )}
@@ -99,7 +99,7 @@ export function VoiceSessionView({
         <button
           type="button"
           onClick={fetchToken}
-          className="w-full rounded-lg border border-amber-500/50 bg-amber-500/5 px-4 py-3 font-medium text-amber-400 transition hover:bg-amber-500/10 hover:shadow-ms-amber"
+          className="w-full rounded-lg border border-neutral-400 bg-neutral-100 px-4 py-3 font-medium text-neutral-900 transition hover:bg-neutral-200"
         >
           Connect to Warden
         </button>
