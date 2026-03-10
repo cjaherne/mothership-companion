@@ -28,6 +28,7 @@ import {
   THE_METAMORPHOSIS_ID,
   GRETA_BASE_ENTRY_POIS,
 } from "@/campaigns/another-bug-hunt/world";
+import { getItemName } from "@/campaigns/another-bug-hunt/items";
 const REGION_IDS = [
   THE_METAMORPHOSIS_ID,
   "landing-zone",
@@ -257,6 +258,7 @@ export function BriefingLandingPage({
           <CharacterList
             characters={runState.characters ?? []}
             compact
+            getItemName={campaignId === "another-bug-hunt" ? getItemName : undefined}
             className="h-full min-h-0"
           />
         </div>
@@ -296,6 +298,7 @@ export function BriefingLandingPage({
               currentLocationId={currentLocationId}
               exploredLocationIds={runState.exploredLocationIds ?? []}
               exploredPoiIds={runState.exploredPoiIds ?? []}
+              characters={runState.characters ?? []}
               selectedLocationId={viewedLocationId ?? undefined}
               onLocationClick={handleSelectLocation}
               onMarkVisited={handleMarkVisited}
@@ -316,6 +319,7 @@ export function BriefingLandingPage({
               currentLocationId={currentLocationId}
               exploredLocationIds={runState.exploredLocationIds ?? []}
               exploredPoiIds={runState.exploredPoiIds ?? []}
+              characters={runState.characters ?? []}
               onLocationClick={handleSelectLocation}
               onMarkVisited={handleMarkVisited}
               onMarkPoiExplored={handleMarkPoiExplored}
@@ -324,6 +328,7 @@ export function BriefingLandingPage({
                 addExploredLocation(runId, targetId);
                 forceRefresh((x) => x + 1);
               }}
+              getItemName={campaignId === "another-bug-hunt" ? getItemName : undefined}
               className="h-full min-h-0 overflow-y-auto"
             />
           ) : (
@@ -352,6 +357,7 @@ export function BriefingLandingPage({
             currentLocationId={currentLocationId}
             exploredLocationIds={runState.exploredLocationIds ?? []}
             exploredPoiIds={runState.exploredPoiIds ?? []}
+            characters={runState.characters ?? []}
             selectedLocationId={viewedLocationId ?? undefined}
             onLocationClick={handleSelectLocation}
             onMarkVisited={handleMarkVisited}

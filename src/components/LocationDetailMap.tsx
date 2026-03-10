@@ -1,6 +1,8 @@
 "use client";
 
 import type { Location } from "@/campaigns/types";
+import { hasRequiredItems } from "@/lib/inventory-utils";
+import type { Character } from "@/types/run";
 
 interface LocationDetailMapProps {
   location: Location | null;
@@ -10,6 +12,8 @@ interface LocationDetailMapProps {
   currentLocationId?: string;
   /** POI IDs the team has already inspected */
   exploredPoiIds?: string[];
+  /** Party characters (for item-based location unlock checks) */
+  characters?: Character[];
   /** Callback when user clicks a connected location to navigate */
   onLocationClick?: (locationId: string) => void;
   /** Callback to mark the current location as visited */
@@ -20,6 +24,8 @@ interface LocationDetailMapProps {
   entryConfig?: Record<string, { poiId: string; targetLocationId: string }>;
   /** Callback when user enters an interior room from an exterior entry point */
   onEnterInterior?: (targetLocationId: string) => void;
+  /** Resolve item ID to display name (for POI itemIds) */
+  getItemName?: (itemId: string) => string;
   className?: string;
 }
 
@@ -29,11 +35,13 @@ export function LocationDetailMap({
   exploredLocationIds = [],
   currentLocationId,
   exploredPoiIds = [],
+  characters = [],
   onLocationClick,
   onMarkVisited,
   onMarkPoiExplored,
   entryConfig,
   onEnterInterior,
+  getItemName,
   className = "",
 }: LocationDetailMapProps) {
   const locMap = new Map(allLocations.map((l) => [l.id, l]));
@@ -83,15 +91,23 @@ export function LocationDetailMap({
           if (!hasInspected) return null;
           const targetLoc = locMap.get(entry.targetLocationId);
           const targetName = targetLoc?.name ?? entry.targetLocationId;
+          const requiredIds = targetLoc?.requiredItemIds ?? [];
+          const canEnter = hasRequiredItems(characters, requiredIds);
           return (
             <div className="mb-4">
-              <button
-                type="button"
-                onClick={() => onEnterInterior(entry.targetLocationId)}
-                className="w-full rounded border-2 border-emerald-600 bg-emerald-100 px-3 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-200"
-              >
-                Enter {targetName}
-              </button>
+              {canEnter ? (
+                <button
+                  type="button"
+                  onClick={() => onEnterInterior(entry.targetLocationId)}
+                  className="w-full rounded border-2 border-emerald-600 bg-emerald-100 px-3 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-200"
+                >
+                  Enter {targetName}
+                </button>
+              ) : (
+                <p className="rounded border border-amber-600/50 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  Locked — {targetLoc?.lockNote ?? "requires keycard"}
+                </p>
+              )}
             </div>
           );
         })()}
@@ -132,15 +148,34 @@ export function LocationDetailMap({
                         {poi.description && isInspected && (
                           <p className="text-xs text-neutral-500">{poi.description}</p>
                         )}
-                        {poi.items && poi.items.length > 0 && isInspected && (
-                          <ul className="mt-1 space-y-0.5">
-                            {poi.items.map((item) => (
-                              <li key={item} className="text-[10px] text-neutral-600">
-                                + {item}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                        {isInspected && (() => {
+                          const itemIds = poi.itemIds ?? [];
+                          const legacyItems = poi.items ?? [];
+                          if (itemIds.length > 0) {
+                            const resolve = getItemName ?? ((id: string) => id);
+                            return (
+                              <ul className="mt-1 space-y-0.5">
+                                {itemIds.map((id) => (
+                                  <li key={id} className="text-[10px] text-neutral-600">
+                                    + {resolve(id)}
+                                  </li>
+                                ))}
+                              </ul>
+                            );
+                          }
+                          if (legacyItems.length > 0) {
+                            return (
+                              <ul className="mt-1 space-y-0.5">
+                                {legacyItems.map((item) => (
+                                  <li key={item} className="text-[10px] text-neutral-600">
+                                    + {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
                     {onMarkPoiExplored && (

@@ -15,7 +15,9 @@ export interface PointOfInterest {
   description?: string;
   /** IDs of POIs or locations this connects to (e.g. door to another room) */
   connectedTo?: string[];
-  /** Inspectable items/loot found at this POI */
+  /** Item IDs found at this POI (resolved via campaign item registry) */
+  itemIds?: string[];
+  /** @deprecated Use itemIds. Legacy display strings for backwards compatibility. */
   items?: string[];
   /** Requires active searching to discover (not immediately visible) */
   isHidden?: boolean;
@@ -36,12 +38,24 @@ export interface Location {
   isLocked?: boolean;
   /** Human-readable note on how to unlock (e.g. "Requires keycard") */
   lockNote?: string;
+  /** Item IDs required to unlock; party must possess all (checked across characters) */
+  requiredItemIds?: string[];
   /** Not shown on the map until discovered/unlocked */
   isHiddenAtStart?: boolean;
   /** If set, this is a sub-location nested inside the given location ID */
   parentLocationId?: string;
   /** Nested sub-locations (e.g. a locked room within a room) */
   subLocations?: Location[];
+}
+
+/** Recipe for combining items into a new item */
+export interface CraftRecipe {
+  id: string;
+  /** All input item IDs required to craft */
+  inputItemIds: string[];
+  /** Output item ID produced */
+  outputItemId: string;
+  description?: string;
 }
 
 /** Planet-level region path (connects two regions) */
@@ -149,6 +163,8 @@ export interface CampaignConfig {
   npcUnlockConditions?: Record<string, NpcUnlockCondition>;
   /** Puzzle IDs in this campaign */
   puzzleIds: string[];
+  /** Craft recipes (combine items to produce new items) */
+  craftRecipes?: CraftRecipe[];
   /** LiveKit room name (unique per campaign session) */
   roomName: string;
   /** Warden Narrator - opening backstory and narrative (above all campaigns) */

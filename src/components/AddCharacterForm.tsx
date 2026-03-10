@@ -7,6 +7,7 @@ import {
   rollRandomName,
   rollRandomTraitsAndPersonality,
   CLASS_NAMES,
+  getLoadoutDisplayText,
   type MothershipCharacterData,
 } from "@/lib/mothership";
 
@@ -61,6 +62,9 @@ export function AddCharacterForm({
         .filter(Boolean),
       personalitySummary: personalitySummary.trim() || "No description provided.",
       mothership: mothership ?? undefined,
+      inventoryItemIds: mothership?.startingGearItemIds
+        ? [...mothership.startingGearItemIds]
+        : [],
     };
 
     onSubmit(char);
@@ -157,7 +161,13 @@ export function AddCharacterForm({
             <span className="text-neutral-600">Credits</span>
             <span>{mothership.credits}</span>
           </div>
-          <p className="mt-2 text-neutral-700">{mothership.loadout}</p>
+          <p className="mt-2 text-neutral-700">
+            {mothership.startingGearItemIds?.length
+              ? mothership.startingGearItemIds
+                  .map((id) => getLoadoutDisplayText(id))
+                  .join("; ")
+              : "—"}
+          </p>
           <p className="mt-1 text-neutral-600">
             {mothership.trinket} • {mothership.patch} patch
           </p>

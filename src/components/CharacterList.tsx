@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import type { Character } from "@/types/run";
-import { CLASS_NAMES } from "@/lib/mothership";
+import { CLASS_NAMES, getLoadoutDisplayText } from "@/lib/mothership";
 
 const AVATAR_SIZE = 72;
 const AVATAR_SIZE_COMPACT = 56;
@@ -15,6 +15,8 @@ const ROW_HEIGHT_COMPACT = 100;
 interface CharacterListProps {
   characters: Character[];
   compact?: boolean;
+  /** Resolve item ID to display name (for inventory list) */
+  getItemName?: (itemId: string) => string;
   className?: string;
 }
 
@@ -63,13 +65,31 @@ function CharacterAvatar({ char, size = 32 }: { char: Character; size?: number }
 }
 
 /** Single stat value in a circle */
-function StatBadge({ label, value }: { label: string; value: number | string }) {
+function StatBadge({
+  label,
+  value,
+  large,
+}: {
+  label: string;
+  value: number | string;
+  large?: boolean;
+}) {
   return (
     <div className="flex flex-col items-center">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-neutral-800 bg-white text-xs font-bold text-neutral-900">
+      <div
+        className={`flex shrink-0 items-center justify-center rounded-full border-2 border-neutral-800 bg-white font-bold text-neutral-900 ${
+          large ? "h-12 w-12 text-base" : "h-8 w-8 text-xs"
+        }`}
+      >
         {value}
       </div>
-      <span className="mt-0.5 text-[10px] font-medium uppercase text-neutral-600">{label}</span>
+      <span
+        className={`mt-0.5 font-medium uppercase text-neutral-600 ${
+          large ? "text-sm" : "text-[10px]"
+        }`}
+      >
+        {label}
+      </span>
     </div>
   );
 }
@@ -128,7 +148,12 @@ function CharacterStatsInline({ m }: { m: NonNullable<Character["mothership"]> }
   );
 }
 
-export function CharacterList({ characters, compact, className = "" }: CharacterListProps) {
+export function CharacterList({
+  characters,
+  compact,
+  getItemName,
+  className = "",
+}: CharacterListProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const avatarSize = compact ? AVATAR_SIZE_COMPACT : AVATAR_SIZE;
   const maxH = compact
@@ -192,18 +217,18 @@ export function CharacterList({ characters, compact, className = "" }: Character
           onClick={() => setSelectedCharacter(null)}
         >
           <div
-            className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-lg border border-neutral-300 bg-white p-6 shadow-xl"
+            className="max-h-[80vh] w-full max-w-4xl overflow-y-auto rounded-lg border border-neutral-300 bg-white p-8 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <CharacterAvatar char={selectedCharacter} size={48} />
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <CharacterAvatar char={selectedCharacter} size={80} />
                 <div>
-                  <h5 className="text-lg font-semibold text-neutral-900">
+                  <h5 className="text-2xl font-semibold text-neutral-900">
                     {selectedCharacter.name}
                   </h5>
                   {selectedCharacter.playerName && (
-                    <p className="text-sm text-neutral-600">
+                    <p className="text-base text-neutral-600">
                       Player: {selectedCharacter.playerName}
                     </p>
                   )}
@@ -218,96 +243,153 @@ export function CharacterList({ characters, compact, className = "" }: Character
                 ×
               </button>
             </div>
-            <div className="space-y-4 text-sm">
+            <div className="space-y-5 text-base">
               {selectedCharacter.mothership && (
                 <>
-                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
-                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Class</h6>
-                    <p className="text-base font-medium text-neutral-900">
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-4">
+                    <h6 className="mb-2 text-sm font-semibold uppercase text-neutral-600">Class</h6>
+                    <p className="text-lg font-medium text-neutral-900">
                       {CLASS_NAMES[selectedCharacter.mothership.class]}
                     </p>
                   </div>
-                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
-                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Stats</h6>
-                    <div className="flex flex-wrap gap-3">
-                      <StatBadge label="STR" value={selectedCharacter.mothership.stats.strength} />
-                      <StatBadge label="SPD" value={selectedCharacter.mothership.stats.speed} />
-                      <StatBadge label="INT" value={selectedCharacter.mothership.stats.intellect} />
-                      <StatBadge label="CBT" value={selectedCharacter.mothership.stats.combat} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded border border-neutral-300 bg-neutral-100 p-4">
+                      <h6 className="mb-2 text-sm font-semibold uppercase text-neutral-600">Stats</h6>
+                      <div className="flex flex-wrap gap-4">
+                        <StatBadge
+                          label="STR"
+                          value={selectedCharacter.mothership.stats.strength}
+                          large
+                        />
+                        <StatBadge
+                          label="SPD"
+                          value={selectedCharacter.mothership.stats.speed}
+                          large
+                        />
+                        <StatBadge
+                          label="INT"
+                          value={selectedCharacter.mothership.stats.intellect}
+                          large
+                        />
+                        <StatBadge
+                          label="CBT"
+                          value={selectedCharacter.mothership.stats.combat}
+                          large
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
-                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Saves</h6>
-                    <div className="flex flex-wrap gap-3">
-                      <StatBadge label="SAN" value={selectedCharacter.mothership.stats.sanity} />
-                      <StatBadge label="FEAR" value={selectedCharacter.mothership.stats.fear} />
-                      <StatBadge label="BOD" value={selectedCharacter.mothership.stats.body} />
+                    <div className="rounded border border-neutral-300 bg-neutral-100 p-4">
+                      <h6 className="mb-2 text-sm font-semibold uppercase text-neutral-600">Saves</h6>
+                      <div className="flex flex-wrap gap-4">
+                        <StatBadge
+                          label="SAN"
+                          value={selectedCharacter.mothership.stats.sanity}
+                          large
+                        />
+                        <StatBadge
+                          label="FEAR"
+                          value={selectedCharacter.mothership.stats.fear}
+                          large
+                        />
+                        <StatBadge
+                          label="BOD"
+                          value={selectedCharacter.mothership.stats.body}
+                          large
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
-                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Health</h6>
-                    <div className="flex flex-wrap gap-6">
+                    <div className="rounded border border-neutral-300 bg-neutral-100 p-4">
+                      <h6 className="mb-2 text-sm font-semibold uppercase text-neutral-600">Health</h6>
+                      <div className="flex flex-wrap gap-6">
+                        <div className="flex flex-col">
+                          <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
+                            <span className="text-lg font-bold text-neutral-900">{selectedCharacter.mothership.health}</span>
+                            <span className="text-neutral-400">/</span>
+                            <span className="text-lg font-bold text-neutral-900">{selectedCharacter.mothership.health}</span>
+                          </div>
+                          <div className="mt-1 flex justify-between gap-4 text-sm text-neutral-600">
+                            <span>Current</span>
+                            <span>Maximum</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
+                            <span className="text-lg font-bold text-neutral-900">{selectedCharacter.mothership.currentWounds ?? 0}</span>
+                            <span className="text-neutral-400">/</span>
+                            <span className="text-lg font-bold text-neutral-900">{selectedCharacter.mothership.maxWounds ?? 2}</span>
+                          </div>
+                          <div className="mt-1 flex justify-between gap-4 text-sm text-neutral-600">
+                            <span>Current</span>
+                            <span>Maximum</span>
+                          </div>
+                          <span className="mt-0.5 text-sm text-neutral-500">Starts at 2.</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="rounded border border-neutral-300 bg-neutral-100 p-4">
+                      <h6 className="mb-2 text-sm font-semibold uppercase text-neutral-600">Gain</h6>
                       <div className="flex flex-col">
                         <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
-                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.health}</span>
+                          <span className="text-lg font-bold text-neutral-900">{selectedCharacter.mothership.stressCurrent ?? 0}</span>
                           <span className="text-neutral-400">/</span>
-                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.health}</span>
+                          <span className="text-lg font-bold text-neutral-900">{selectedCharacter.mothership.stressMax ?? 10}</span>
                         </div>
-                        <div className="mt-1 flex justify-between gap-4 text-xs text-neutral-600">
+                        <div className="mt-1 flex justify-between gap-4 text-sm text-neutral-600">
                           <span>Current</span>
                           <span>Maximum</span>
                         </div>
                       </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
-                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.currentWounds ?? 0}</span>
-                          <span className="text-neutral-400">/</span>
-                          <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.maxWounds ?? 2}</span>
-                        </div>
-                        <div className="mt-1 flex justify-between gap-4 text-xs text-neutral-600">
-                          <span>Current</span>
-                          <span>Maximum</span>
-                        </div>
-                        <span className="mt-0.5 text-xs text-neutral-500">Starts at 2.</span>
-                      </div>
                     </div>
                   </div>
-                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
-                    <h6 className="mb-2 text-xs font-semibold uppercase text-neutral-600">Gain</h6>
-                    <div className="flex flex-col">
-                      <div className="flex items-center justify-center gap-1 rounded-full border-2 border-neutral-800 bg-white px-4 py-2">
-                        <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.stressCurrent ?? 0}</span>
-                        <span className="text-neutral-400">/</span>
-                        <span className="text-base font-bold text-neutral-900">{selectedCharacter.mothership.stressMax ?? 10}</span>
-                      </div>
-                      <div className="mt-1 flex justify-between gap-4 text-xs text-neutral-600">
-                        <span>Current</span>
-                        <span>Maximum</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="rounded border border-neutral-300 bg-neutral-100 p-3">
-                    <p className="text-xs text-neutral-600">
-                      {selectedCharacter.mothership.loadout}
+                  <div className="rounded border border-neutral-300 bg-neutral-100 p-4">
+                    <p className="text-sm text-neutral-600">
+                      {selectedCharacter.mothership.startingGearItemIds?.length
+                        ? selectedCharacter.mothership.startingGearItemIds
+                            .map((id) => getLoadoutDisplayText(id))
+                            .join("; ")
+                        : "—"}
                     </p>
-                    <p className="mt-1 text-xs text-neutral-600">
+                    <p className="mt-2 text-sm text-neutral-600">
                       Trinket: {selectedCharacter.mothership.trinket} | Patch:{" "}
                       {selectedCharacter.mothership.patch} | Credits: {selectedCharacter.mothership.credits} cr
                     </p>
                   </div>
                 </>
               )}
+              <div className="rounded border border-neutral-300 bg-neutral-100 p-4">
+                <h6 className="mb-3 text-sm font-semibold uppercase text-neutral-600">
+                  Inventory
+                </h6>
+                {(() => {
+                  const ids = selectedCharacter.inventoryItemIds ?? [];
+                  const resolve = getItemName ?? getLoadoutDisplayText;
+                  if (ids.length === 0) {
+                    return (
+                      <p className="text-sm text-neutral-500">No items</p>
+                    );
+                  }
+                  return (
+                    <ul className="space-y-1.5">
+                      {ids.map((id) => (
+                        <li key={id} className="text-base text-neutral-800">
+                          • {resolve(id)}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                })()}
+              </div>
               {selectedCharacter.traits.length > 0 && (
                 <div>
                   <span className="text-neutral-600">Traits: </span>
-                  <span className="text-neutral-800">
+                  <span className="text-lg text-neutral-800">
                     {selectedCharacter.traits.join(", ")}
                   </span>
                 </div>
               )}
               <div>
                 <span className="text-neutral-600">Personality & background:</span>
-                <p className="mt-1 text-neutral-800">
+                <p className="mt-2 text-lg text-neutral-800">
                   {selectedCharacter.personalitySummary}
                 </p>
               </div>

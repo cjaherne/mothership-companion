@@ -70,7 +70,10 @@ export interface NPCPersonalityProfile {
   knownFactIds?: string[];
 
   /** Per-fact reveal overrides (minAffability, etc.); use campaign default thresholds if absent */
-  factRevealConditions?: Record<string, { minAffability?: number; minTrust?: number }>;
+  factRevealConditions?: Record<
+    string,
+    { minAffability?: number; minTrust?: number; requiredItemIds?: string[] }
+  >;
 
   /** Conditions under which this NPC will/won't help the player */
   motivationHooks: string[];

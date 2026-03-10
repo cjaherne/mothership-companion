@@ -198,6 +198,47 @@ export function updateCharacter(
   saveRunState(runId, { characters: chars });
 }
 
+/** Add an item to a character's inventory (e.g. when "finding" at a POI) */
+export function addItemToCharacter(
+  runId: string,
+  characterId: string,
+  itemId: string
+): void {
+  const state = getRunState(runId);
+  const chars = state.characters.map((c) => {
+    if (c.id !== characterId) return c;
+    const current = c.inventoryItemIds ?? [];
+    if (current.includes(itemId)) return c;
+    return { ...c, inventoryItemIds: [...current, itemId] };
+  });
+  saveRunState(runId, { characters: chars });
+}
+
+/**
+ * Craft an item by consuming inputs and producing output.
+ * Returns true if successful, false if character lacks required items.
+ */
+export function craftItem(
+  runId: string,
+  characterId: string,
+  recipe: { inputItemIds: string[]; outputItemId: string }
+): boolean {
+  const state = getRunState(runId);
+  const char = state.characters.find((c) => c.id === characterId);
+  if (!char) return false;
+
+  const inv = [...(char.inventoryItemIds ?? [])];
+  for (const id of recipe.inputItemIds) {
+    const idx = inv.indexOf(id);
+    if (idx < 0) return false;
+    inv.splice(idx, 1);
+  }
+
+  const newInv = [...inv, recipe.outputItemId];
+  updateCharacter(runId, characterId, { inventoryItemIds: newInv });
+  return true;
+}
+
 /** Mark a point of interest as inspected (may unlock hidden NPCs) */
 export function addExploredPoi(runId: string, poiId: string): void {
   const state = getRunState(runId);

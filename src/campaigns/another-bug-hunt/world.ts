@@ -18,6 +18,7 @@ const medbayOperatingRoom: Location = {
   parentLocationId: "medbay",
   isLocked: true,
   lockNote: "Only Dr. Edem has the keycard.",
+  requiredItemIds: ["edem-keycard"],
   connectedLocationIds: ["medbay"],
   pointsOfInterest: [
     {
@@ -34,7 +35,7 @@ const medbayOperatingRoom: Location = {
       id: "larva-specimens",
       name: "Specimen Containment Tubes",
       description: "Four large glass tubes, each holding a developing carcinid larva. Untouched.",
-      items: ["carcinid larva (x4, contained)"],
+      itemIds: ["carcinid-larva-contained"],
     },
     {
       id: "carc-limb",
@@ -46,7 +47,7 @@ const medbayOperatingRoom: Location = {
       id: "medbay-or-acid",
       name: "Lead Container",
       description: "A heavy lead container. Inside: hydrofluoric acid.",
-      items: ["hydrofluoric acid"],
+      itemIds: ["hydrofluoric-acid"],
       isHidden: true,
     },
     {
@@ -128,6 +129,7 @@ export const gretaBaseLocations: Location[] = [
       "Rust creeps over the large metal door barring entry. Muddy floors inside. Storage lockers line the walls. The interior door will not open while the exterior is open.",
     isLocked: true,
     lockNote: "Exterior door requires a keycard (reinforced steel). Interior door is also keycard-locked.",
+    requiredItemIds: ["airlock-keycard"],
     connectedLocationIds: ["outside-airlock", "commissary"],
     pointsOfInterest: [
       {
@@ -144,7 +146,7 @@ export const gretaBaseLocations: Location[] = [
         id: "storage-lockers",
         name: "Storage Lockers",
         description: "Lockers lining the walls. A few have deep indentations. One has giant claw marks across it.",
-        items: ["hazard suit", "pulse rifle magazine (x2)", "rosary"],
+        itemIds: ["hazard-suit", "pulse-rifle-magazine-x2", "rosary"],
       },
     ],
   },
@@ -165,7 +167,7 @@ export const gretaBaseLocations: Location[] = [
         name: "Headless Corpse (LCpl Xavier)",
         description:
           "Under an upturned table, a headless body in fatigues. 'Paper cuts' criss-cross the skin. The chest cavity is completely hollowed out — something erupted from inside. A human arm protrudes from under the table. Cake splattered across the floor.",
-        items: ["dog tags: LCpl Xavier"],
+        itemIds: ["dog-tags-xavier"],
       },
       {
         id: "severed-head",
@@ -205,14 +207,14 @@ export const gretaBaseLocations: Location[] = [
         id: "mre-piles",
         name: "Piles of MREs",
         description: "Rations pulled from every shelf and stacked in rough piles across the floor.",
-        items: ["MREs (large pile)"],
+        itemIds: ["mres-large-pile"],
       },
       {
         id: "lange-corpse",
         name: "Slumped Corpse (2ndLt Lange)",
         description:
           "A marine, slumped in the far corner. 'Paper cuts' criss-cross the emaciated body. Scientist or Medical skill: starved to death.",
-        items: ["dog tags: 2ndLt Lange"],
+        itemIds: ["dog-tags-lange"],
       },
     ],
   },
@@ -223,6 +225,7 @@ export const gretaBaseLocations: Location[] = [
       "A medical-grade walk-in freezer. Around -40°C. Empty except for one frozen marine and a discarded medical case.",
     isLocked: true,
     lockNote: "Locked. No keycard has been found.",
+    requiredItemIds: ["freezer-keycard"],
     connectedLocationIds: ["medbay"],
     pointsOfInterest: [
       {
@@ -230,14 +233,14 @@ export const gretaBaseLocations: Location[] = [
         name: "Frozen Marine (LCpl Resnick)",
         description:
           "Wearing a tinfoil hat. Clutches a plastic vacuum tumbler. Inside: frozen hydrofluoric acid. If the tumbler is taken, the marine's fingers snap off (Fear Save).",
-        items: ["vacuum tumbler (frozen hydrofluoric acid)"],
+        itemIds: ["vacuum-tumbler-hydrofluoric"],
       },
       {
         id: "medical-case",
         name: "Medical Case",
         description:
           "Cold interior. Cracking it open lets out a hiss of frosty vapor. Contains frozen chemotherapeutic agents (25L). Scientist or Medical skill: used to treat extreme radiation damage.",
-        items: ["frozen chemotherapeutic agents (25L)"],
+        itemIds: ["frozen-chemotherapeutic-agents"],
       },
       {
         id: "vent-to-medbay",
@@ -258,7 +261,7 @@ export const gretaBaseLocations: Location[] = [
         id: "showers",
         name: "A. Group Showers / Toilets",
         description: "Standard crew washroom. Smells stale.",
-        items: ["stimpak (inside toilet tank)"],
+        itemIds: ["stimpak-toilet-tank"],
         isHidden: true,
       },
       {
@@ -266,12 +269,12 @@ export const gretaBaseLocations: Location[] = [
         name: "B. Marine Enlisted Barracks",
         description:
           "12 bunks in total disarray. Lewd posters. Smells like body odor. If searched: frag grenades, a butterfly knife, a journal detailing a relationship between HM3 Brookman and Cpl Ivanovic.",
-        items: [
-          "frag grenade (x2)",
-          "butterfly knife",
-          "journal (Brookman / Ivanovic relationship)",
-          "pornographic magazines (Jump Humpers)",
-          "cigarettes — Richter Blue (x8 packs)",
+        itemIds: [
+          "frag-grenade-x2",
+          "butterfly-knife",
+          "journal-brookman-ivanovic",
+          "pornographic-magazines",
+          "cigarettes-richter-blue",
         ],
         isHidden: true,
       },
@@ -280,7 +283,7 @@ export const gretaBaseLocations: Location[] = [
         name: "C. Marine Officer Barracks",
         description:
           "Five bunks, desks, duty roster. List of essential personnel: Dr. Edem, Hinton (Logic Core only).",
-        items: ["duty roster", "personnel list (Dr. Edem; Hinton — Logic Core only)"],
+        itemIds: ["duty-roster", "personnel-list-edem-hinton"],
         isHidden: true,
       },
       {
@@ -288,11 +291,11 @@ export const gretaBaseLocations: Location[] = [
         name: "D. 2ndLt Kaplan's Quarters",
         description:
           "Tidy. Desk holds a photograph of Kaplan with their partner and two small children, and a Samsa VI planetary survey. Inside a cam-locked desk drawer: a revolver (12 bullets) and Hinton's personal locator tracker — currently showing Hinton's location as the foothills of a nearby mountain.",
-        items: [
-          "photograph (Kaplan family)",
-          "Samsa VI planetary survey",
-          "revolver (12 bullets) — cam-locked drawer",
-          "Hinton's personal locator tracker — cam-locked drawer",
+        itemIds: [
+          "photograph-kaplan-family",
+          "samsa-vi-planetary-survey",
+          "revolver-12-bullets",
+          "hinton-personal-locator",
         ],
         isHidden: true,
       },
@@ -301,11 +304,11 @@ export const gretaBaseLocations: Location[] = [
         name: "E. Research Team Barracks",
         description:
           "Five bunks. A Bao-Neumann 'BZT' gaming console, a marijuana plant, a copy of 'The Auctioneer' by Joan Samson, and an anime body pillow.",
-        items: [
-          "Bao-Neumann 'BZT' gaming console",
-          "marijuana plant",
-          "'The Auctioneer' by Joan Samson",
-          "anime body pillow",
+        itemIds: [
+          "bao-neumann-bzt-console",
+          "marijuana-plant",
+          "the-auctioneer-book",
+          "anime-body-pillow",
         ],
         isHidden: true,
       },
@@ -314,9 +317,9 @@ export const gretaBaseLocations: Location[] = [
         name: "F. Dr. Edem's Quarters",
         description:
           "Weather charts pinned to the wall show a major storm system incoming. An unopened birthday card addressed to Olsson sits on the desk. Inside: 'Thanks for always listening. Hopefully, they'll let me leave after this one.'",
-        items: [
-          "weather charts (storm incoming)",
-          "birthday card to Olsson (unopened)",
+        itemIds: [
+          "weather-charts-storm",
+          "birthday-card-olsson",
         ],
         isHidden: true,
       },
@@ -394,10 +397,10 @@ export const gretaBaseLocations: Location[] = [
         name: "Marine Corpse (2ndLt Kaplan)",
         description:
           "Slumped over the controls. Single gunshot wound to the head — self-inflicted. One hand holds a revolver with five shots remaining. The other holds the Samsa VI Org Chart. 'Paper cuts' cover the body.",
-        items: [
-          "revolver (5 shots remaining)",
-          "Samsa VI Org Chart",
-          "dog tags: 2ndLt Kaplan",
+        itemIds: [
+          "revolver-5-shots",
+          "samsa-vi-org-chart",
+          "dog-tags-kaplan",
         ],
       },
       {
@@ -420,7 +423,7 @@ export const gretaBaseLocations: Location[] = [
         name: "Piles of Mud (Outside)",
         description:
           "The muddy piles outside the garage doors are actually a bisected corpse in fatigues.",
-        items: ["dog tags: PFC Olsson"],
+        itemIds: ["dog-tags-olsson"],
         isHidden: true,
       },
       {
@@ -441,25 +444,25 @@ export const gretaBaseLocations: Location[] = [
         name: "Giant Dirt Hole",
         description:
           "Standing in a puddle of water, a marine digs relentlessly, completely ignoring their surroundings. Dog tags: Sgt Abara. DO NOT TOUCH — crab legs will erupt from his neck. A fallen power line (offline) hangs from the ceiling nearby.",
-        items: ["dog tags: Sgt Abara"],
+        itemIds: ["dog-tags-abara"],
       },
       {
         id: "tool-bench",
         name: "Tool Bench",
         description: "Assorted tools, well-used.",
-        items: [
+        itemIds: [
           "crowbar",
           "flashlight",
-          "patch kit",
-          "nail gun (box of x1000 shots)",
-          "hand welder",
+          "patch-kit",
+          "nail-gun-x1000",
+          "hand-welder",
         ],
       },
       {
         id: "fuel-barrels",
         name: "Fuel Barrels",
         description: "Six barrels of fuel for the backup generator. A vent behind them leads to the Medbay Operating Room.",
-        items: ["fuel barrel (x6)"],
+        itemIds: ["fuel-barrel-x6"],
         connectedTo: ["medbay-operating-room"],
       },
       {

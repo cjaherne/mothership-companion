@@ -33,8 +33,8 @@ export interface MothershipCharacterData {
   stressCurrent?: number;
   /** Maximum stress (default 10) */
   stressMax?: number;
-  /** Full loadout description from class table */
-  loadout: string;
+  /** Item IDs for starting gear (from class loadout table) */
+  startingGearItemIds: string[];
   trinket: string;
   patch: string;
   credits: number;
@@ -106,66 +106,77 @@ function applyClassModifiers(
   return result;
 }
 
-/** Loadout tables from Player's Survival Guide p.7 */
-const MARINE_LOADOUTS = [
-  "Tank Top and Camo Pants (AP 1), Combat Knife (as Scalpel DMG [+]), Stimpak (x5)",
-  "Advanced Battle Dress (AP 10), Flamethrower (4 shots), Boarding Axe",
-  "Standard Battle Dress (AP 7), Combat Shotgun (4 rounds), Rucksack, Camping Gear",
-  "Standard Battle Dress (AP 7), Pulse Rifle (3 mags), Infrared Goggles",
-  "Standard Battle Dress (AP 7), Smart Rifle (3 mags), Binoculars, Personal Locator",
-  "Standard Battle Dress (AP 7), SMG (3 mags), MRE (x7)",
-  "Fatigues (AP 2), Combat Shotgun (2 rounds), Dog (pet), Leash, Tennis Ball",
-  "Fatigues (AP 2), Revolver (12 rounds), Frag Grenade",
-  "Dress Uniform (AP 1), Revolver (1 round), Challenge Coin",
-  "Advanced Battle Dress (AP 10), General-Purpose Machine Gun (1 Can of ammo), HUD",
+/** Loadout entry: unique ID + display text (Player's Survival Guide p.7) */
+interface LoadoutEntry {
+  id: string;
+  text: string;
+}
+
+const MARINE_LOADOUTS: LoadoutEntry[] = [
+  { id: "marine-loadout-1", text: "Tank Top and Camo Pants (AP 1), Combat Knife (as Scalpel DMG [+]), Stimpak (x5)" },
+  { id: "marine-loadout-2", text: "Advanced Battle Dress (AP 10), Flamethrower (4 shots), Boarding Axe" },
+  { id: "marine-loadout-3", text: "Standard Battle Dress (AP 7), Combat Shotgun (4 rounds), Rucksack, Camping Gear" },
+  { id: "marine-loadout-4", text: "Standard Battle Dress (AP 7), Pulse Rifle (3 mags), Infrared Goggles" },
+  { id: "marine-loadout-5", text: "Standard Battle Dress (AP 7), Smart Rifle (3 mags), Binoculars, Personal Locator" },
+  { id: "marine-loadout-6", text: "Standard Battle Dress (AP 7), SMG (3 mags), MRE (x7)" },
+  { id: "marine-loadout-7", text: "Fatigues (AP 2), Combat Shotgun (2 rounds), Dog (pet), Leash, Tennis Ball" },
+  { id: "marine-loadout-8", text: "Fatigues (AP 2), Revolver (12 rounds), Frag Grenade" },
+  { id: "marine-loadout-9", text: "Dress Uniform (AP 1), Revolver (1 round), Challenge Coin" },
+  { id: "marine-loadout-10", text: "Advanced Battle Dress (AP 10), General-Purpose Machine Gun (1 Can of ammo), HUD" },
 ];
 
-const ANDROID_LOADOUTS = [
-  "Vaccsuit (AP 3), Smart Rifle (2 mags), Infrared Goggles, Mylar Blanket",
-  "Vaccsuit (AP 3), Revolver (12 rounds), Long-range Comms, Satchel",
-  "Hazard Suit (AP 5), Revolver (6 rounds), Defibrillator, First Aid Kit, Flashlight",
-  "Hazard Suit (AP 5), Foam Gun (2 charges), Sample Collection Kit, Screwdriver (as Assorted Tools)",
-  "Standard Battle Dress (AP 7), Tranq Pistol (3 shots), Paracord (100m)",
-  "Standard Crew Attire (AP 1), Stun Baton, Small Pet (organic)",
-  "Standard Crew Attire (AP 1), Scalpel, Bioscanner",
-  "Standard Crew Attire (AP 1), Frag Grenade, Pen Knife",
-  "Manufacturer Supplied Attire (AP 1), Jump-9 Ticket (destination blank)",
-  "Corporate Attire (AP 1), VIP Corporate Key Card",
+const ANDROID_LOADOUTS: LoadoutEntry[] = [
+  { id: "android-loadout-1", text: "Vaccsuit (AP 3), Smart Rifle (2 mags), Infrared Goggles, Mylar Blanket" },
+  { id: "android-loadout-2", text: "Vaccsuit (AP 3), Revolver (12 rounds), Long-range Comms, Satchel" },
+  { id: "android-loadout-3", text: "Hazard Suit (AP 5), Revolver (6 rounds), Defibrillator, First Aid Kit, Flashlight" },
+  { id: "android-loadout-4", text: "Hazard Suit (AP 5), Foam Gun (2 charges), Sample Collection Kit, Screwdriver (as Assorted Tools)" },
+  { id: "android-loadout-5", text: "Standard Battle Dress (AP 7), Tranq Pistol (3 shots), Paracord (100m)" },
+  { id: "android-loadout-6", text: "Standard Crew Attire (AP 1), Stun Baton, Small Pet (organic)" },
+  { id: "android-loadout-7", text: "Standard Crew Attire (AP 1), Scalpel, Bioscanner" },
+  { id: "android-loadout-8", text: "Standard Crew Attire (AP 1), Frag Grenade, Pen Knife" },
+  { id: "android-loadout-9", text: "Manufacturer Supplied Attire (AP 1), Jump-9 Ticket (destination blank)" },
+  { id: "android-loadout-10", text: "Corporate Attire (AP 1), VIP Corporate Key Card" },
 ];
 
-const SCIENTIST_LOADOUTS = [
-  "Hazard Suit (AP 5), Tranq Pistol (3 shots), Bioscanner, Sample Collection Kit",
-  "Hazard Suit (AP 5), Flamethrower (1 charge), Stimpak, Electronic Tool Set",
-  "Vaccsuit (AP 3), Rigging Gun, Sample Collection Kit, Flashlight, Lab Rat (pet)",
-  "Vaccsuit (AP 3), Foam Gun (2 charges), Foldable Stretcher, First Aid Kit, Radiation Pills (x5)",
-  "Lab Coat (AP 1), Screwdriver (as Assorted Tools), Medscanner, Vaccine (1 dose)",
-  "Lab Coat (AP 1), Cybernetic Diagnostic Scanner, Portable Computer Terminal",
-  "Scrubs (AP 1), Scalpel, Automed (x5), Oxygen Tank with Filter Mask",
-  "Scrubs (AP 1), Vial of Acid, Mylar Blanket, First Aid Kit",
-  "Standard Crew Attire (AP 1), Utility Knife (as Scalpel), Cybernetic Diagnostic Scanner, Duct Tape",
-  "Civilian Clothes (AP 1), Briefcase, Prescription Pad, Fountain Pen (Poison Injector)",
+const SCIENTIST_LOADOUTS: LoadoutEntry[] = [
+  { id: "scientist-loadout-1", text: "Hazard Suit (AP 5), Tranq Pistol (3 shots), Bioscanner, Sample Collection Kit" },
+  { id: "scientist-loadout-2", text: "Hazard Suit (AP 5), Flamethrower (1 charge), Stimpak, Electronic Tool Set" },
+  { id: "scientist-loadout-3", text: "Vaccsuit (AP 3), Rigging Gun, Sample Collection Kit, Flashlight, Lab Rat (pet)" },
+  { id: "scientist-loadout-4", text: "Vaccsuit (AP 3), Foam Gun (2 charges), Foldable Stretcher, First Aid Kit, Radiation Pills (x5)" },
+  { id: "scientist-loadout-5", text: "Lab Coat (AP 1), Screwdriver (as Assorted Tools), Medscanner, Vaccine (1 dose)" },
+  { id: "scientist-loadout-6", text: "Lab Coat (AP 1), Cybernetic Diagnostic Scanner, Portable Computer Terminal" },
+  { id: "scientist-loadout-7", text: "Scrubs (AP 1), Scalpel, Automed (x5), Oxygen Tank with Filter Mask" },
+  { id: "scientist-loadout-8", text: "Scrubs (AP 1), Vial of Acid, Mylar Blanket, First Aid Kit" },
+  { id: "scientist-loadout-9", text: "Standard Crew Attire (AP 1), Utility Knife (as Scalpel), Cybernetic Diagnostic Scanner, Duct Tape" },
+  { id: "scientist-loadout-10", text: "Civilian Clothes (AP 1), Briefcase, Prescription Pad, Fountain Pen (Poison Injector)" },
 ];
 
-const TEAMSTER_LOADOUTS = [
-  "Vaccsuit (AP 3), Laser Cutter (1 extra battery), Patch Kit (x3), Toolbelt with Assorted Tools",
-  "Vaccsuit (AP 3), Revolver (6 rounds), Crowbar, Flashlight",
-  "Vaccsuit (AP 3), Rigging Gun (1 shot), Shovel, Salvage Drone",
-  "Hazard Suit (AP 5), Vibechete, Spanner, Camping Gear, Water Filtration Device",
-  "Heavy Duty Work Clothes (AP 2), Explosives & Detonator, Cigarettes",
-  "Heavy Duty Work Clothes (AP 2), Drill (as Assorted Tools), Paracord (100m), Salvage Drone",
-  "Standard Crew Attire (AP 1), Combat Shotgun (4 rounds), Extension Cord (20m), Cat (pet)",
-  "Standard Crew Attire (AP 1), Nail Gun (32 rounds), Head Lamp, Toolbelt with Assorted Tools, Lunch Box",
-  "Standard Crew Attire (AP 1), Flare Gun (2 rounds), Water Filtration Device, Personal Locator, Subsurface Scanner",
-  "Lounge Wear (AP 1), Crowbar, Stimpak, Six Pack of Beer",
+const TEAMSTER_LOADOUTS: LoadoutEntry[] = [
+  { id: "teamster-loadout-1", text: "Vaccsuit (AP 3), Laser Cutter (1 extra battery), Patch Kit (x3), Toolbelt with Assorted Tools" },
+  { id: "teamster-loadout-2", text: "Vaccsuit (AP 3), Revolver (6 rounds), Crowbar, Flashlight" },
+  { id: "teamster-loadout-3", text: "Vaccsuit (AP 3), Rigging Gun (1 shot), Shovel, Salvage Drone" },
+  { id: "teamster-loadout-4", text: "Hazard Suit (AP 5), Vibechete, Spanner, Camping Gear, Water Filtration Device" },
+  { id: "teamster-loadout-5", text: "Heavy Duty Work Clothes (AP 2), Explosives & Detonator, Cigarettes" },
+  { id: "teamster-loadout-6", text: "Heavy Duty Work Clothes (AP 2), Drill (as Assorted Tools), Paracord (100m), Salvage Drone" },
+  { id: "teamster-loadout-7", text: "Standard Crew Attire (AP 1), Combat Shotgun (4 rounds), Extension Cord (20m), Cat (pet)" },
+  { id: "teamster-loadout-8", text: "Standard Crew Attire (AP 1), Nail Gun (32 rounds), Head Lamp, Toolbelt with Assorted Tools, Lunch Box" },
+  { id: "teamster-loadout-9", text: "Standard Crew Attire (AP 1), Flare Gun (2 rounds), Water Filtration Device, Personal Locator, Subsurface Scanner" },
+  { id: "teamster-loadout-10", text: "Lounge Wear (AP 1), Crowbar, Stimpak, Six Pack of Beer" },
 ];
 
-function getClassLoadouts(cls: MothershipClass): string[] {
+function getClassLoadouts(cls: MothershipClass): LoadoutEntry[] {
   switch (cls) {
     case "marine": return MARINE_LOADOUTS;
     case "android": return ANDROID_LOADOUTS;
     case "scientist": return SCIENTIST_LOADOUTS;
     case "teamster": return TEAMSTER_LOADOUTS;
   }
+}
+
+/** Resolve loadout bundle ID to display text (for inventory display) */
+export function getLoadoutDisplayText(loadoutId: string): string {
+  const all = [...MARINE_LOADOUTS, ...ANDROID_LOADOUTS, ...SCIENTIST_LOADOUTS, ...TEAMSTER_LOADOUTS];
+  return all.find((e) => e.id === loadoutId)?.text ?? loadoutId;
 }
 
 /** Trinkets D100 table - subset from Player's Survival Guide p.8 */
@@ -252,7 +263,7 @@ export function createRandomMothershipCharacter(): MothershipCharacterData {
   const maxWounds = cls === "marine" || cls === "android" ? 3 : 2;
 
   const loadouts = getClassLoadouts(cls);
-  const loadout = loadouts[Math.floor(Math.random() * loadouts.length)];
+  const chosen = loadouts[Math.floor(Math.random() * loadouts.length)];
 
   const trinket = TRINKETS[rollD100() % TRINKETS.length];
   const patch = PATCHES[rollD100() % PATCHES.length];
@@ -263,7 +274,7 @@ export function createRandomMothershipCharacter(): MothershipCharacterData {
     stats,
     health,
     maxWounds,
-    loadout,
+    startingGearItemIds: [chosen.id],
     trinket,
     patch,
     credits,

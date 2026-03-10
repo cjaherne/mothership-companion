@@ -2,12 +2,16 @@
 
 import type { RoomRect, DoorConnection, VentConnection } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
 import { GRETA_BASE_FLOORPLAN } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
+import { hasRequiredItems } from "@/lib/inventory-utils";
+import type { Character } from "@/types/run";
 
 interface GretaBaseFloorplanProps {
   rooms: RoomRect[];
   currentLocationId?: string;
   exploredLocationIds: string[];
   exploredPoiIds: string[];
+  /** Party characters (for item-based door unlocks) */
+  characters?: Character[];
   selectedLocationId?: string;
   onLocationClick?: (locationId: string) => void;
   onMarkVisited?: (locationId: string) => void;
@@ -71,6 +75,7 @@ export function GretaBaseFloorplan({
   currentLocationId,
   exploredLocationIds,
   exploredPoiIds,
+  characters = [],
   selectedLocationId,
   onLocationClick,
   onMarkVisited,
@@ -87,6 +92,11 @@ export function GretaBaseFloorplan({
   const isImplicitDoorRevealed = (from: string, to: string) =>
     exploredLocs.has(from) || exploredLocs.has(to);
   const isVentRevealed = (poiIds: string[]) => poiIds.some((id) => exploredSet.has(id));
+
+  const isDoorUnlocked = (d: DoorConnection | Omit<DoorConnection, "poiId">) =>
+    d.requiredItemIds?.length
+      ? hasRequiredItems(characters, d.requiredItemIds)
+      : !d.isLocked;
 
   const getRoomStyle = (id: string) => {
     const isCurrent = id === currentLocationId;
@@ -176,10 +186,11 @@ export function GretaBaseFloorplan({
           const to = roomMap.get(d.to);
           if (!from || !to || !isDoorRevealed(d.poiId)) return null;
           const pos = getEdgeMidpoint(from, to);
-          return d.isLocked ? (
-            <LockedDoorIcon key={`door-${d.from}-${d.to}-${d.poiId}`} x={pos.x} y={pos.y} />
-          ) : (
+          const unlocked = isDoorUnlocked(d);
+          return unlocked ? (
             <UnlockedDoorIcon key={`door-${d.from}-${d.to}-${d.poiId}`} x={pos.x} y={pos.y} />
+          ) : (
+            <LockedDoorIcon key={`door-${d.from}-${d.to}-${d.poiId}`} x={pos.x} y={pos.y} />
           );
         })}
 
@@ -188,10 +199,11 @@ export function GretaBaseFloorplan({
           const to = roomMap.get(d.to);
           if (!from || !to || !isImplicitDoorRevealed(d.from, d.to)) return null;
           const pos = getEdgeMidpoint(from, to);
-          return d.isLocked ? (
-            <LockedDoorIcon key={`implicit-${d.from}-${d.to}`} x={pos.x} y={pos.y} />
-          ) : (
+          const unlocked = isDoorUnlocked(d);
+          return unlocked ? (
             <UnlockedDoorIcon key={`implicit-${d.from}-${d.to}`} x={pos.x} y={pos.y} />
+          ) : (
+            <LockedDoorIcon key={`implicit-${d.from}-${d.to}`} x={pos.x} y={pos.y} />
           );
         })}
       </svg>
