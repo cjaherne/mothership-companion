@@ -18,8 +18,10 @@ export interface DoorConnection {
   to: string;
   /** POI ID that reveals this door (inspect to show locked/unlocked state) */
   poiId: string;
-  /** Whether the door is locked */
+  /** Whether the door is locked (static). If requiredItemIds is set, actual unlock is computed from party inventory. */
   isLocked: boolean;
+  /** Item IDs required to unlock; party must possess all. Overrides isLocked when satisfied. */
+  requiredItemIds?: string[];
 }
 
 export interface VentConnection {
@@ -56,17 +58,35 @@ const ROOMS: RoomRect[] = [
 
 /** Exterior approach connections (outside ↔ interior); revealed when POI inspected */
 const EXTERIOR_DOORS: DoorConnection[] = [
-  { from: "outside-airlock", to: "airlock", poiId: "airlock-exterior-door", isLocked: false },
+  {
+    from: "outside-airlock",
+    to: "airlock",
+    poiId: "airlock-exterior-door",
+    isLocked: true,
+    requiredItemIds: ["airlock-keycard"],
+  },
   { from: "outside-garage", to: "garage", poiId: "garage-exterior-doors", isLocked: false },
 ];
 
 const DOORS: DoorConnection[] = [
   ...EXTERIOR_DOORS,
-  { from: "airlock", to: "commissary", poiId: "interior-door", isLocked: true },
+  {
+    from: "airlock",
+    to: "commissary",
+    poiId: "interior-door",
+    isLocked: true,
+    requiredItemIds: ["interior-keycard"],
+  },
   { from: "commissary", to: "pantry", poiId: "kitchenette", isLocked: false },
   { from: "commissary", to: "crew-habitat", poiId: "barricade", isLocked: false },
   { from: "crew-habitat", to: "armory", poiId: "blast-door", isLocked: false },
-  { from: "medbay", to: "medbay-operating-room", poiId: "operating-room-door", isLocked: true },
+  {
+    from: "medbay",
+    to: "medbay-operating-room",
+    poiId: "operating-room-door",
+    isLocked: true,
+    requiredItemIds: ["edem-keycard"],
+  },
 ];
 
 const VENTS: VentConnection[] = [
@@ -79,7 +99,12 @@ const IMPLICIT_DOORS: Omit<DoorConnection, "poiId">[] = [
   { from: "commissary", to: "command-center", isLocked: false },
   { from: "crew-habitat", to: "medbay", isLocked: false },
   { from: "medbay", to: "command-center", isLocked: false },
-  { from: "medbay", to: "freezer", isLocked: true },
+  {
+    from: "medbay",
+    to: "freezer",
+    isLocked: true,
+    requiredItemIds: ["freezer-keycard"],
+  },
   { from: "garage", to: "medbay", isLocked: false },
 ];
 

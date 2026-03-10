@@ -1,6 +1,7 @@
 "use client";
 
 import type { Location } from "@/campaigns/types";
+import type { Character } from "@/types/run";
 import { GretaBaseFloorplan } from "./GretaBaseFloorplan";
 import { GRETA_BASE_FLOORPLAN } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
 
@@ -11,6 +12,8 @@ interface InternalLocationMapProps {
   exploredLocationIds: string[];
   /** POI IDs the party has inspected (reveals doors/vents on Greta Base minimap) */
   exploredPoiIds?: string[];
+  /** Party characters (for item-based door unlocks on Greta Base floorplan) */
+  characters?: Character[];
   /** Location being viewed in detail */
   selectedLocationId?: string;
   onLocationClick?: (locationId: string) => void;
@@ -41,6 +44,7 @@ export function InternalLocationMap({
   currentLocationId,
   exploredLocationIds,
   exploredPoiIds = [],
+  characters = [],
   selectedLocationId,
   onLocationClick,
   onMarkVisited,
@@ -61,6 +65,7 @@ export function InternalLocationMap({
           currentLocationId={currentLocationId}
           exploredLocationIds={exploredLocationIds}
           exploredPoiIds={exploredPoiIds}
+          characters={characters}
           selectedLocationId={selectedLocationId}
           onLocationClick={onLocationClick}
           onMarkVisited={onMarkVisited}

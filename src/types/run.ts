@@ -20,8 +20,10 @@ export interface Character {
   traits: string[];
   /** Free-form summary for NPC context: personality, background, how to roleplay them */
   personalitySummary: string;
-  /** Mothership RPG stats, loadout, etc. (optional for backwards compat) */
+  /** Mothership RPG stats and starting gear (optional) */
   mothership?: MothershipCharacterData;
+  /** Item IDs the character possesses (includes starting gear + found items) */
+  inventoryItemIds?: string[];
 }
 
 /** Persisted game state for a run */

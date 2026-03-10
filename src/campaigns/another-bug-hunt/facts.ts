@@ -54,6 +54,18 @@ export const distressSignalsFacts: Fact[] = [
   },
   // --- Base infrastructure ---
   {
+    id: "power_sequence",
+    text: "The power restoration sequence for the backup generator. Restart procedures are documented in the maintenance logs.",
+    tier: "minor",
+    scenarioId: "1-distress-signals",
+  },
+  {
+    id: "carcinid_garage",
+    text: "The carcinid—or something that was the carcinid—is in the Garage. It has grown. It makes a rhythmic thudding sound.",
+    tier: "major",
+    scenarioId: "1-distress-signals",
+  },
+  {
     id: "comms-destroyed",
     text: "The Command Center communications equipment is destroyed. It can be repaired (takes 2d10 hours in campaign mode). Until the Heron Station comm tower is retaken, repaired comms will only broadcast the Signal.",
     tier: "minor",

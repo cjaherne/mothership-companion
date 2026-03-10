@@ -11,6 +11,15 @@ import { missions } from "./mission";
 import { scenarios } from "./scenario";
 import { puzzleIds } from "./scenarios/1-distress-signals/scenario";
 
+const craftRecipes = [
+  {
+    id: "craft-makeshift-tool",
+    inputItemIds: ["crowbar", "hand-welder"],
+    outputItemId: "makeshift-tool",
+    description: "Combine crowbar and hand welder.",
+  },
+];
+
 export const anotherBugHuntCampaign: CampaignConfig = {
   id: "another-bug-hunt",
   name: "Another Bug Hunt",
@@ -33,6 +42,7 @@ export const anotherBugHuntCampaign: CampaignConfig = {
     },
   },
   puzzleIds,
+  craftRecipes,
   roomName: "mothership-another-bug-hunt",
   wardenNarrator: {
     narrative: `Six months. That's how long Greta Base has been silent. Samsa VI—a jungle planet, a terraforming colony, a research station. The Company sends you because someone has to. The tropical storm howls outside. Radio is dead. You descend into darkness. The facility is ransacked. No survivors—or so it seems. Something waits in the shadows. Something that came from the samples.`,
