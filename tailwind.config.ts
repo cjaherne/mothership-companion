@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ["var(--font-cinzel)", "Georgia", "serif"],
+      },
       colors: {
         neon: {
           cyan: "#00fff2",

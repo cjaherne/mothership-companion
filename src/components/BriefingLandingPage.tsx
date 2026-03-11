@@ -200,19 +200,19 @@ export function BriefingLandingPage({
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
       {/* Compact header: location | campaign — scenario */}
-      <div className="shrink-0 border-b border-neutral-300 pb-2">
-        <p className="text-base font-semibold tracking-wide text-neutral-900 sm:text-lg">
+      <div className="shrink-0 border-b border-neutral-600 pb-2">
+        <p className="font-heading text-base font-semibold tracking-wide text-white sm:text-lg">
           {headerLocationName.toUpperCase()}
-          <span className="mx-2 text-neutral-400">|</span>
-          <span className="text-neutral-600">{scenarioLabel}</span>
+          <span className="mx-2 text-neutral-500">|</span>
+          <span className="text-neutral-400">{scenarioLabel}</span>
         </p>
       </div>
 
       {/* 3-column layout: Left (Briefing + NPCs) | Center (Maps) | Right (Players + Location) */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_auto_auto_auto] gap-3 overflow-hidden lg:grid-cols-[1fr_1.8fr_1.2fr] lg:grid-rows-[1fr_1fr]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_auto_auto_auto] gap-3 overflow-hidden lg:grid-cols-[minmax(220px,1.35fr)_minmax(200px,1.3fr)_minmax(260px,1.35fr)] lg:grid-rows-[1fr_1fr]">
         {/* Left col: Background */}
         <div className="flex min-h-[140px] flex-col overflow-hidden lg:min-h-0">
-          <h4 className="mb-1 shrink-0 text-sm font-medium text-neutral-700">
+          <h4 className="mb-1 shrink-0 text-sm font-medium text-neutral-300">
             Background
           </h4>
           <BriefingSection
@@ -238,7 +238,7 @@ export function BriefingLandingPage({
             />
           ) : (
             <div
-              className="relative flex h-full min-h-[80px] items-center justify-center overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 text-xs text-neutral-600"
+              className="relative flex h-full min-h-[80px] items-center justify-center overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 text-xs text-neutral-400"
               style={{
                 backgroundImage: "url(/images/ui/planet-map-placeholder.png)",
                 backgroundSize: "cover",
@@ -259,6 +259,8 @@ export function BriefingLandingPage({
             characters={runState.characters ?? []}
             compact
             getItemName={campaignId === "another-bug-hunt" ? getItemName : undefined}
+            runId={runId}
+            onCharacterUpdate={() => forceRefresh((x) => x + 1)}
             className="h-full min-h-0"
           />
         </div>
@@ -333,7 +335,7 @@ export function BriefingLandingPage({
             />
           ) : (
             <div
-              className="relative flex h-full min-h-[100px] items-center justify-center overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 text-xs text-neutral-600"
+              className="relative flex h-full min-h-[100px] items-center justify-center overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 text-xs text-neutral-400"
               style={{
                 backgroundImage: "url(/images/ui/locations-placeholder.png)",
                 backgroundSize: "cover",

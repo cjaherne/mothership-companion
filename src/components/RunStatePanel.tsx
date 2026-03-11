@@ -19,28 +19,28 @@ export function RunStatePanel({ runId, campaignId }: RunStatePanelProps) {
   );
 
   return (
-    <div className="rounded-lg border border-neutral-300">
+    <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-neutral-700 hover:text-neutral-900"
+        className="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-neutral-300 hover:text-white"
       >
         <span>Run state</span>
         <span className="text-xs">{isOpen ? "−" : "+"}</span>
       </button>
       {isOpen && (
-        <div className="space-y-4 border-t border-neutral-300 px-4 py-3 text-sm">
+        <div className="space-y-4 border-t border-neutral-600 px-4 py-3 text-sm">
           {state.characters.length > 0 && (
             <div>
-              <h5 className="mb-1 text-xs font-medium text-neutral-500">
+              <h5 className="mb-1 text-xs font-medium text-neutral-400">
                 Characters
               </h5>
               <ul className="space-y-1">
                 {state.characters.map((c) => (
-                  <li key={c.id} className="text-neutral-800">
+                  <li key={c.id} className="text-neutral-200">
                     {c.name}
                     {c.traits.length > 0 && (
-                      <span className="ml-2 text-neutral-600">
+                      <span className="ml-2 text-neutral-400">
                         ({c.traits.join(", ")})
                       </span>
                     )}
@@ -51,10 +51,10 @@ export function RunStatePanel({ runId, campaignId }: RunStatePanelProps) {
           )}
           {state.exploredLocationIds.length > 0 && (
             <div>
-              <h5 className="mb-1 text-xs font-medium text-neutral-500">
+              <h5 className="mb-1 text-xs font-medium text-neutral-400">
                 Explored
               </h5>
-              <p className="text-neutral-700">
+              <p className="text-neutral-300">
                 {state.exploredLocationIds
                   .map((id) => locationNames.get(id) ?? id)
                   .join(", ")}
@@ -63,20 +63,20 @@ export function RunStatePanel({ runId, campaignId }: RunStatePanelProps) {
           )}
           {state.interactedNpcIds.length > 0 && (
             <div>
-              <h5 className="mb-1 text-xs font-medium text-neutral-500">
+              <h5 className="mb-1 text-xs font-medium text-neutral-400">
                 NPCs interacted
               </h5>
-              <p className="text-neutral-700">{state.interactedNpcIds.join(", ")}</p>
+              <p className="text-neutral-300">{state.interactedNpcIds.join(", ")}</p>
             </div>
           )}
           {Object.keys(state.npcAttributeState).length > 0 && (
             <div>
-              <h5 className="mb-1 text-xs font-medium text-neutral-500">
+              <h5 className="mb-1 text-xs font-medium text-neutral-400">
                 NPC attitudes
               </h5>
               <ul className="space-y-1">
                 {Object.entries(state.npcAttributeState).map(([npcId, attrs]) => (
-                  <li key={npcId} className="text-neutral-700">
+                  <li key={npcId} className="text-neutral-300">
                     {npcId}: fear {attrs.fear.toFixed(2)}, stress{" "}
                     {attrs.stress.toFixed(2)}, affability{" "}
                     {attrs.affability.toFixed(2)}
@@ -99,7 +99,7 @@ export function RunStatePanel({ runId, campaignId }: RunStatePanelProps) {
             state.exploredLocationIds.length === 0 &&
             state.interactedNpcIds.length === 0 &&
             Object.keys(state.npcAttributeState).length === 0 && (
-              <p className="text-neutral-600">No state recorded yet.</p>
+              <p className="text-neutral-500">No state recorded yet.</p>
             )}
         </div>
       )}

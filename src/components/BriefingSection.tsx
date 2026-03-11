@@ -66,18 +66,18 @@ export function BriefingSection({
     };
   }, []);
 
-  const textClass = compact ? "text-sm leading-relaxed" : "text-base leading-relaxed";
+  const textClass = "text-base leading-relaxed";
   const padClass = compact ? "p-2" : "p-4";
   const iconSize = compact ? 14 : 16;
   const iconBtnClass =
-    "rounded border border-neutral-300 p-1.5 text-neutral-600 transition hover:bg-neutral-200 hover:text-neutral-900 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-neutral-600";
+    "rounded border border-neutral-500 p-1.5 text-neutral-400 transition hover:bg-neutral-700 hover:text-white disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-neutral-500";
 
   return (
     <div className={`flex min-h-0 flex-col ${compact ? "gap-1" : "gap-2"} ${className}`}>
       <div
-        className={`min-h-0 flex-1 overflow-y-auto rounded border border-neutral-300 bg-neutral-50 ${padClass}`}
+        className={`min-h-0 flex-1 overflow-y-auto rounded border-2 border-neutral-600 bg-neutral-800/60 ${padClass}`}
       >
-        <p className={`whitespace-pre-wrap ${textClass} text-neutral-800`}>
+        <p className={`whitespace-pre-wrap ${textClass} text-neutral-300`}>
           {displayText}
         </p>
       </div>
@@ -92,14 +92,14 @@ export function BriefingSection({
             <h3 id="tts-error-title" className="mb-2 font-medium text-red-400">
               Voice playback failed
             </h3>
-            <p className="mb-3 text-sm text-neutral-600">{wardenTts.error}</p>
-            <p className="mb-4 text-sm text-neutral-600">
+            <p className="mb-3 text-sm text-neutral-400">{wardenTts.error}</p>
+            <p className="mb-4 text-sm text-neutral-400">
               Please read through the briefing instead.
             </p>
             <button
               type="button"
               onClick={dismissError}
-              className="rounded border border-neutral-400 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-200"
+              className="rounded border border-neutral-500 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700"
             >
               OK
             </button>

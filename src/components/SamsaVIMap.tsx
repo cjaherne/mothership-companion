@@ -121,9 +121,9 @@ export function SamsaVIMap({
 
   return (
     <div
-      className={`overflow-auto rounded-lg border border-neutral-300 bg-neutral-50 p-2 ${className}`}
+      className={`overflow-auto rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-2 ${className}`}
     >
-      <h4 className="mb-1 text-[10px] font-medium uppercase tracking-wider text-neutral-600">
+      <h4 className="font-heading mb-1 text-[10px] font-medium uppercase tracking-wider text-amber-200/90">
         Samsa VI
       </h4>
       <svg

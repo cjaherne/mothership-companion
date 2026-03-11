@@ -31,8 +31,8 @@ function NpcVoiceControls({ onEnd }: { onEnd: () => void }) {
           : state ?? "Connecting";
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2">
-      <span className="text-xs font-medium text-neutral-700">
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-600 bg-neutral-800/60 px-4 py-2">
+      <span className="text-xs font-medium text-neutral-300">
         {stateLabel}
       </span>
       <div className="flex items-center gap-2">
@@ -107,13 +107,13 @@ export function NpcVoicePanel({
 
   if (!token) {
     return (
-      <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-4">
+      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-neutral-900">
+            <p className="text-sm font-medium text-neutral-100">
               Talk to {npcName}
             </p>
-            <p className="text-xs text-neutral-600">
+            <p className="text-xs text-neutral-400">
               Connect to start a voice conversation
             </p>
           </div>
@@ -134,8 +134,8 @@ export function NpcVoicePanel({
   }
 
   return (
-    <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-2">
-      <p className="mb-2 text-xs font-medium text-neutral-700">
+    <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-2">
+      <p className="mb-2 text-xs font-medium text-neutral-300">
         Speaking with {npcName}
       </p>
       <LiveKitRoom

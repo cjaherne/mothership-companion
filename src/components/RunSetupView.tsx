@@ -70,19 +70,19 @@ export function RunSetupView({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-neutral-900">
+        <h3 className="font-heading text-2xl font-semibold tracking-wide text-white">
           Set up: {campaign.name}
         </h3>
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-neutral-600 hover:text-neutral-900"
+          className="text-sm text-neutral-400 hover:text-white transition-colors"
         >
           ← Back
         </button>
       </div>
 
-      <p className="text-sm text-neutral-600">
+      <p className="text-base leading-relaxed text-neutral-300">
         Create your group&apos;s characters. Capture player name and character
         details. Mothership stats and loadout can be rolled randomly.
       </p>
@@ -97,7 +97,7 @@ export function RunSetupView({
         />
       ) : null}
 
-      <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-6">
+      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-6">
         <AddCharacterForm
           runId={run.id}
           onSubmit={handleFormSubmit}
@@ -107,35 +107,35 @@ export function RunSetupView({
 
       {characters.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-neutral-600">
+          <h4 className="font-heading text-lg font-semibold tracking-wide text-neutral-200">
             Group ({characters.length})
           </h4>
           <ul className="space-y-2">
             {characters.map((c) => (
               <li
                 key={c.id}
-                className="flex items-start justify-between rounded border border-neutral-300 px-4 py-3"
+                className="flex items-start justify-between rounded border border-neutral-600 px-4 py-3 bg-neutral-800/50"
               >
                 <div>
                   {c.playerName ? (
-                    <span className="font-medium text-neutral-900">{c.playerName}</span>
+                    <span className="font-medium text-neutral-100">{c.playerName}</span>
                   ) : null}
-                  <span className="font-medium text-neutral-900">
+                  <span className="font-medium text-neutral-100">
                     {c.playerName ? " → " : ""}
                     {c.name}
                   </span>
                   {c.mothership && (
-                    <span className="ml-2 text-xs text-neutral-600">
+                    <span className="ml-2 text-xs text-neutral-400">
                       {CLASS_NAMES[c.mothership.class]}
                     </span>
                   )}
                   {c.traits.length > 0 && (
-                    <span className="ml-2 text-xs text-neutral-600">
+                    <span className="ml-2 text-xs text-neutral-400">
                       {c.traits.join(", ")}
                     </span>
                   )}
                   {c.personalitySummary && (
-                    <p className="mt-1 text-xs text-neutral-600">
+                    <p className="mt-1 text-xs text-neutral-400">
                       {c.personalitySummary}
                     </p>
                   )}
@@ -163,7 +163,7 @@ export function RunSetupView({
           Start session
         </button>
         {!canStart && (
-          <p className="flex items-center text-sm text-neutral-500">
+          <p className="flex items-center text-sm text-neutral-400">
             Add at least one player to start
           </p>
         )}

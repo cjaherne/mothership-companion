@@ -11,6 +11,8 @@
 
 export type MothershipClass = "marine" | "android" | "scientist" | "teamster";
 
+export type CharacterSex = "male" | "female" | "other";
+
 export interface MothershipStats {
   strength: number;
   speed: number;
@@ -23,22 +25,80 @@ export interface MothershipStats {
 
 export interface MothershipCharacterData {
   class: MothershipClass;
+  /** Character sex for reference image selection (artwork generation) */
+  sex?: CharacterSex;
   stats: MothershipStats;
   /** Maximum health; current health when tracking damage (defaults to health if undefined) */
   health: number;
   maxWounds: number;
   /** Current wounds (default 0) */
   currentWounds?: number;
-  /** Current stress (default 0) */
+  /** Current stress (2 at creation) */
   stressCurrent?: number;
-  /** Maximum stress (default 10) */
+  /** Maximum stress (2 at creation) */
   stressMax?: number;
+  /** Skill IDs from the skills matrix (Trained/Expert/Master) */
+  skillIds?: string[];
+  /** Android only: which stat received -10 */
+  androidReduceStat?: keyof MothershipStats;
+  /** Scientist only: which stat received +5 */
+  scientistBoostStat?: keyof MothershipStats;
   /** Item IDs for starting gear (from class loadout table) */
   startingGearItemIds: string[];
   trinket: string;
   patch: string;
   credits: number;
 }
+
+/** Class descriptions, trauma response, stat modifiers, default skills, and bonus rules */
+export const CLASS_INFO: Record<
+  MothershipClass,
+  {
+    name: string;
+    description: string;
+    traumaResponse: string;
+    statModifiers: string[];
+    defaultSkillIds: string[];
+    bonusRules: string;
+  }
+> = {
+  marine: {
+    name: "Marine",
+    description:
+      "Marines are handy in a fight, but whenever they Panic it may cause problems for the rest of the crew.",
+    traumaResponse: "Whenever you Panic, every close friendly player must make a Fear Save.",
+    statModifiers: ["+10 COMBAT", "+10 BODY SAVE", "+20 FEAR SAVE", "+1 MAX WOUNDS"],
+    defaultSkillIds: ["military-training", "athletics"],
+    bonusRules: "1 Expert Skill OR 2 Trained Skills",
+  },
+  android: {
+    name: "Android",
+    description:
+      "Androids are a terrifying and exciting addition to any crew. They tend to unnerve other crewmembers with their cold inhumanity.",
+    traumaResponse: "Fear Saves made by close friendly players are at disadvantage.",
+    statModifiers: ["+20 INTELLECT", "-10 to 1 stat (player chooses)", "+60 FEAR SAVE", "+1 MAX WOUNDS"],
+    defaultSkillIds: ["linguistics", "computers", "mathematics"],
+    bonusRules: "1 Expert Skill OR 2 Trained Skills",
+  },
+  scientist: {
+    name: "Scientist",
+    description:
+      "Scientists are doctors, researchers, or anyone who wants to slice open creatures (or infected crewmembers) with a scalpel.",
+    traumaResponse: "Whenever you fail a Sanity Save, all close friendly players gain 1 Stress.",
+    statModifiers: ["+10 INTELLECT", "+5 to 1 stat (player chooses)", "+30 SANITY SAVE"],
+    defaultSkillIds: [],
+    bonusRules: "1 Master skill (+ its Expert & Trained prereqs) + 1 bonus Trained",
+  },
+  teamster: {
+    name: "Teamster",
+    description:
+      "Teamsters are rough and tumble blue-collar space workers, mechanics, engineers, miners, and pilots.",
+    traumaResponse: "Once per session, you may take advantage on a Panic Check.",
+    statModifiers: ["+5 to all stats", "+10 to all saves"],
+    defaultSkillIds: ["industrial-equipment", "zero-g"],
+    bonusRules: "1 Trained Skill AND 1 Expert Skill",
+  },
+};
 
 function roll1d10(): number {
   return Math.floor(Math.random() * 10) + 1;
@@ -49,17 +109,17 @@ function roll2d10(): number {
 }
 
 /** Stats: 2d10+25 each. Range 27-45. */
-function rollStat(): number {
+export function rollStat(): number {
   return roll2d10() + 25;
 }
 
 /** Saves: 2d10+10 each. Range 12-30. */
-function rollSave(): number {
+export function rollSave(): number {
   return roll2d10() + 10;
 }
 
 /** Health: 1d10+10. Range 11-20. */
-function rollHealth(): number {
+export function rollHealth(): number {
   return roll1d10() + 10;
 }
 
@@ -68,10 +128,22 @@ function rollCredits(): number {
   return roll2d10() * 10;
 }
 
+/** Stat keys that can receive Android's -10 or Scientist's +5 */
+export const STAT_KEYS: (keyof MothershipStats)[] = [
+  "strength",
+  "speed",
+  "intellect",
+  "combat",
+];
+
 /** Class modifiers per Player's Survival Guide p.4-5 */
-function applyClassModifiers(
+export function applyClassModifiers(
   stats: MothershipStats,
-  cls: MothershipClass
+  cls: MothershipClass,
+  options?: {
+    androidReduceStat?: keyof MothershipStats;
+    scientistBoostStat?: keyof MothershipStats;
+  }
 ): MothershipStats {
   const result = { ...stats };
   switch (cls) {
@@ -82,8 +154,9 @@ function applyClassModifiers(
       break;
     case "android": {
       result.intellect += 20;
-      const reduce = ["strength", "speed", "combat"] as const;
-      const key = reduce[Math.floor(Math.random() * reduce.length)];
+      const key =
+        options?.androidReduceStat ??
+        (["strength", "speed", "combat"] as const)[Math.floor(Math.random() * 3)];
       result[key] = Math.max(1, result[key] - 10);
       result.fear += 60;
       break;
@@ -91,7 +164,11 @@ function applyClassModifiers(
     case "scientist":
       result.intellect += 10;
       result.sanity += 30;
-      result.strength = Math.min(85, result.strength + 5);
+      if (options?.scientistBoostStat) {
+        result[options.scientistBoostStat] = Math.min(85, result[options.scientistBoostStat] + 5);
+      } else {
+        result.strength = Math.min(85, result.strength + 5);
+      }
       break;
     case "teamster":
       result.strength = Math.min(85, result.strength + 5);
@@ -104,6 +181,18 @@ function applyClassModifiers(
       break;
   }
   return result;
+}
+
+/** Compute final stats from base stats, class, and optional stat choices */
+export function computeStatsWithClass(
+  baseStats: MothershipStats,
+  cls: MothershipClass,
+  options?: {
+    androidReduceStat?: keyof MothershipStats;
+    scientistBoostStat?: keyof MothershipStats;
+  }
+): MothershipStats {
+  return applyClassModifiers(baseStats, cls, options);
 }
 
 /** Loadout entry: unique ID + display text (Player's Survival Guide p.7) */
@@ -252,33 +341,110 @@ export function rollRandomStats(): MothershipStats {
   };
 }
 
+/** Roll loadout, trinket, patch, and credits for a class */
+export function rollLoadoutTrinketPatchCredits(cls: MothershipClass): {
+  loadoutId: string;
+  trinket: string;
+  patch: string;
+  credits: number;
+} {
+  const loadouts = getClassLoadouts(cls);
+  const chosen = loadouts[Math.floor(Math.random() * loadouts.length)];
+  return {
+    loadoutId: chosen.id,
+    trinket: TRINKETS[rollD100() % TRINKETS.length],
+    patch: PATCHES[rollD100() % PATCHES.length],
+    credits: rollCredits(),
+  };
+}
+
+/** Build MothershipCharacterData from creation parts */
+export function buildMothershipCharacter(params: {
+  class: MothershipClass;
+  sex?: CharacterSex;
+  baseStats: MothershipStats;
+  health: number;
+  skillIds?: string[];
+  androidReduceStat?: keyof MothershipStats;
+  scientistBoostStat?: keyof MothershipStats;
+  loadoutId?: string;
+  trinket?: string;
+  patch?: string;
+  credits?: number;
+}): MothershipCharacterData {
+  const {
+    class: cls,
+    sex,
+    baseStats,
+    health,
+    skillIds = [],
+    androidReduceStat,
+    scientistBoostStat,
+  } = params;
+
+  const stats = computeStatsWithClass(baseStats, cls, {
+    androidReduceStat,
+    scientistBoostStat,
+  });
+  const maxWounds = cls === "marine" || cls === "android" ? 3 : 2;
+
+  const rolled =
+    params.loadoutId !== undefined &&
+    params.trinket !== undefined &&
+    params.patch !== undefined &&
+    params.credits !== undefined
+      ? { loadoutId: params.loadoutId, trinket: params.trinket, patch: params.patch, credits: params.credits }
+      : rollLoadoutTrinketPatchCredits(cls);
+
+  return {
+    class: cls,
+    sex,
+    stats,
+    health,
+    maxWounds,
+    stressCurrent: 2,
+    stressMax: 2,
+    skillIds,
+    androidReduceStat,
+    scientistBoostStat,
+    startingGearItemIds: [rolled.loadoutId],
+    trinket: rolled.trinket,
+    patch: rolled.patch,
+    credits: rolled.credits,
+  };
+}
+
 export function createRandomMothershipCharacter(): MothershipCharacterData {
   const classes: MothershipClass[] = ["marine", "android", "scientist", "teamster"];
   const cls = classes[Math.floor(Math.random() * classes.length)];
 
-  let stats = rollRandomStats();
-  stats = applyClassModifiers(stats, cls);
+  const baseStats = rollRandomStats();
+  const options: { androidReduceStat?: keyof MothershipStats; scientistBoostStat?: keyof MothershipStats } =
+    {};
+  if (cls === "android") {
+    options.androidReduceStat = (["strength", "speed", "combat"] as const)[
+      Math.floor(Math.random() * 3)
+    ];
+  }
+  if (cls === "scientist") {
+    options.scientistBoostStat = (["strength", "speed", "intellect", "combat"] as const)[
+      Math.floor(Math.random() * 4)
+    ];
+  }
 
-  const health = rollHealth();
-  const maxWounds = cls === "marine" || cls === "android" ? 3 : 2;
+  const rolled = rollLoadoutTrinketPatchCredits(cls);
+  const sexes: CharacterSex[] = ["male", "female", "other"];
+  const sex = sexes[Math.floor(Math.random() * sexes.length)];
 
-  const loadouts = getClassLoadouts(cls);
-  const chosen = loadouts[Math.floor(Math.random() * loadouts.length)];
-
-  const trinket = TRINKETS[rollD100() % TRINKETS.length];
-  const patch = PATCHES[rollD100() % PATCHES.length];
-  const credits = rollCredits();
-
-  return {
+  return buildMothershipCharacter({
     class: cls,
-    stats,
-    health,
-    maxWounds,
-    startingGearItemIds: [chosen.id],
-    trinket,
-    patch,
-    credits,
-  };
+    sex,
+    baseStats,
+    health: rollHealth(),
+    skillIds: CLASS_INFO[cls].defaultSkillIds,
+    ...options,
+    ...rolled,
+  });
 }
 
 export const CLASS_NAMES: Record<MothershipClass, string> = {
@@ -287,6 +453,25 @@ export const CLASS_NAMES: Record<MothershipClass, string> = {
   scientist: "Scientist",
   teamster: "Teamster",
 };
+
+export const SEX_LABELS: Record<CharacterSex, string> = {
+  male: "Male",
+  female: "Female",
+  other: "Other",
+};
+
+/**
+ * Path to class+sex reference image for artwork generation.
+ * Placeholder images at /images/classes/{class}-{sex}.png (replace with real art).
+ * "other" falls back to male for image lookup.
+ */
+export function getClassReferenceImagePath(
+  cls: MothershipClass,
+  sex?: CharacterSex
+): string {
+  const sexKey = sex === "female" ? "female" : "male";
+  return `/images/classes/${cls}-${sexKey}.png`;
+}
 
 /** Pick one element from an array at random */
 function pick<T>(arr: T[]): T {

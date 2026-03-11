@@ -8,6 +8,23 @@ import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
 import { readFileSync } from "fs";
 import { join } from "path";
+import sharp from "sharp";
+
+/** Keep top fraction of image height to remove class name label at bottom */
+const PORTRAIT_CROP_RATIO = 0.85;
+
+async function cropPortraitToRemoveLabel(buffer: Buffer): Promise<Buffer> {
+  const img = sharp(buffer);
+  const meta = await img.metadata();
+  const width = meta.width ?? 512;
+  const height = meta.height ?? 512;
+  const cropHeight = Math.floor(height * PORTRAIT_CROP_RATIO);
+  return img
+    .extract({ left: 0, top: 0, width, height: cropHeight })
+    .resize(512, 512)
+    .png()
+    .toBuffer();
+}
 
 const BACKGROUND_COLORS = [
   "solid orange", "solid green", "solid purple", "solid blue", "solid teal",
@@ -51,6 +68,11 @@ function pickOne<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+const NEGATIVE_PROMPT =
+  "text, words, letters, labels, typography, captions, signage, watermark, logo, written text, class name, " +
+  "control panel, monitor frame, display screen, UI elements, control knobs, magenta, glowing display, " +
+  "scrambled text, pixelated text, interface, HUD, border frame";
+
 function buildPrompt(
   character: { name: string; traits: string[]; personalitySummary: string },
   variabilityHints?: string[]
@@ -63,6 +85,7 @@ function buildPrompt(
   const cloth = pickOne(CLOTHING);
   const face = pickOne(FACIAL_FEATURES);
   const style =
+    `Plain portrait only, no text, no labels, no UI, no frame, no control panel. ` +
     `Stylized black and white line art portrait, stippling and fine dots for shading, ` +
     `${bg} background, ${hair}, ${face}, wearing ${cloth}` +
     (acc !== "none" ? `, ${acc}` : "") +
@@ -85,6 +108,7 @@ export async function POST(request: NextRequest) {
 
   let body: {
     character: { name: string; traits: string[]; personalitySummary: string };
+    referenceImagePath?: string;
     regenerate?: boolean;
     variabilityHints?: string[];
   };
@@ -97,7 +121,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { character, regenerate, variabilityHints } = body;
+  const { character, referenceImagePath, regenerate, variabilityHints } = body;
   if (!character?.name) {
     return NextResponse.json(
       { error: "character with name is required" },
@@ -121,12 +145,25 @@ export async function POST(request: NextRequest) {
   );
 
   let imageData: string;
+  const fallbackPath = join(process.cwd(), "public", "images", "npcs", "maas.png");
+  const refPath = referenceImagePath
+    ? join(process.cwd(), "public", referenceImagePath.replace(/^\//, ""))
+    : fallbackPath;
+  const isClassReference = referenceImagePath?.includes("classes") ?? false;
+
   try {
-    const maasPath = join(process.cwd(), "public", "images", "npcs", "maas.png");
-    const buffer = readFileSync(maasPath);
+    let buffer: Buffer;
+    try {
+      buffer = readFileSync(refPath);
+    } catch {
+      buffer = readFileSync(fallbackPath);
+    }
+    if (isClassReference) {
+      buffer = await cropPortraitToRemoveLabel(buffer);
+    }
     imageData = `data:image/png;base64,${buffer.toString("base64")}`;
   } catch (err) {
-    console.error("Failed to read Maas reference image:", err);
+    console.error("Failed to read reference image:", err);
     return NextResponse.json(
       { error: "Reference image not found" },
       { status: 500 }
@@ -141,6 +178,7 @@ export async function POST(request: NextRequest) {
         input: {
           image: imageData,
           prompt,
+          negative_prompt: NEGATIVE_PROMPT,
           disable_safety_checker: true,
           prompt_strength: 0.68,
           num_inference_steps: 50,
