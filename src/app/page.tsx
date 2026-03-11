@@ -127,7 +127,7 @@ export default function Home() {
         )}
 
         <div
-          className={`flex-1 bg-white p-8 text-neutral-900 ${
+          className={`flex-1 p-8 bg-black text-white ${
             viewState === "briefing" ? "min-h-0 overflow-hidden flex flex-col" : ""
           }`}
         >
@@ -185,11 +185,11 @@ function HomeContent({ onSelectCampaign }: HomeContentProps) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-10">
       {/* Hero - full width */}
-      <section className="border-b border-neutral-200 pb-8">
-        <h2 className="mb-3 text-2xl font-bold tracking-tight text-neutral-900">
+      <section className="border-b border-neutral-700 pb-8">
+        <h2 className="font-heading mb-3 text-2xl font-bold tracking-tight text-white">
           Mothership Companion
         </h2>
-        <p className="max-w-2xl text-base leading-relaxed text-neutral-700">
+        <p className="max-w-2xl text-base leading-relaxed text-neutral-400">
           A voice-interactive Warden for Mothership RPG scenarios. Real-time
           voice chat with NPCs powered by LiveKit and the Vercel AI SDK. Create
           characters, read the briefing, explore locations, and talk to the
@@ -201,35 +201,35 @@ function HomeContent({ onSelectCampaign }: HomeContentProps) {
       <div className="grid gap-10 lg:grid-cols-2">
       {/* Setup guide */}
       <section>
-        <h3 className="mb-4 text-lg font-semibold text-neutral-900">
+        <h3 className="font-heading mb-4 text-lg font-semibold tracking-wide text-amber-200/90">
           Setup
         </h3>
         <div className="space-y-4">
-          <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-4">
-            <h4 className="mb-2 font-medium text-neutral-800">1. Configure environment</h4>
-            <p className="mb-2 text-sm text-neutral-600">
-              Copy <code className="rounded bg-neutral-200 px-1.5 py-0.5 text-xs">.env.example</code> to{" "}
-              <code className="rounded bg-neutral-200 px-1.5 py-0.5 text-xs">.env.local</code> and set:
+          <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+            <h4 className="mb-2 font-medium text-neutral-200">1. Configure environment</h4>
+            <p className="mb-2 text-sm text-neutral-400">
+              Copy <code className="rounded bg-neutral-700 px-1.5 py-0.5 text-xs text-neutral-200">.env.example</code> to{" "}
+              <code className="rounded bg-neutral-700 px-1.5 py-0.5 text-xs text-neutral-200">.env.local</code> and set:
             </p>
-            <ul className="list-inside list-disc space-y-1 text-sm text-neutral-700">
-              <li><strong>LIVEKIT_URL</strong>, <strong>LIVEKIT_API_KEY</strong>, <strong>LIVEKIT_API_SECRET</strong></li>
-              <li><strong>OPENAI_API_KEY</strong> (required for AI and TTS)</li>
-              <li><strong>REPLICATE_API_TOKEN</strong> (optional, for character artwork)</li>
+            <ul className="list-inside list-disc space-y-1 text-sm text-neutral-400">
+              <li><strong className="text-neutral-300">LIVEKIT_URL</strong>, <strong className="text-neutral-300">LIVEKIT_API_KEY</strong>, <strong className="text-neutral-300">LIVEKIT_API_SECRET</strong></li>
+              <li><strong className="text-neutral-300">OPENAI_API_KEY</strong> (required for AI and TTS)</li>
+              <li><strong className="text-neutral-300">REPLICATE_API_TOKEN</strong> (optional, for character artwork)</li>
             </ul>
           </div>
-          <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-4">
-            <h4 className="mb-2 font-medium text-neutral-800">2. Run the app and agent</h4>
-            <p className="mb-3 text-sm text-neutral-600">
+          <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+            <h4 className="mb-2 font-medium text-neutral-200">2. Run the app and agent</h4>
+            <p className="mb-3 text-sm text-neutral-400">
               Use two terminals:
             </p>
             <ol className="space-y-2 text-sm">
               <li className="flex items-start gap-2">
                 <span className="shrink-0 font-medium text-neutral-500">Terminal 1:</span>
-                <code className="rounded bg-neutral-200 px-2 py-1 text-xs">npm run dev</code>
+                <code className="rounded bg-neutral-700 px-2 py-1 text-xs text-neutral-200">npm run dev</code>
               </li>
               <li className="flex items-start gap-2">
                 <span className="shrink-0 font-medium text-neutral-500">Terminal 2:</span>
-                <code className="rounded bg-neutral-200 px-2 py-1 text-xs">npm run agent:dev</code>
+                <code className="rounded bg-neutral-700 px-2 py-1 text-xs text-neutral-200">npm run agent:dev</code>
               </li>
             </ol>
             <p className="mt-3 text-xs text-neutral-500">
@@ -241,35 +241,35 @@ function HomeContent({ onSelectCampaign }: HomeContentProps) {
 
       {/* How to play */}
       <section className="lg:min-w-0">
-        <h3 className="mb-4 text-lg font-semibold text-neutral-900">
+        <h3 className="font-heading mb-4 text-lg font-semibold tracking-wide text-amber-200/90">
           How to play
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-neutral-300 bg-white p-4 shadow-sm">
-            <span className="mb-2 inline-block rounded-full bg-neutral-800 px-2.5 py-0.5 text-xs font-medium text-white">Step 1</span>
-            <h4 className="font-medium text-neutral-900">Select a campaign</h4>
-            <p className="mt-1 text-sm text-neutral-600">
+          <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+            <span className="mb-2 inline-block rounded-full bg-amber-900/60 px-2.5 py-0.5 text-xs font-medium text-amber-200">Step 1</span>
+            <h4 className="font-medium text-neutral-100">Select a campaign</h4>
+            <p className="mt-1 text-sm text-neutral-400">
               Choose from the sidebar (e.g. Another Bug Hunt). Create a new run or resume a previous one.
             </p>
           </div>
-          <div className="rounded-lg border border-neutral-300 bg-white p-4 shadow-sm">
-            <span className="mb-2 inline-block rounded-full bg-neutral-800 px-2.5 py-0.5 text-xs font-medium text-white">Step 2</span>
-            <h4 className="font-medium text-neutral-900">Create characters</h4>
-            <p className="mt-1 text-sm text-neutral-600">
+          <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+            <span className="mb-2 inline-block rounded-full bg-amber-900/60 px-2.5 py-0.5 text-xs font-medium text-amber-200">Step 2</span>
+            <h4 className="font-medium text-neutral-100">Create characters</h4>
+            <p className="mt-1 text-sm text-neutral-400">
               Add player characters with Mothership stats. Roll random or enter details manually.
             </p>
           </div>
-          <div className="rounded-lg border border-neutral-300 bg-white p-4 shadow-sm">
-            <span className="mb-2 inline-block rounded-full bg-neutral-800 px-2.5 py-0.5 text-xs font-medium text-white">Step 3</span>
-            <h4 className="font-medium text-neutral-900">Read the briefing</h4>
-            <p className="mt-1 text-sm text-neutral-600">
+          <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+            <span className="mb-2 inline-block rounded-full bg-amber-900/60 px-2.5 py-0.5 text-xs font-medium text-amber-200">Step 3</span>
+            <h4 className="font-medium text-neutral-100">Read the briefing</h4>
+            <p className="mt-1 text-sm text-neutral-400">
               Review the Background, explore the planet map and locations, and see NPCs in the area.
             </p>
           </div>
-          <div className="rounded-lg border border-neutral-300 bg-white p-4 shadow-sm">
-            <span className="mb-2 inline-block rounded-full bg-neutral-800 px-2.5 py-0.5 text-xs font-medium text-white">Step 4</span>
-            <h4 className="font-medium text-neutral-900">Talk to the Warden</h4>
-            <p className="mt-1 text-sm text-neutral-600">
+          <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+            <span className="mb-2 inline-block rounded-full bg-amber-900/60 px-2.5 py-0.5 text-xs font-medium text-amber-200">Step 4</span>
+            <h4 className="font-medium text-neutral-100">Talk to the Warden</h4>
+            <p className="mt-1 text-sm text-neutral-400">
               Click &quot;Talk to Warden&quot; to connect your mic and speak with NPCs in real time.
             </p>
           </div>
@@ -279,16 +279,16 @@ function HomeContent({ onSelectCampaign }: HomeContentProps) {
 
       {/* Campaigns - full width */}
       <section>
-        <h3 className="mb-4 text-lg font-semibold text-neutral-900">
+        <h3 className="font-heading mb-4 text-lg font-semibold tracking-wide text-amber-200/90">
           Campaigns
         </h3>
         <div className="grid gap-6 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => onSelectCampaign("another-bug-hunt")}
-            className="group relative overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 text-left shadow-sm transition hover:border-neutral-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2"
+            className="group relative overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 text-left transition hover:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
           >
-            <div className="aspect-[3/4] overflow-hidden bg-neutral-200">
+            <div className="aspect-[3/4] overflow-hidden bg-neutral-700">
               <img
                 src="/images/campaigns/another-bug-hunt.png"
                 alt="Another Bug Hunt"
@@ -300,8 +300,8 @@ function HomeContent({ onSelectCampaign }: HomeContentProps) {
               <p className="text-sm text-neutral-300">Distress Signals scenario</p>
             </div>
           </button>
-          <div className="flex aspect-[3/4] flex-col items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-neutral-50">
-            <span className="text-4xl text-neutral-300">+</span>
+          <div className="flex aspect-[3/4] flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-600 bg-neutral-800/40">
+            <span className="text-4xl text-neutral-500">+</span>
             <p className="mt-2 text-sm font-medium text-neutral-500">Future Content</p>
           </div>
         </div>

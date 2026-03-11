@@ -27,6 +27,11 @@ body {
 }
 
 /* Sci-fi scanline overlay (optional subtle effect) */
+/* Gothic heading font for Dark Space Horror theme */
+.font-heading {
+  font-family: var(--font-cinzel), Georgia, serif;
+}
+
 .scanlines::after {
   content: "";
   position: fixed;

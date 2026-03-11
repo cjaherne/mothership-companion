@@ -21,6 +21,9 @@ export interface CampaignRun {
   state?: RunState;
 }
 
+/** Runs created but not yet persisted (waiting for first character) */
+const pendingRuns = new Map<string, CampaignRun>();
+
 export function getRuns(): CampaignRun[] {
   if (typeof window === "undefined") return [];
   try {
@@ -34,7 +37,7 @@ export function getRuns(): CampaignRun[] {
 }
 
 export function getRun(runId: string): CampaignRun | undefined {
-  return getRuns().find((r) => r.id === runId);
+  return getRuns().find((r) => r.id === runId) ?? pendingRuns.get(runId);
 }
 
 export function getRunsForCampaign(campaignId: string): CampaignRun[] {
@@ -54,7 +57,8 @@ export function getRunState(runId: string): RunState {
 export function createRun(
   campaignId: string,
   scenarioId: string | undefined,
-  initialState?: Partial<RunState>
+  initialState?: Partial<RunState>,
+  options?: { persist?: boolean }
 ): CampaignRun {
   let state = {
     ...EMPTY_RUN_STATE,
@@ -92,11 +96,29 @@ export function createRun(
     createdAt: new Date().toISOString(),
     state,
   };
+
+  if (options?.persist === false) {
+    pendingRuns.set(run.id, run);
+    return run;
+  }
+
   const runs = getRuns();
   runs.unshift(run);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(runs));
   syncRunStateToApi(run.id);
   return run;
+}
+
+/** Persist a pending run to localStorage (called when first character is added) */
+function persistPendingRun(runId: string): void {
+  const run = pendingRuns.get(runId);
+  if (!run) return;
+  pendingRuns.delete(runId);
+  const runs = getRuns();
+  if (runs.some((r) => r.id === runId)) return; // already persisted
+  runs.unshift(run);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(runs));
+  syncRunStateToApi(runId);
 }
 
 export function updateRunLastPlayed(runId: string): void {
@@ -125,6 +147,9 @@ export function updateRun(
 }
 
 export function saveRunState(runId: string, statePatch: Partial<RunState>): void {
+  if (pendingRuns.has(runId)) {
+    persistPendingRun(runId);
+  }
   const current = getRunState(runId);
   const merged = deepMergeRunState(current, statePatch);
   updateRun(runId, { state: merged });

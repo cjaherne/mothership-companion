@@ -109,8 +109,8 @@ export function GretaBaseFloorplan({
   };
 
   return (
-    <div className={`overflow-auto rounded-lg border border-neutral-300 bg-neutral-50 ${compact ? "p-2" : "p-4"} ${className}`}>
-      <h4 className={`text-xs font-medium uppercase tracking-wider text-neutral-500 ${compact ? "mb-1" : "mb-3"}`}>
+    <div className={`overflow-auto rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${compact ? "p-2" : "p-4"} ${className}`}>
+      <h4 className={`font-heading text-xs font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "mb-1" : "mb-3"}`}>
         Greta Base — Minimap
       </h4>
       <svg
@@ -208,7 +208,7 @@ export function GretaBaseFloorplan({
         })}
       </svg>
 
-      <div className="mt-3 space-y-2 text-[10px] text-neutral-500">
+      <div className="mt-3 space-y-2 text-[10px] text-neutral-400">
         <div className="flex flex-wrap items-center gap-4">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-emerald-400" /> Current

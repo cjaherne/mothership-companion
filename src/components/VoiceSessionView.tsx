@@ -24,13 +24,13 @@ function VoiceAssistantUI({ onExit }: { onExit: () => void }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-neutral-600">
-          Agent: <span className="text-neutral-900 font-medium">{state}</span>
+        <p className="text-sm text-neutral-400">
+          Agent: <span className="text-neutral-200 font-medium">{state}</span>
         </p>
         <button
           type="button"
           onClick={onExit}
-          className="text-xs text-neutral-600 hover:text-red-600"
+          className="text-xs text-neutral-400 hover:text-red-400"
         >
           Exit session
         </button>
@@ -99,7 +99,7 @@ export function VoiceSessionView({
         <button
           type="button"
           onClick={fetchToken}
-          className="w-full rounded-lg border border-neutral-400 bg-neutral-100 px-4 py-3 font-medium text-neutral-900 transition hover:bg-neutral-200"
+          className="w-full rounded-lg border-2 border-amber-500/60 bg-amber-950/40 px-4 py-3 font-medium text-amber-200 transition hover:bg-amber-900/50"
         >
           Connect to Warden
         </button>

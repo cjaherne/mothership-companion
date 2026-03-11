@@ -48,7 +48,7 @@ export function LocationDetailMap({
   if (!location) {
     return (
       <div
-        className={`flex items-center justify-center rounded-lg border border-neutral-300 bg-neutral-50 p-6 text-neutral-600 ${className}`}
+        className={`flex items-center justify-center rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-6 text-neutral-400 ${className}`}
       >
         <p className="text-sm">No location selected</p>
       </div>
@@ -60,10 +60,10 @@ export function LocationDetailMap({
 
   return (
     <div
-      className={`flex min-h-0 flex-col overflow-y-auto rounded-lg border border-neutral-300 bg-neutral-50 p-4 ${className}`}
+      className={`flex min-h-0 flex-col overflow-y-auto rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4 ${className}`}
     >
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h4 className="text-xs font-medium uppercase tracking-wider text-neutral-600">
+        <h4 className="font-heading text-xs font-medium uppercase tracking-wider text-amber-200/90">
           {location.name}
         </h4>
         {onMarkVisited && (
@@ -72,15 +72,15 @@ export function LocationDetailMap({
             onClick={() => onMarkVisited(location.id)}
             className={`rounded border px-2 py-1 text-[10px] font-medium transition ${
               exploredLocationIds.includes(location.id)
-                ? "border-green-600 bg-green-100 text-green-800 hover:bg-green-200"
-                : "border-neutral-400 bg-neutral-200 text-neutral-800 hover:bg-neutral-300"
+                ? "border-green-600 bg-green-900/40 text-green-400 hover:bg-green-900/60"
+                : "border-neutral-500 bg-neutral-700 text-neutral-300 hover:bg-neutral-600"
             }`}
           >
             {exploredLocationIds.includes(location.id) ? "Visited ✓ (undo)" : "Mark as Visited"}
           </button>
         )}
       </div>
-      <p className="mb-4 text-xs text-neutral-700">{location.description}</p>
+      <p className="mb-4 text-xs text-neutral-400">{location.description}</p>
 
       {entryConfig &&
         onEnterInterior &&
@@ -99,12 +99,12 @@ export function LocationDetailMap({
                 <button
                   type="button"
                   onClick={() => onEnterInterior(entry.targetLocationId)}
-                  className="w-full rounded border-2 border-emerald-600 bg-emerald-100 px-3 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-200"
+                  className="w-full rounded border-2 border-emerald-600 bg-emerald-900/40 px-3 py-2 text-sm font-medium text-emerald-400 transition hover:bg-emerald-900/60"
                 >
                   Enter {targetName}
                 </button>
               ) : (
-                <p className="rounded border border-amber-600/50 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                <p className="rounded border border-amber-600/50 bg-amber-950/40 px-3 py-2 text-sm text-amber-300">
                   Locked — {targetLoc?.lockNote ?? "requires keycard"}
                 </p>
               )}
@@ -123,7 +123,7 @@ export function LocationDetailMap({
               return (
                 <li
                   key={poi.id}
-                  className="rounded border border-neutral-300 bg-white px-3 py-2"
+                  className="rounded border border-neutral-600 bg-neutral-700/50 px-3 py-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2 min-w-0">
@@ -135,7 +135,7 @@ export function LocationDetailMap({
                       <div className="min-w-0">
                         <span
                           className={`text-sm ${
-                            isInspected ? "text-neutral-600" : "text-neutral-900"
+                            isInspected ? "text-neutral-400" : "text-neutral-200"
                           }`}
                         >
                           {poi.name}

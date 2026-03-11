@@ -81,21 +81,21 @@ export function NpcSelector({
   if (npcIds.length === 0) {
     return (
     <div
-      className={`flex flex-col overflow-hidden rounded-lg border border-neutral-300 bg-neutral-50 ${className}`}
+      className={`flex flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${className}`}
     >
-      <h4 className={`border-b border-neutral-300 text-sm font-medium uppercase tracking-wider text-neutral-600 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
+      <h4 className={`font-heading border-b border-neutral-600 text-sm font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
         NPCs
       </h4>
-        <p className={`text-sm text-neutral-600 ${compact ? "p-2" : "p-4"}`}>No NPCs available here.</p>
+        <p className={`text-sm text-neutral-400 ${compact ? "p-2" : "p-4"}`}>No NPCs available here.</p>
       </div>
     );
   }
 
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-lg border border-neutral-300 bg-neutral-50 ${className}`}
+      className={`flex flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${className}`}
     >
-      <h4 className={`shrink-0 border-b border-neutral-300 text-base font-medium uppercase tracking-wider text-neutral-600 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
+      <h4 className={`font-heading shrink-0 border-b border-neutral-600 text-base font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
         NPCs in this location
       </h4>
       <ul
@@ -113,10 +113,10 @@ export function NpcSelector({
                 onClick={() => onSelectNpc(npcId)}
                 className={`flex w-full items-center gap-2 rounded text-left transition ${
                   compact ? "px-2 py-2" : "px-3 py-2"
-                } ${
+                }                 ${
                   isSelected
                     ? "bg-neon-pink/20 text-neon-pink"
-                    : "text-neutral-900 hover:bg-neutral-200"
+                    : "text-neutral-100 hover:bg-neutral-700/50"
                 }`}
               >
                 <NpcAvatar npcId={npcId} size={avatarSize} />

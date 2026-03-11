@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import type { Character } from "@/types/run";
+import { getClassReferenceImagePath } from "@/lib/mothership";
 
 const VARIABILITY_HINTS = [
   "different gender",
@@ -39,13 +40,19 @@ export function CharacterArtworkModal({
   const [loading, setLoading] = useState(true);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const generate = useCallback(
-    async (regenerate = false) => {
+    async (regenerate = false, signal?: AbortSignal) => {
       setLoading(true);
       setError(null);
       const hints = regenerate ? pickRandom(VARIABILITY_HINTS, 3) : undefined;
+      let aborted = false;
       try {
+        const referenceImagePath = character.mothership?.class
+          ? getClassReferenceImagePath(character.mothership.class, character.mothership.sex ?? "male")
+          : undefined;
+
         const res = await fetch("/api/character-art", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -55,9 +62,11 @@ export function CharacterArtworkModal({
               traits: character.traits,
               personalitySummary: character.personalitySummary,
             },
+            referenceImagePath,
             regenerate,
             variabilityHints: hints,
           }),
+          signal,
         });
         const data = await res.json();
         if (!res.ok) {
@@ -65,16 +74,27 @@ export function CharacterArtworkModal({
         }
         setImageUrl(data.url);
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          aborted = true;
+          return;
+        }
         setError(err instanceof Error ? err.message : "Failed to generate artwork");
       } finally {
-        setLoading(false);
+        if (!aborted) setLoading(false);
       }
     },
-    [character.name, character.traits, character.personalitySummary]
+    [character.name, character.traits, character.personalitySummary, character.mothership?.class, character.mothership?.sex]
   );
 
   useEffect(() => {
-    generate(false);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    generate(false, controller.signal);
+    return () => {
+      controller.abort();
+      abortRef.current = null;
+    };
   }, [generate]);
 
   const handleKeyDown = useCallback(

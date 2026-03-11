@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
+import { Cinzel } from "next/font/google";
 import "./globals.css";
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  variable: "--font-cinzel",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Mothership Companion | Warden",
@@ -12,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-neutral-950 text-neutral-100 antialiased">
+    <html lang="en" className={`dark ${cinzel.variable}`}>
+      <body className="min-h-screen bg-neutral-950 text-neutral-100 antialiased font-sans">
         {children}
       </body>
     </html>

@@ -85,7 +85,7 @@ export function InternalLocationMap({
   if (ids.length === 0) {
     return (
       <div
-        className={`flex flex-col items-center justify-center rounded-lg border border-neutral-300 bg-neutral-50 p-6 text-neutral-600 ${className}`}
+        className={`flex flex-col items-center justify-center rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-6 text-neutral-400 ${className}`}
       >
         <p className="text-sm">No internal locations</p>
       </div>
@@ -94,9 +94,9 @@ export function InternalLocationMap({
 
   return (
     <div
-      className={`overflow-auto rounded-lg border border-neutral-300 bg-neutral-50 ${compact ? "p-2" : "p-4"} ${className}`}
+      className={`overflow-auto rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${compact ? "p-2" : "p-4"} ${className}`}
     >
-      <h4 className={`text-xs font-medium uppercase tracking-wider text-neutral-600 ${compact ? "mb-1" : "mb-3"}`}>
+      <h4 className={`font-heading text-xs font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "mb-1" : "mb-3"}`}>
         {regionName} — Internal Map
       </h4>
       <svg
@@ -181,7 +181,7 @@ export function InternalLocationMap({
           );
         })}
       </svg>
-      <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-neutral-600">
+      <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-neutral-400">
         <span className="flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-green-500" /> Current
         </span>
@@ -200,8 +200,8 @@ export function InternalLocationMap({
             onClick={() => onMarkVisited(selectedLocationId)}
             className={`ml-auto rounded border px-2 py-1 text-[10px] font-medium transition ${
               exploredLocationIds.includes(selectedLocationId)
-                ? "border-green-600 bg-green-100 text-green-800 hover:bg-green-200"
-                : "border-neutral-400 bg-neutral-200 text-neutral-800 hover:bg-neutral-300"
+                ? "border-green-600 bg-green-900/40 text-green-400 hover:bg-green-900/60"
+                : "border-neutral-500 bg-neutral-700 text-neutral-300 hover:bg-neutral-600"
             }`}
           >
             {exploredLocationIds.includes(selectedLocationId) ? "Visited ✓ (undo)" : "Mark as Visited"}
