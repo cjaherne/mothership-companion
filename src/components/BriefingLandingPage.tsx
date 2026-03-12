@@ -23,7 +23,7 @@ import { SamsaVIMap } from "./SamsaVIMap";
 import { InternalLocationMap } from "./InternalLocationMap";
 import { LocationDetailMap } from "./LocationDetailMap";
 import { NpcSelector } from "./NpcSelector";
-import { NpcVoicePanel } from "./NpcVoicePanel";
+import { NpcVoicePanelWithIntro } from "./NpcVoicePanelWithIntro";
 import {
   THE_METAMORPHOSIS_ID,
   GRETA_BASE_ENTRY_POIS,
@@ -280,14 +280,16 @@ export function BriefingLandingPage({
             className="min-h-0 flex-1"
           />
           {selectedNpcId && (
-            <NpcVoicePanel
+            <NpcVoicePanelWithIntro
               campaignId={campaignId}
               runId={runId}
-              activeNpcId={selectedNpcId}
-              onEnd={() => {
+              npcId={selectedNpcId}
+              onExit={() => {
                 setActiveNpc(runId, undefined);
+                setSelectedNpcId(null);
                 forceRefresh((x) => x + 1);
               }}
+              onUpdate={() => forceRefresh((x) => x + 1)}
             />
           )}
         </div>

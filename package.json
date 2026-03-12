@@ -1,6 +1,6 @@
 {
   "name": "mothership-companion",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,13 +15,13 @@
     "agent:download-files": "tsx agent/main.ts download-files"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.0.0",
+    "@ai-sdk/openai": "^2.0.0",
     "@livekit/agents": "^1.0.0",
     "@livekit/agents-plugin-livekit": "^1.0.48",
     "@livekit/agents-plugin-openai": "^1.0.48",
     "@livekit/agents-plugin-silero": "^1.0.48",
     "@livekit/components-react": "^2.0.0",
-    "ai": "^4.0.0",
+    "ai": "^5.0.0",
     "dotenv": "^17.3.1",
     "livekit-client": "^2.0.0",
     "livekit-server-sdk": "^2.0.0",

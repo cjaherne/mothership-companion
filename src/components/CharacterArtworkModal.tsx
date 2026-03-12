@@ -178,7 +178,28 @@ export function CharacterArtworkModal({
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => onAccept(imageUrl)}
+                onClick={async () => {
+                  // Convert Replicate URL to base64 so it persists (Replicate URLs expire)
+                  if (imageUrl.startsWith("data:")) {
+                    onAccept(imageUrl);
+                    return;
+                  }
+                  try {
+                    const res = await fetch("/api/character-art/embed", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ url: imageUrl }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.dataUrl) {
+                      onAccept(data.dataUrl);
+                    } else {
+                      onAccept(imageUrl);
+                    }
+                  } catch {
+                    onAccept(imageUrl);
+                  }
+                }}
                 className="rounded border border-amber-500/50 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/20"
               >
                 Accept

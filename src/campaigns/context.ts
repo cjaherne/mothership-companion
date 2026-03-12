@@ -282,3 +282,166 @@ export function getCampaignContextForAgent(
 
   return parts.join("\n");
 }
+
+export type AgentType = "warden" | "npc";
+
+/**
+ * Get context string for the Warden (game helper).
+ * Only includes facts the player has already discovered; never reveals new information.
+ */
+export function getWardenContext(
+  campaignId: CampaignId,
+  runState: RunState | null
+): string {
+  const campaign = getCampaign(campaignId);
+  const playerKnowledge = runState?.playerKnowledgeFactIds ?? [];
+  const explored = runState?.exploredLocationIds ?? [];
+  const interacted = runState?.interactedNpcIds ?? [];
+  const currentLocId =
+    runState?.currentLocationId ?? campaign.world.defaultLocationId;
+  const currentLoc = campaign.world.locations.find((l) => l.id === currentLocId);
+
+  const parts: string[] = [];
+  parts.push("## Role: Warden (Game Helper)");
+  parts.push(
+    "You are the Warden—the AI assistant for this Mothership RPG session. Sci-fi dark horror setting."
+  );
+  parts.push(
+    "Your persona: grim, atmospheric, subtly foreboding. You assist players by summarizing what they know."
+  );
+  parts.push("");
+  parts.push("## CRITICAL — What you may reference");
+  parts.push("- ONLY the facts, locations, and NPCs listed below. NEVER reveal plot points or information they haven't discovered.");
+  parts.push(`- CURRENT LOCATION: ${currentLoc?.name ?? currentLocId}`);
+  parts.push("- You MUST get the player's location correct.");
+  parts.push("");
+
+  const locNames = campaign.world.locations
+    .filter((l) => explored.includes(l.id))
+    .map((l) => l.name)
+    .join(", ");
+  parts.push(`Explored locations: ${locNames || "none yet"}`);
+  parts.push(`NPCs interacted with: ${interacted.length ? interacted.join(", ") : "none yet"}`);
+
+  if (playerKnowledge.length > 0) {
+    const factTexts = playerKnowledge
+      .map((fid) => getFact(fid)?.text)
+      .filter(Boolean);
+    parts.push(`Facts they have learned: ${factTexts.join(" | ")}`);
+  } else {
+    parts.push("Facts they have learned: none yet");
+  }
+
+  const isPrologue = currentLocId === "the-metamorphosis";
+  if (isPrologue) {
+    parts.push("");
+    parts.push("## Prologue context (players on The Metamorphosis)");
+    parts.push("- Players have just woken from cryosleep. Maas awaits with briefing.");
+    parts.push("- They have NOT descended to the planet yet. Do NOT mention storm, landing, or surface.");
+  }
+
+  if (runState?.characters?.length) {
+    parts.push("");
+    parts.push("## Player characters");
+    runState.characters.forEach((c) => {
+      const label = c.playerName ? `${c.playerName} (${c.name})` : c.name;
+      parts.push(`- ${label}: ${c.traits.join(", ")}`);
+    });
+  }
+
+  parts.push("");
+  parts.push(
+    "CRITICAL: Do NOT reveal any fact, plot point, puzzle solution, or location detail not listed above. Keep responses concise for voice (2-4 sentences)."
+  );
+
+  return parts.join("\n");
+}
+
+/**
+ * Get context string for an NPC.
+ * Includes only facts that pass canRevealFact gating.
+ */
+export function getNpcContext(
+  campaignId: CampaignId,
+  npcId: string,
+  runState: RunState | null,
+  revealableFactIds: string[],
+  interactionIntent: "threaten" | "bribe" | "charm" | null
+): string {
+  const campaign = getCampaign(campaignId);
+  const npc = getNpcProfile(npcId);
+  if (!npc) return `Unknown NPC: ${npcId}`;
+
+  const playerKnowledge = runState?.playerKnowledgeFactIds ?? [];
+  const attrs = runState?.npcAttributeState?.[npcId] ?? npc.manipulatableAttributes ?? {
+    fear: 0.5,
+    stress: 0.5,
+    affability: 0.5,
+  };
+
+  const parts: string[] = [];
+  parts.push(`## Role: ${npc.name} (${npcId})`);
+  parts.push(`Archetype: ${npc.archetype}`);
+  parts.push(`Traits: ${npc.traits.join(", ")}`);
+  const fear = attrs.fear ?? 0.5;
+  const stress = attrs.stress ?? 0.5;
+  const affability = attrs.affability ?? 0.5;
+  parts.push(
+    `Current attitude: fear=${fear.toFixed(2)}, stress=${stress.toFixed(2)}, affability=${affability.toFixed(2)}`
+  );
+  parts.push(`Speech: ${npc.speechProfile.register}, ${npc.speechProfile.verbosity}`);
+
+  const manner = npc.speechProfile.responseManner;
+  if (manner) {
+    parts.push(
+      `Response manner: ${manner}. You must respond in a ${manner} way—stay in character.`
+    );
+  }
+
+  if (npc.speechProfile.verbalTics?.length) {
+    parts.push(`Verbal tics (use SPARINGLY, vary them—never start every response with the same one like "Look, the point is..."); choose at most one per response: ${npc.speechProfile.verbalTics.join(", ")}`);
+  }
+
+  // Irritation escalation: the more players talk to this NPC, the more abrupt they get
+  const interactionCount = runState?.npcVoiceInteractionCounts?.[npcId] ?? 0;
+  if (interactionCount >= 2) {
+    const level = interactionCount >= 5 ? "very irritated" : interactionCount >= 3 ? "irritated" : "getting impatient";
+    parts.push(`VOICE INTERACTION COUNT: ${interactionCount}. You are ${level}. Become more abrupt, shorter answers, less willing to elaborate. Do not repeat yourself.`);
+  }
+
+  parts.push("");
+  parts.push("## What you know and may reveal");
+  parts.push(`Knowledge scope: ${npc.knowledgeScope.join("; ")}`);
+
+  if (revealableFactIds.length > 0) {
+    const factTexts = revealableFactIds
+      .map((fid) => getFact(fid)?.text)
+      .filter(Boolean);
+    parts.push(`Facts you may reveal now: ${factTexts.join(" | ")}`);
+  } else {
+    parts.push("Facts you may reveal now: none (player hasn't met conditions or you've already told them)");
+  }
+
+  parts.push("");
+  parts.push(`Already told player: ${playerKnowledge.filter((f) => npc.knownFactIds?.includes(f)).join(", ") || "none"}`);
+  parts.push(`Motivation: ${npc.motivationHooks.join("; ")}`);
+
+  if (interactionIntent) {
+    parts.push(`Current interaction intent detected: ${interactionIntent}`);
+  }
+
+  if (runState?.characters?.length) {
+    parts.push("");
+    parts.push("## Player characters present");
+    runState.characters.forEach((c) => {
+      parts.push(`- ${c.name}: ${c.traits.join(", ")}`);
+    });
+  }
+
+  parts.push("");
+  parts.push(
+    "Stay in character. Speak only as this NPC. No asterisks or stage directions. Keep responses concise for voice (2-4 sentences)."
+  );
+
+  return parts.join("\n");
+}

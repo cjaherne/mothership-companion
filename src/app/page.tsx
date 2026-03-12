@@ -7,7 +7,8 @@ import { ScenarioContextMenu } from "@/components/ScenarioContextMenu";
 import { BriefingLandingPage } from "@/components/BriefingLandingPage";
 import { CampaignRunOptions } from "@/components/CampaignRunOptions";
 import { RunSetupView } from "@/components/RunSetupView";
-import { VoiceSessionView } from "@/components/VoiceSessionView";
+import { ClickToTalkPanel } from "@/components/ClickToTalkPanel";
+import { RunStatePanel } from "@/components/RunStatePanel";
 import type { CampaignId } from "@/campaigns";
 import type { CampaignRun } from "@/lib/runs";
 
@@ -132,12 +133,28 @@ export default function Home() {
           }`}
         >
           {viewState === "session" && activeRun ? (
-            <VoiceSessionView
-              key={`session-${activeRun.runId}-${scenarioRefreshKey}`}
-              campaignId={activeRun.campaignId}
-              runId={activeRun.runId}
-              onExit={handleExitSession}
-            />
+            <div className="flex flex-col gap-6 p-8">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-neutral-100">
+                  Voice Session — Warden
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleExitSession}
+                  className="text-xs text-neutral-500 hover:text-red-400"
+                >
+                  Exit session
+                </button>
+              </div>
+              <ClickToTalkPanel
+                key={`session-${activeRun.runId}-${scenarioRefreshKey}`}
+                campaignId={activeRun.campaignId}
+                runId={activeRun.runId}
+                agentType="warden"
+                label="Talk to Warden"
+              />
+              <RunStatePanel runId={activeRun.runId} campaignId={activeRun.campaignId} />
+            </div>
           ) : viewState === "briefing" && activeRun ? (
             <div className="min-h-0 flex-1 flex flex-col">
             <BriefingLandingPage

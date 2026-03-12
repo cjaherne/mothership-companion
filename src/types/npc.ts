@@ -72,7 +72,15 @@ export interface NPCPersonalityProfile {
   /** Per-fact reveal overrides (minAffability, etc.); use campaign default thresholds if absent */
   factRevealConditions?: Record<
     string,
-    { minAffability?: number; minTrust?: number; requiredItemIds?: string[] }
+    {
+      minAffability?: number;
+      minTrust?: number;
+      requiredItemIds?: string[];
+      /** Player must know these fact IDs before this fact can be revealed */
+      requiredFactIds?: string[];
+      /** Player must use this interaction type (threaten, bribe, charm) to unlock */
+      requiredInteractionType?: "threaten" | "bribe" | "charm";
+    }
   >;
 
   /** Conditions under which this NPC will/won't help the player */
@@ -92,6 +100,9 @@ export interface NPCPersonalityProfile {
 
   /** Optional: message delivered before interaction (e.g. mission briefing). Agent speaks this first. */
   greetingMessage?: string;
+
+  /** Optional: exact text for TTS intro when player clicks "Talk to X". If set, plays before push-to-talk. */
+  introTtsText?: string;
 }
 
 /** Speech pattern configuration for consistent dialogue generation */
@@ -113,6 +124,16 @@ export interface SpeechProfile {
 
   /** Vocal quality hint (e.g. "tinny and annoying", "gravelly") for TTS/immersion */
   vocalQuality?: string;
+
+  /** Override response manner for prompt injection (rude, dismissive, etc.) */
+  responseManner?:
+    | "rude"
+    | "abrupt"
+    | "dismissive"
+    | "condescending"
+    | "neutral"
+    | "friendly"
+    | "paranoid";
 }
 
 /** Runtime instance of an NPC in a scene - extends profile with state */

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       messages: messages ?? [],
     });
 
-    return result.toDataStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (err) {
     console.error("AI orchestrate error:", err);
     return NextResponse.json(

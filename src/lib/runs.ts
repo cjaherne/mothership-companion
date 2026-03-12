@@ -195,7 +195,31 @@ function deepMergeRunState(
     interactedNpcIds: patch.interactedNpcIds ?? current.interactedNpcIds,
     playerKnowledgeFactIds:
       patch.playerKnowledgeFactIds ?? current.playerKnowledgeFactIds,
+    npcIntroPlayedIds: patch.npcIntroPlayedIds ?? current.npcIntroPlayedIds ?? [],
+    npcVoiceInteractionCounts: patch.npcVoiceInteractionCounts ?? current.npcVoiceInteractionCounts ?? {},
   };
+}
+
+/** Increment NPC voice interaction count (for irritation escalation) */
+export function incrementNpcVoiceInteraction(runId: string, npcId: string): void {
+  const state = getRunState(runId);
+  const counts = { ...(state.npcVoiceInteractionCounts ?? {}) };
+  counts[npcId] = (counts[npcId] ?? 0) + 1;
+  saveRunState(runId, { npcVoiceInteractionCounts: counts });
+}
+
+/** Mark an NPC's intro speech as played for this run */
+export function markNpcIntroPlayed(runId: string, npcId: string): void {
+  const state = getRunState(runId);
+  const ids = state.npcIntroPlayedIds ?? [];
+  if (ids.includes(npcId)) return;
+  saveRunState(runId, { npcIntroPlayedIds: [...ids, npcId] });
+}
+
+/** Check if an NPC's intro has been played for this run */
+export function hasNpcIntroPlayed(runId: string, npcId: string): boolean {
+  const state = getRunState(runId);
+  return (state.npcIntroPlayedIds ?? []).includes(npcId);
 }
 
 export function addCharacter(runId: string, character: Character): void {

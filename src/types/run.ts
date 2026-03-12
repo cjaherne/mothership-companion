@@ -44,6 +44,10 @@ export interface RunState {
   currentLocationId?: string;
   /** NPC the player is currently speaking to (for voice session) */
   activeNpcId?: string;
+  /** NPC IDs whose intro/briefing speech has been played this run */
+  npcIntroPlayedIds?: string[];
+  /** How many times the player has spoken to each NPC via push-to-talk this session */
+  npcVoiceInteractionCounts?: Record<string, number>;
   /** Turn or session count */
   turn?: number;
 }
