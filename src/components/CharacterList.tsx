@@ -7,15 +7,16 @@ import { CLASS_NAMES, SEX_LABELS, getLoadoutDisplayText } from "@/lib/mothership
 import { updateCharacter } from "@/lib/runs";
 import { StatBadge, ValueOverMaxBadge } from "./MothershipStatDisplay";
 import { SkillsTreeView } from "./SkillsTreeView";
+import { CharacterArtworkModal } from "./CharacterArtworkModal";
 
 type ModalTab = "character" | "skills";
 
 const AVATAR_SIZE = 72;
-const AVATAR_SIZE_COMPACT = 56;
+const AVATAR_SIZE_COMPACT = 40;
 const VISIBLE_ROWS = 4;
 const VISIBLE_ROWS_COMPACT = 4;
 const ROW_HEIGHT = 120;
-const ROW_HEIGHT_COMPACT = 112; // matches min-h-[112px] of character row button
+const ROW_HEIGHT_COMPACT = 65; // fit 4 rows at 1080p (~260px for list)
 
 interface CharacterListProps {
   characters: Character[];
@@ -73,12 +74,40 @@ function CharacterAvatar({ char, size = 32 }: { char: Character; size?: number }
   );
 }
 
-function CharacterStatsInline({ m }: { m: NonNullable<Character["mothership"]> }) {
+function CharacterStatsInline({ m, compact }: { m: NonNullable<Character["mothership"]>; compact?: boolean }) {
   const wounds = m.currentWounds ?? 0;
   const stressCur = m.stressCurrent ?? 0;
   const stressMax = m.stressMax ?? 10;
   const health = m.health ?? 0;
   const maxWounds = m.maxWounds ?? 2;
+
+  if (compact) {
+    return (
+      <div className="flex shrink-0 flex-nowrap gap-1 overflow-hidden">
+        <div className="rounded border border-neutral-600 bg-neutral-700/50 px-1 py-0.5">
+          <div className="flex gap-0.5">
+            <StatBadge label="STR" value={m.stats.strength} dark />
+            <StatBadge label="SPD" value={m.stats.speed} dark />
+            <StatBadge label="INT" value={m.stats.intellect} dark />
+            <StatBadge label="CBT" value={m.stats.combat} dark />
+          </div>
+        </div>
+        <div className="rounded border border-neutral-600 bg-neutral-700/50 px-1 py-0.5">
+          <div className="flex gap-0.5">
+            <StatBadge label="SAN" value={m.stats.sanity} dark />
+            <StatBadge label="FEAR" value={m.stats.fear} dark />
+            <StatBadge label="BOD" value={m.stats.body} dark />
+          </div>
+        </div>
+        <div className="flex items-center gap-2 rounded border border-neutral-600 bg-neutral-700/50 px-1.5 py-0.5">
+          <span className="text-[9px] text-neutral-400">HP</span>
+          <span className="text-xs font-medium text-white">{health}/{health}</span>
+          <span className="text-[9px] text-neutral-400">W</span>
+          <span className="text-xs font-medium text-white">{wounds}/{maxWounds}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex shrink-0 flex-wrap gap-1.5">
@@ -147,6 +176,7 @@ export function CharacterList({
 }: CharacterListProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [modalTab, setModalTab] = useState<ModalTab>("character");
+  const [showRegenerateArtwork, setShowRegenerateArtwork] = useState(false);
 
   const openCharacter = (char: Character) => {
     setSelectedCharacter(char);
@@ -156,16 +186,18 @@ export function CharacterList({
   const maxH = compact
     ? VISIBLE_ROWS_COMPACT * ROW_HEIGHT_COMPACT
     : VISIBLE_ROWS * ROW_HEIGHT;
+  const minH = compact ? maxH + 40 : undefined; // ensure 4 rows fit: list + header
 
   return (
     <div
       className={`flex flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${className}`}
+      style={minH ? { minHeight: minH } : undefined}
     >
-      <h4 className={`font-heading shrink-0 border-b border-neutral-600 text-lg font-semibold uppercase tracking-widest text-amber-200/90 ${compact ? "px-2 py-2" : "px-4 py-3"}`}>
+      <h4 className={`font-heading shrink-0 border-b border-neutral-600 font-semibold uppercase tracking-widest text-amber-200/90 ${compact ? "px-2 py-1 text-xs" : "px-4 py-3 text-lg"}`}>
         Players
       </h4>
       <ul
-        className="flex-1 overflow-y-auto p-1"
+        className="flex-1 overflow-y-auto p-1 min-h-0"
         style={{ maxHeight: characters.length > 0 ? maxH : undefined }}
       >
         {characters.length === 0 ? (
@@ -178,13 +210,13 @@ export function CharacterList({
               <button
                 type="button"
                 onClick={() => openCharacter(char)}
-                className={`flex min-h-[112px] w-full items-center gap-4 rounded text-left transition hover:bg-neutral-700/50 ${
-                  compact ? "px-2 py-2" : "px-3 py-3"
+                className={`flex h-[65px] min-h-0 w-full shrink-0 items-center gap-2 rounded text-left transition hover:bg-neutral-700/50 ${
+                  compact ? "px-2 py-1" : "px-3 py-3"
                 }`}
               >
                 <CharacterAvatar char={char} size={avatarSize} />
                 <div className="min-w-0 flex-1 overflow-hidden">
-                  <div className="truncate text-xl font-semibold text-neutral-100">{char.name}</div>
+                  <div className={`truncate font-semibold text-neutral-100 ${compact ? "text-base" : "text-xl"}`}>{char.name}</div>
                   {char.mothership && (
                     <div className="truncate text-xs font-medium uppercase text-neutral-400">
                       {CLASS_NAMES[char.mothership.class]}
@@ -195,7 +227,7 @@ export function CharacterList({
                   )}
                 </div>
                 {char.mothership && (
-                  <CharacterStatsInline m={char.mothership} />
+                  <CharacterStatsInline m={char.mothership} compact={compact} />
                 )}
               </button>
             </li>
@@ -203,7 +235,22 @@ export function CharacterList({
         )}
       </ul>
 
-      {selectedCharacter && (
+      {showRegenerateArtwork && selectedCharacter && runId && (
+        <CharacterArtworkModal
+          character={selectedCharacter}
+          runId={runId}
+          onAccept={(avatarPath) => {
+            updateCharacter(runId, selectedCharacter.id, { avatarPath });
+            setSelectedCharacter({ ...selectedCharacter, avatarPath });
+            setShowRegenerateArtwork(false);
+            onCharacterUpdate?.();
+          }}
+          onSkip={() => setShowRegenerateArtwork(false)}
+          onClose={() => setShowRegenerateArtwork(false)}
+        />
+      )}
+
+      {selectedCharacter && !showRegenerateArtwork && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           role="dialog"
@@ -300,7 +347,18 @@ export function CharacterList({
                 <>
                   <div className="flex gap-6">
                     <div className="w-1/3 shrink-0">
-                      <CharacterAvatar char={selectedCharacter} size={320} />
+                      <div className="relative">
+                        <CharacterAvatar char={selectedCharacter} size={320} />
+                        {runId && (
+                          <button
+                            type="button"
+                            onClick={() => setShowRegenerateArtwork(true)}
+                            className="mt-2 text-sm text-amber-400 hover:text-amber-300"
+                          >
+                            Regenerate artwork
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="min-w-0 flex-1 grid grid-cols-2 gap-4">
                       <div className="rounded border border-neutral-600 bg-neutral-800/50 p-4">
