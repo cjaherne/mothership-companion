@@ -213,19 +213,19 @@ export function AddCharacterForm({
   const classInfo = CLASS_INFO[cls];
 
   return (
-    <div className="space-y-6 text-neutral-100">
+    <div className="min-w-0 space-y-6 text-neutral-100">
       <h4 className="font-heading text-xl font-semibold tracking-wide text-white">Add character</h4>
 
       {/* Class panel (left) and Character panel (right) */}
-      <div className="grid gap-6 sm:grid-cols-[1fr_1fr]">
+      <div className="grid gap-4 sm:gap-6 sm:grid-cols-[1fr_1fr]">
         {/* Class panel */}
-        <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+        <div className="min-w-0 rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-3 sm:p-4">
           <h5 className="font-heading mb-4 border-b border-neutral-600 pb-3 text-lg font-semibold uppercase tracking-widest text-amber-200/90">
             Class
           </h5>
-          <div className="flex items-start gap-6">
-            <div className="shrink-0 self-start">
-              <div className="aspect-square w-[640px] max-w-full overflow-hidden rounded border-2 border-neutral-500 bg-neutral-700">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-6">
+            <div className="shrink-0 self-center sm:self-start">
+              <div className="aspect-square w-28 overflow-hidden rounded border-2 border-neutral-500 bg-neutral-700 sm:w-36 md:w-40 lg:w-44">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getClassReferenceImagePath(cls, sex)}
@@ -341,7 +341,7 @@ export function AddCharacterForm({
         </div>
 
         {/* Character panel */}
-        <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+        <div className="min-w-0 rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-3 sm:p-4">
           <h5 className="font-heading mb-4 border-b border-neutral-600 pb-3 text-lg font-semibold uppercase tracking-widest text-amber-200/90">
             Character
           </h5>
@@ -451,10 +451,10 @@ export function AddCharacterForm({
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
                   <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Stats</h6>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {(["strength", "speed", "intellect", "combat"] as const).map((key) => (
                       <StatBadgeWithRoll
                         key={key}
@@ -467,13 +467,14 @@ export function AddCharacterForm({
                         }
                         onRoll={() => handleRollStat(key)}
                         dark
+                        large={false}
                       />
               ))}
             </div>
           </div>
-                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
                   <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Saves</h6>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {(["sanity", "fear", "body"] as const).map((key) => (
                       <StatBadgeWithRoll
                         key={key}
@@ -486,26 +487,28 @@ export function AddCharacterForm({
                         }
                         onRoll={() => handleRollStat(key)}
                         dark
+                        large={false}
                       />
                     ))}
                   </div>
                 </div>
-                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
                   <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Health</h6>
-                  <div className="flex flex-wrap gap-3">
-                    <HealthBadgeWithRoll value={health} onRoll={handleRollHealth} dark />
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
+                    <HealthBadgeWithRoll value={health} onRoll={handleRollHealth} dark large={false} />
                     <ValueOverMaxBadge
                       current={0}
                       max={cls === "marine" || cls === "android" ? 3 : 2}
                       label="Wounds"
                       dark
+                      large={false}
                     />
                   </div>
                 </div>
-                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+                <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
                   <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Gain</h6>
                   <div className="flex flex-col">
-                    <ValueOverMaxBadge current={2} max={2} label="Stress" secondLabel="Min" dark />
+                    <ValueOverMaxBadge current={2} max={2} label="Stress" secondLabel="Min" dark large={false} />
                   </div>
                 </div>
               </div>
@@ -515,7 +518,7 @@ export function AddCharacterForm({
       </div>
 
       {/* Inventory */}
-      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-3 sm:p-4">
         <div className="mb-4 flex items-center justify-between border-b border-neutral-600 pb-3">
           <h5 className="font-heading text-lg font-semibold uppercase tracking-widest text-amber-200/90">
             Inventory
@@ -529,26 +532,26 @@ export function AddCharacterForm({
           </button>
         </div>
         {loadoutTrinketPatchCredits && (
-          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
               <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Loadout</h6>
               <p className="text-sm text-neutral-200">
                 {getLoadoutDisplayText(loadoutTrinketPatchCredits.loadoutId)}
               </p>
             </div>
-            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
               <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Trinket</h6>
               <p className="text-sm text-neutral-200">
                 {loadoutTrinketPatchCredits.trinket}
               </p>
             </div>
-            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
               <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Patch</h6>
               <p className="text-sm text-neutral-200">
                 {loadoutTrinketPatchCredits.patch}
               </p>
             </div>
-            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-3">
+            <div className="rounded border border-neutral-600 bg-neutral-700/50 p-2 sm:p-3">
               <h6 className="font-heading mb-1.5 text-xs font-semibold uppercase text-neutral-300">Credits</h6>
               <div className="flex flex-wrap gap-2 pt-1">
                 <StatBadge
@@ -564,7 +567,7 @@ export function AddCharacterForm({
       </div>
 
       {/* Skills */}
-      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-3 sm:p-4">
         <h5 className="font-heading mb-4 border-b border-neutral-600 pb-3 text-lg font-semibold uppercase tracking-widest text-amber-200/90">
           Skills
         </h5>

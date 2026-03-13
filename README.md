@@ -9,7 +9,7 @@ A voice-interactive Warden companion for **Mothership** RPG scenarios. Create ch
 - **Briefing & maps** — Read scenario background, explore the Samsa VI planet map, drill into regions (Greta Base, Heron Station, etc.), and view location details with points of interest.
 - **NPC interaction** — See NPCs in each location. Connect to the Warden or any NPC for real-time voice chat via click-to-talk (OpenAI STT, LLM, TTS).
 - **Rule references** — Open the Player's Survival Guide and Shipbreaker's Toolkit PDFs from the sidebar.
-- **Mobile responsive** — Sidebar becomes a drawer on small screens; hamburger menu, touch-friendly buttons, responsive padding.
+- **Mobile responsive** — Sidebar becomes a drawer on small screens; hamburger menu, touch-friendly buttons, responsive padding. Character creation (class image, stats grid, skills matrix) scaled for mobile.
 
 ## Tech Stack
 
