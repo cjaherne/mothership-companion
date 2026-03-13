@@ -97,7 +97,7 @@ export function RunSetupView({
         />
       ) : null}
 
-      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-6">
+      <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4 sm:p-6">
         <AddCharacterForm
           runId={run.id}
           onSubmit={handleFormSubmit}

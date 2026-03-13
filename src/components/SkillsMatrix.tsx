@@ -272,25 +272,25 @@ export function SkillsMatrix({
 
     return (
       <div
-        className={`flex flex-col rounded-lg border-2 p-4 ${
+        className={`flex flex-col rounded-lg border-2 p-3 sm:p-4 ${
           dark ? "border-neutral-600 bg-neutral-800/40" : "border-neutral-400 bg-neutral-100/80"
         }`}
       >
         <h6
-          className={`mb-3 text-base font-bold uppercase tracking-wide ${
+          className={`mb-3 text-sm sm:text-base font-bold uppercase tracking-wide ${
             dark ? "text-amber-200/90" : "text-amber-800"
           }`}
         >
           {TIER_LABELS[tier]}
         </h6>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             {skills.map((s) => (
               <SkillCell key={s.id} skill={s} />
             ))}
           </div>
           <div
-            className={`w-48 shrink-0 rounded border p-3 ${
+            className={`w-full shrink-0 rounded border p-3 sm:w-48 ${
               dark ? "border-neutral-600 bg-neutral-900/60" : "border-neutral-300 bg-neutral-50"
             }`}
           >
@@ -335,7 +335,7 @@ export function SkillsMatrix({
 
   return (
     <div
-      className={`rounded-lg border-2 p-4 ${
+      className={`min-w-0 rounded-lg border-2 p-3 sm:p-4 ${
         dark
           ? "border-neutral-600 bg-neutral-800/30"
           : "border-neutral-300 bg-white"
@@ -348,7 +348,7 @@ export function SkillsMatrix({
       >
         {CLASS_INFO[cls].bonusRules}
       </p>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Column tier="trained" skills={trained} />
         <Column tier="expert" skills={expert} />
         <Column tier="master" skills={master} />
