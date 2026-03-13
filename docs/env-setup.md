@@ -13,10 +13,16 @@
    cp .env.example .env.local
    ```
 
-2. Edit `.env.local` and add your keys:
+2. Generate admin auth credentials (for login when running locally or hosted):
+   ```bash
+   npm run generate-admin-credentials
+   ```
+   This adds `ADMIN_PASSWORD` and `SESSION_SECRET` to `.env.local` and prints the password. Save it for login (username: `admin`).
+
+3. Edit `.env.local` and add your keys:
    - `OPENAI_API_KEY` – OpenAI API key (for AI SDK, TTS, and Whisper STT)
 
-3. Restart the dev server after changing env vars.
+4. Restart the dev server after changing env vars.
 
 ## If You Accidentally Commit Secrets
 

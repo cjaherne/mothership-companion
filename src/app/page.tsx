@@ -107,9 +107,21 @@ export default function Home() {
               <span className="text-neon-pink">SHIP</span>
               <span className="text-white"> COMPANION</span>
             </button>
-            <p className="mt-1 text-sm text-neutral-400">
-              Voice-interactive Warden for Mothership RPG scenarios
-            </p>
+            <div className="mt-1 flex items-center justify-between">
+              <p className="text-sm text-neutral-400">
+                Voice-interactive Warden for Mothership RPG scenarios
+              </p>
+              <button
+                type="button"
+                onClick={async () => {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  window.location.href = "/login";
+                }}
+                className="text-xs text-neutral-500 hover:text-neutral-300"
+              >
+                Sign out
+              </button>
+            </div>
           </div>
         </header>
 

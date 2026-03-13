@@ -1,6 +1,6 @@
 {
   "name": "mothership-companion",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,8 @@
     "test:agent": "jest --testPathPatterns=__tests__/agent",
     "start": "next start",
     "lint": "next lint",
-    "pregenerate-tts": "tsx scripts/preGenerateTts.ts"
+    "pregenerate-tts": "tsx scripts/preGenerateTts.ts",
+    "generate-admin-credentials": "tsx scripts/generateAdminCredentials.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.0",

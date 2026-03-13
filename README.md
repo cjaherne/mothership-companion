@@ -32,6 +32,7 @@ npm install
 
 ```bash
 cp .env.example .env.local
+npm run generate-admin-credentials   # Adds ADMIN_PASSWORD, SESSION_SECRET for login
 ```
 
 Edit `.env.local` and set:
@@ -51,7 +52,7 @@ npm run dev
 
 ### 4. Open the app
 
-Go to [http://localhost:3000](http://localhost:3000).
+Go to [http://localhost:3000](http://localhost:3000). Sign in with username `admin` and the password printed by `generate-admin-credentials`.
 
 ## How to Use
 
@@ -99,6 +100,7 @@ mothership-companion/
 │   │   │   ├── ai/orchestrate/   # AI SDK NPC/puzzle logic
 │   │   │   ├── character-art/    # Replicate artwork generation
 │   │   │   ├── voice/talk/       # Click-to-talk (STT → LLM → TTS)
+│   │   │   ├── auth/login, logout # Admin login
 │   │   │   ├── run/state/        # Run state persistence
 │   │   │   └── tts/              # Briefing TTS
 │   │   ├── layout.tsx
@@ -141,12 +143,14 @@ mothership-companion/
 | `npm run build` | Production build |
 | `npm run start` | Run production server |
 | `npm run pregenerate-tts` | Pre-generate static TTS (NPC intros, briefing pages, location backgrounds) |
+| `npm run generate-admin-credentials` | Generate ADMIN_PASSWORD and SESSION_SECRET for local or hosted auth |
 | `npm test` | Run tests |
 
 ## Documentation
 
 - [Environment setup](docs/env-setup.md) — Env vars and security
 - [OpenAI API key](docs/openai-api-key.md) — Getting an API key
+- [AWS deployment](docs/aws-deployment.md) — Host on Amplify with WAF and GitHub auto-deploy
 
 ## License
 
