@@ -38,7 +38,7 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-950 px-4">
-      <div className="w-full max-w-sm space-y-8 rounded-lg border border-neutral-700 bg-neutral-900/80 p-8 shadow-xl">
+      <div className="w-full max-w-sm space-y-8 rounded-lg border border-neutral-700 bg-neutral-900/80 p-6 shadow-xl sm:p-8">
         <div className="text-center">
           <h1 className="font-heading text-2xl font-bold tracking-tight text-white">
             <span className="text-white">MOTHER</span>

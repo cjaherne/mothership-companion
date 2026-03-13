@@ -56,7 +56,7 @@ export function ScenarioContextMenu({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 border-b border-neutral-800 bg-neutral-900/50 px-8 py-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-neutral-800 bg-neutral-900/50 px-4 py-2 sm:px-6 sm:py-3 lg:px-8">
         <span className="text-sm font-medium text-neutral-300">
           {campaign.name}
           {scenario && ` — ${scenario.name}`}
@@ -66,7 +66,7 @@ export function ScenarioContextMenu({
             <button
               type="button"
               onClick={onBack}
-              className="rounded border border-neutral-600 px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+              className="min-h-[44px] min-w-[44px] rounded border border-neutral-600 px-3 py-2 text-xs text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200 sm:py-1.5"
             >
               ← Back
             </button>
@@ -74,7 +74,7 @@ export function ScenarioContextMenu({
           <button
             type="button"
             onClick={() => setShowAddCharacter(true)}
-            className="rounded border border-neon-pink/50 px-3 py-1.5 text-xs font-medium text-neon-pink hover:bg-neon-pink/10"
+            className="min-h-[44px] min-w-[44px] rounded border border-neon-pink/50 px-3 py-2 text-xs font-medium text-neon-pink hover:bg-neon-pink/10 sm:py-1.5"
           >
             New Character
           </button>
@@ -82,7 +82,7 @@ export function ScenarioContextMenu({
             <button
               type="button"
               onClick={handleDepartForSamsa}
-              className="rounded border border-neon-pink/50 bg-neon-pink/5 px-3 py-1.5 text-xs font-medium text-neon-pink hover:bg-neon-pink/10"
+              className="min-h-[44px] min-w-[44px] rounded border border-neon-pink/50 bg-neon-pink/5 px-3 py-2 text-xs font-medium text-neon-pink hover:bg-neon-pink/10 sm:py-1.5"
             >
               Depart for Samsa VI
             </button>
@@ -90,7 +90,7 @@ export function ScenarioContextMenu({
           <button
             type="button"
             onClick={handleTalkToWarden}
-            className="rounded border border-neutral-600 bg-neutral-800/50 px-3 py-1.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="min-h-[44px] min-w-[44px] rounded border border-neutral-600 bg-neutral-800/50 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white sm:py-1.5"
           >
             Talk to Warden
           </button>

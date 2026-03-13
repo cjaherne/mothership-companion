@@ -1,4 +1,14 @@
 import "@testing-library/jest-dom";
+import { matchMediaMock } from "./src/__tests__/utils/matchMediaMock";
+
+// matchMedia mock for responsive tests; default to desktop
+beforeAll(() => {
+  matchMediaMock.useMediaQuery("(min-width: 1024px)");
+});
+afterEach(() => {
+  matchMediaMock.clear();
+  matchMediaMock.useMediaQuery("(min-width: 1024px)");
+});
 
 // Mock fetch for syncRunStateToApi (used by createRun)
 global.fetch = jest.fn(() => Promise.resolve({ ok: true } as Response));

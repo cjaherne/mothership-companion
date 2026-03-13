@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { PdfViewerOverlay } from "@/components/PdfViewerOverlay";
 import { ScenarioContextMenu } from "@/components/ScenarioContextMenu";
 import { BriefingLandingPage } from "@/components/BriefingLandingPage";
@@ -64,6 +65,9 @@ export default function Home() {
     setViewState("home");
   };
 
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-950 text-neutral-100 scanlines">
       <Sidebar
@@ -72,8 +76,14 @@ export default function Home() {
           setSelectedCampaignId(id);
           setViewState(id ? "campaign" : "home");
           if (!id) setActiveRun(null);
+          if (!isDesktop) setSidebarOpen(false);
         }}
-        onOpenPdf={(src, title) => setPdfOverlay({ src, title })}
+        onOpenPdf={(src, title) => {
+          setPdfOverlay({ src, title });
+          if (!isDesktop) setSidebarOpen(false);
+        }}
+        isOpen={isDesktop || sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {pdfOverlay && (
@@ -89,7 +99,7 @@ export default function Home() {
           viewState === "briefing" ? "overflow-hidden min-h-0" : "overflow-y-auto"
         }`}
       >
-        <header className="relative shrink-0 overflow-x-hidden border-b border-neutral-800 bg-black px-8 py-6">
+        <header className="relative shrink-0 overflow-x-hidden border-b border-neutral-800 bg-black px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
           <div
             className="absolute inset-y-0 left-1/3 right-0 bg-cover bg-center bg-no-repeat opacity-20 overflow-hidden"
             style={{
@@ -97,18 +107,32 @@ export default function Home() {
             }}
             aria-hidden
           />
-          <div className="relative z-10 py-0.5">
-            <button
-              type="button"
-              onClick={goHome}
-              className="text-left text-2xl font-bold leading-tight tracking-tight transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
-            >
-              <span className="text-white">MOTHER</span>
-              <span className="text-neon-pink">SHIP</span>
-              <span className="text-white"> COMPANION</span>
-            </button>
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-sm text-neutral-400">
+          <div className="relative z-10 flex items-start justify-between gap-3 py-0.5">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              {!isDesktop && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(true)}
+                  className="shrink-0 rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                  aria-label="Open menu"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={goHome}
+                className="text-left text-xl font-bold leading-tight tracking-tight transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black sm:text-2xl"
+              >
+                <span className="text-white">MOTHER</span>
+                <span className="text-neon-pink">SHIP</span>
+                <span className="text-white"> COMPANION</span>
+              </button>
+            </div>
+            <div className="mt-1 flex shrink-0 items-center gap-2">
+              <p className="hidden text-sm text-neutral-400 sm:block">
                 Voice-interactive Warden for Mothership RPG scenarios
               </p>
               <button
@@ -117,7 +141,7 @@ export default function Home() {
                   await fetch("/api/auth/logout", { method: "POST" });
                   window.location.href = "/login";
                 }}
-                className="text-xs text-neutral-500 hover:text-neutral-300"
+                className="rounded p-1.5 text-xs text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300 sm:p-0"
               >
                 Sign out
               </button>
@@ -140,12 +164,12 @@ export default function Home() {
         )}
 
         <div
-          className={`flex-1 p-8 bg-black text-white ${
-            viewState === "briefing" ? "min-h-0 overflow-hidden flex flex-col" : ""
+          className={`flex-1 bg-black p-4 text-white sm:p-6 lg:p-8 ${
+            viewState === "briefing" ? "flex min-h-0 flex-col overflow-hidden" : ""
           }`}
         >
           {viewState === "session" && activeRun ? (
-            <div className="flex flex-col gap-6 p-8">
+            <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-neutral-100">
                   Voice Session — Warden

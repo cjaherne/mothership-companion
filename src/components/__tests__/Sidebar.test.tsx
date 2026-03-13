@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Sidebar } from "../Sidebar";
+import { setViewport } from "@/__tests__/utils/responsive";
 
 describe("Sidebar", () => {
   it("renders campaign list (excludes Warden, which is a meta-NPC type)", () => {
@@ -19,7 +20,7 @@ describe("Sidebar", () => {
       />
     );
     const btn = screen.getByRole("button", { name: "Another Bug Hunt" });
-    expect(btn.className).toContain("ring-amber");
+    expect(btn.className).toContain("bg-neutral-800");
   });
 
   it("calls onSelectCampaign when campaign clicked", () => {
@@ -41,5 +42,45 @@ describe("Sidebar", () => {
     );
     fireEvent.click(screen.getByText("Clear selection"));
     expect(onSelect).toHaveBeenCalledWith(null);
+  });
+
+  describe("responsive", () => {
+    it("desktop: sidebar always visible", () => {
+      setViewport("desktop");
+      render(
+        <Sidebar selectedCampaignId={null} onSelectCampaign={() => {}} isOpen={false} onClose={() => {}} />
+      );
+      expect(screen.getByText("Campaigns")).toBeInTheDocument();
+    });
+
+    it("mobile: calls onClose when backdrop clicked", () => {
+      setViewport("mobile");
+      const onClose = jest.fn();
+      render(
+        <Sidebar
+          selectedCampaignId={null}
+          onSelectCampaign={() => {}}
+          isOpen={true}
+          onClose={onClose}
+        />
+      );
+      const backdrop = screen.getByLabelText("Close menu");
+      fireEvent.click(backdrop);
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it("mobile: sidebar content visible when isOpen", () => {
+      setViewport("mobile");
+      render(
+        <Sidebar
+          selectedCampaignId={null}
+          onSelectCampaign={() => {}}
+          isOpen={true}
+          onClose={() => {}}
+        />
+      );
+      expect(screen.getByText("Campaigns")).toBeInTheDocument();
+      expect(screen.getByText("Another Bug Hunt")).toBeInTheDocument();
+    });
   });
 });

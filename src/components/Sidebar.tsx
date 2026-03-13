@@ -2,6 +2,7 @@
 
 import { listCampaignIds, getCampaign } from "@/campaigns";
 import type { CampaignId } from "@/campaigns";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export const PDF_DOCS = [
   { src: "/Player-Survival-Guide-v1.2.pdf", title: "Player's Survival Guide" },
@@ -12,13 +13,53 @@ interface SidebarProps {
   selectedCampaignId: CampaignId | null;
   onSelectCampaign: (id: CampaignId | null) => void;
   onOpenPdf?: (src: string, title: string) => void;
+  /** Mobile drawer: when true on mobile, sidebar is open; onClose for backdrop/close */
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function Sidebar({ selectedCampaignId, onSelectCampaign, onOpenPdf }: SidebarProps) {
+export function Sidebar({
+  selectedCampaignId,
+  onSelectCampaign,
+  onOpenPdf,
+  isOpen = true,
+  onClose,
+}: SidebarProps) {
   const campaignIds = listCampaignIds().filter((id) => id !== "warden");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const showAsOverlay = !isDesktop;
+  const visible = isDesktop || isOpen;
 
   return (
-    <aside className="flex h-full w-56 flex-col border-r border-neutral-800 bg-black">
+    <>
+      {showAsOverlay && visible && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          aria-label="Close menu"
+        />
+      )}
+      <aside
+        className={`flex h-full w-56 shrink-0 flex-col border-r border-neutral-800 bg-black transition-transform duration-200 ease-out ${
+          showAsOverlay
+            ? `fixed inset-y-0 left-0 z-50 ${isOpen ? "translate-x-0" : "-translate-x-full"}`
+            : "relative"
+        }`}
+        aria-hidden={showAsOverlay && !isOpen}
+      >
+        {showAsOverlay && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-3 top-4 rounded p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white lg:hidden"
+            aria-label="Close sidebar"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       <div className="border-b border-neutral-800 p-4">
         <h2 className="text-xs font-medium uppercase tracking-widest text-neutral-400">
           Campaigns
@@ -67,5 +108,6 @@ export function Sidebar({ selectedCampaignId, onSelectCampaign, onOpenPdf }: Sid
         </button>
       </div>
     </aside>
+    </>
   );
 }
