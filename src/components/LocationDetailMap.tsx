@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import type { Location } from "@/campaigns/types";
 import { hasRequiredItems } from "@/lib/inventory-utils";
+import { WordPuzzleModal } from "./WordPuzzleModal";
 import type { Character } from "@/types/run";
 
 interface LocationDetailMapProps {
@@ -20,12 +22,31 @@ interface LocationDetailMapProps {
   onMarkVisited?: (locationId: string) => void;
   /** Callback when user inspects a point of interest */
   onMarkPoiExplored?: (poiId: string) => void;
-  /** Config for exterior→interior entry (e.g. Greta Base). Keys: exterior location ID. */
-  entryConfig?: Record<string, { poiId: string; targetLocationId: string }>;
+  /** Callback when a puzzle is solved */
+  onPuzzleSolved?: (puzzleId: string) => void;
+  /** Get word puzzle config for a puzzle ID (clue + solution) */
+  getPuzzleConfig?: (puzzleId: string) => { clue: string; solution: string } | null;
+  /** Puzzle IDs the party has solved */
+  solvedPuzzleIds?: string[];
+  /** Config for entry to connected rooms. Keys: current location ID. Values can include per-entry lock. */
+  entryConfig?: Record<
+    string,
+    {
+      poiId: string;
+      targetLocationId: string;
+      requiredItemIds?: string[];
+      unlockOverridePuzzleIds?: string[];
+      lockNote?: string;
+    }
+  >;
   /** Callback when user enters an interior room from an exterior entry point */
   onEnterInterior?: (targetLocationId: string) => void;
   /** Resolve item ID to display name (for POI itemIds) */
   getItemName?: (itemId: string) => string;
+  /** Items taken from POIs: poiId -> { itemId -> characterId } */
+  takenPoiItems?: Record<string, Record<string, string>>;
+  /** Callback when a character takes an item from a POI */
+  onTakeItem?: (poiId: string, itemId: string, characterId: string) => void;
   className?: string;
 }
 
@@ -35,15 +56,22 @@ export function LocationDetailMap({
   exploredLocationIds = [],
   currentLocationId,
   exploredPoiIds = [],
+  solvedPuzzleIds = [],
   characters = [],
   onLocationClick,
   onMarkVisited,
   onMarkPoiExplored,
+  onPuzzleSolved,
+  getPuzzleConfig,
   entryConfig,
   onEnterInterior,
   getItemName,
+  takenPoiItems = {},
+  onTakeItem,
   className = "",
 }: LocationDetailMapProps) {
+  const [puzzleModalPuzzleId, setPuzzleModalPuzzleId] = useState<string | null>(null);
+  const [pendingTake, setPendingTake] = useState<{ poiId: string; itemId: string } | null>(null);
   const locMap = new Map(allLocations.map((l) => [l.id, l]));
   if (!location) {
     return (
@@ -91,8 +119,13 @@ export function LocationDetailMap({
           if (!hasInspected) return null;
           const targetLoc = locMap.get(entry.targetLocationId);
           const targetName = targetLoc?.name ?? entry.targetLocationId;
-          const requiredIds = targetLoc?.requiredItemIds ?? [];
-          const canEnter = hasRequiredItems(characters, requiredIds);
+          const requiredIds = entry.requiredItemIds ?? targetLoc?.requiredItemIds ?? [];
+          const overridePuzzleIds =
+            entry.unlockOverridePuzzleIds ?? targetLoc?.unlockOverridePuzzleIds ?? [];
+          const hasOverride = overridePuzzleIds.some((id) => solvedPuzzleIds.includes(id));
+          const canEnter =
+            requiredIds.length === 0 || hasRequiredItems(characters, requiredIds) || hasOverride;
+          const lockNote = entry.lockNote ?? targetLoc?.lockNote ?? "requires keycard";
           return (
             <div className="mb-4">
               {canEnter ? (
@@ -105,7 +138,7 @@ export function LocationDetailMap({
                 </button>
               ) : (
                 <p className="rounded border border-amber-600/50 bg-amber-950/40 px-3 py-2 text-sm text-amber-300">
-                  Locked — {targetLoc?.lockNote ?? "requires keycard"}
+                  Locked — {lockNote}
                 </p>
               )}
             </div>
@@ -117,8 +150,22 @@ export function LocationDetailMap({
           <p className="text-[10px] font-medium uppercase text-neutral-600">
             Points of interest
           </p>
-          <ul className="space-y-1.5">
-            {pois.map((poi) => {
+          {(() => {
+            const visiblePois = pois.filter(
+              (poi) =>
+                !poi.requiredPoiIds?.length ||
+                poi.requiredPoiIds.every((id) => exploredPoiIds.includes(id))
+            );
+            const prefabParentId = "landing-zone-prefab";
+            const parentPoi = pois.find((p) => p.id === prefabParentId);
+            const insidePrefab = visiblePois.filter(
+              (poi) => poi.requiredPoiIds?.includes(prefabParentId)
+            );
+            const topLevel = visiblePois.filter(
+              (poi) => !poi.requiredPoiIds?.includes(prefabParentId)
+            );
+
+            const renderPoiItem = (poi: (typeof pois)[0]) => {
               const isInspected = exploredPoiIds.includes(poi.id);
               return (
                 <li
@@ -148,18 +195,100 @@ export function LocationDetailMap({
                         {poi.description && isInspected && (
                           <p className="text-xs text-neutral-500">{poi.description}</p>
                         )}
+                        {isInspected && poi.puzzleId && (() => {
+                          const isSolved = solvedPuzzleIds.includes(poi.puzzleId);
+                          const config = getPuzzleConfig?.(poi.puzzleId);
+                          if (isSolved) {
+                            return (
+                              <span className="ml-1.5 text-[10px] text-emerald-400/80">
+                                Puzzle solved ✓
+                              </span>
+                            );
+                          }
+                          if (config && onPuzzleSolved) {
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => setPuzzleModalPuzzleId(poi.puzzleId!)}
+                                className="mt-1 rounded border border-amber-600/50 bg-amber-900/30 px-2 py-0.5 text-[10px] font-medium text-amber-400 hover:bg-amber-900/50"
+                              >
+                                Solve puzzle
+                              </button>
+                            );
+                          }
+                          return null;
+                        })()}
                         {isInspected && (() => {
                           const itemIds = poi.itemIds ?? [];
                           const legacyItems = poi.items ?? [];
-                          if (itemIds.length > 0) {
-                            const resolve = getItemName ?? ((id: string) => id);
+                          const resolve = getItemName ?? ((id: string) => id);
+                          const hasPuzzle = !!poi.puzzleId;
+                          const puzzleSolved = hasPuzzle && solvedPuzzleIds.includes(poi.puzzleId!);
+                          if (hasPuzzle && !puzzleSolved && itemIds.length > 0) {
                             return (
-                              <ul className="mt-1 space-y-0.5">
-                                {itemIds.map((id) => (
-                                  <li key={id} className="text-[10px] text-neutral-600">
-                                    + {resolve(id)}
-                                  </li>
-                                ))}
+                              <p className="mt-1 text-[10px] text-amber-400/80">
+                                Solve the combination to access the contents.
+                              </p>
+                            );
+                          }
+                          if (itemIds.length > 0) {
+                            return (
+                              <ul className="mt-1 space-y-1">
+                                {itemIds.map((id) => {
+                                  const takenByCharId = takenPoiItems[poi.id]?.[id];
+                                  const takenBy = takenByCharId
+                                    ? characters.find((c) => c.id === takenByCharId)
+                                    : null;
+                                  const isPending = pendingTake?.poiId === poi.id && pendingTake?.itemId === id;
+                                  return (
+                                    <li key={id} className="text-[10px] text-neutral-600">
+                                      {takenBy ? (
+                                        <span>+ {resolve(id)} <span className="text-green-500/80">✓ Taken by {takenBy.name}</span></span>
+                                      ) : (
+                                        <span className="flex flex-wrap items-center gap-1">
+                                          <span>+ {resolve(id)}</span>
+                                          {onTakeItem && characters.length > 0 && (
+                                            <>
+                                              {isPending ? (
+                                                <span className="flex flex-wrap items-center gap-1">
+                                                  <span className="text-neutral-500">Who picks it up?</span>
+                                                  {characters.map((c) => (
+                                                    <button
+                                                      key={c.id}
+                                                      type="button"
+                                                      onClick={() => {
+                                                        onTakeItem(poi.id, id, c.id);
+                                                        setPendingTake(null);
+                                                      }}
+                                                      className="rounded border border-cyan-600/50 bg-cyan-900/30 px-1.5 py-0.5 text-[10px] text-cyan-400 hover:bg-cyan-900/50"
+                                                    >
+                                                      {c.name}
+                                                    </button>
+                                                  ))}
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => setPendingTake(null)}
+                                                    className="text-[10px] text-neutral-500 hover:text-neutral-400"
+                                                  >
+                                                    Cancel
+                                                  </button>
+                                                </span>
+                                              ) : (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setPendingTake({ poiId: poi.id, itemId: id })}
+                                                  className="rounded border border-cyan-600/50 bg-cyan-900/30 px-1.5 py-0.5 text-[10px] text-cyan-400 hover:bg-cyan-900/50"
+                                                >
+                                                  Take
+                                                </button>
+                                              )}
+                                            </>
+                                          )}
+                                        </span>
+                                      )}
+                                    </li>
+                                  );
+                                })}
                               </ul>
                             );
                           }
@@ -194,8 +323,26 @@ export function LocationDetailMap({
                   </div>
                 </li>
               );
-            })}
-          </ul>
+            };
+
+            return (
+              <>
+                <ul className="space-y-1.5">
+                  {topLevel.map(renderPoiItem)}
+                </ul>
+                {insidePrefab.length > 0 && parentPoi && (
+                  <div className="mt-3">
+                    <p className="mb-1.5 text-[10px] font-medium uppercase text-neutral-500">
+                      Inside {parentPoi.name}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {insidePrefab.map(renderPoiItem)}
+                    </ul>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       ) : (
         <p className="text-sm text-neutral-600">You are here.</p>
@@ -232,6 +379,16 @@ export function LocationDetailMap({
         <span className="h-1.5 w-1.5 rounded-full bg-neutral-500" />
         Door / connection
       </div>
+
+      {puzzleModalPuzzleId && getPuzzleConfig?.(puzzleModalPuzzleId) && onPuzzleSolved && (
+        <WordPuzzleModal
+          puzzleId={puzzleModalPuzzleId}
+          clue={getPuzzleConfig(puzzleModalPuzzleId)!.clue}
+          solution={getPuzzleConfig(puzzleModalPuzzleId)!.solution}
+          onSolve={() => onPuzzleSolved(puzzleModalPuzzleId)}
+          onClose={() => setPuzzleModalPuzzleId(null)}
+        />
+      )}
     </div>
   );
 }

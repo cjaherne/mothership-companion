@@ -39,6 +39,7 @@ const attributeThresholds: NPCAttributeThresholds = {
 export const demarProfile: NPCPersonalityProfile = {
   id: "demar",
   name: "Demar",
+  role: "Marine",
   archetype:
     "Hive-possessed marine. Crouched in the APC, rocking rhythmically, eyes unfocused. Does not register the players as distinct from the Hive. He is not violent — he is gone. He will not answer questions. He cycles, unprompted, through fragments of Hive-devotion and vague longing.",
   traits: ["possessed", "vacant", "rhythmic", "serene", "absent"],

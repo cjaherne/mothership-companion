@@ -1,6 +1,6 @@
 {
   "name": "mothership-companion",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,21 +10,12 @@
     "test:agent": "jest --testPathPatterns=__tests__/agent",
     "start": "next start",
     "lint": "next lint",
-    "agent:dev": "tsx agent/main.ts dev",
-    "agent:start": "tsx agent/main.ts start",
-    "agent:download-files": "tsx agent/main.ts download-files"
+    "pregenerate-tts": "tsx scripts/preGenerateTts.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.0",
-    "@livekit/agents": "^1.0.0",
-    "@livekit/agents-plugin-livekit": "^1.0.48",
-    "@livekit/agents-plugin-openai": "^1.0.48",
-    "@livekit/agents-plugin-silero": "^1.0.48",
-    "@livekit/components-react": "^2.0.0",
     "ai": "^5.0.0",
     "dotenv": "^17.3.1",
-    "livekit-client": "^2.0.0",
-    "livekit-server-sdk": "^2.0.0",
     "next": "14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

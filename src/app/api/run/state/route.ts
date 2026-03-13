@@ -1,8 +1,8 @@
 /**
- * Run state API - for agent/orchestration to persist state during play
+ * Run state API - for voice/orchestration to persist state during play
  *
  * In-memory store (resets on server restart). Client uses localStorage;
- * this API allows the voice agent to update state when wired.
+ * this API allows the voice/talk endpoint to read run state.
  */
 
 import { NextRequest, NextResponse } from "next/server";

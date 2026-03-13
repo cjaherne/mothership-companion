@@ -1,8 +1,7 @@
 /**
- * TTS API - Warden voice for Scenario Briefing
+ * TTS API - Warden voice for Scenario Briefing and NPC intros
  *
- * Uses OpenAI TTS (tts-1, onyx voice) to generate audio from text.
- * No LiveKit involvement; does not touch run state.
+ * Uses OpenAI TTS (tts-1) to generate audio from text.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -80,33 +79,30 @@ export async function POST(request: NextRequest) {
   const chunks = chunkText(text);
 
   try {
-    const buffers: ArrayBuffer[] = [];
-    for (const chunk of chunks) {
-      const res = await fetch("https://api.openai.com/v1/audio/speech", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "tts-1",
-          voice,
-          input: chunk,
-          response_format: "mp3",
-        }),
-      });
+    const buffers = await Promise.all(
+      chunks.map(async (chunk) => {
+        const res = await fetch("https://api.openai.com/v1/audio/speech", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "tts-1",
+            voice,
+            input: chunk,
+            response_format: "mp3",
+          }),
+        });
 
-      if (!res.ok) {
-        const err = await res.text();
-        return NextResponse.json(
-          { error: `OpenAI TTS failed: ${err}` },
-          { status: res.status }
-        );
-      }
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`OpenAI TTS failed: ${err}`);
+        }
 
-      const arrBuf = await res.arrayBuffer();
-      buffers.push(arrBuf);
-    }
+        return res.arrayBuffer();
+      })
+    );
 
     const totalLength = buffers.reduce((acc, b) => acc + b.byteLength, 0);
     const combined = new Uint8Array(totalLength);

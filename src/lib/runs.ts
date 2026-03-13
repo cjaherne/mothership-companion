@@ -197,7 +197,57 @@ function deepMergeRunState(
       patch.playerKnowledgeFactIds ?? current.playerKnowledgeFactIds,
     npcIntroPlayedIds: patch.npcIntroPlayedIds ?? current.npcIntroPlayedIds ?? [],
     npcVoiceInteractionCounts: patch.npcVoiceInteractionCounts ?? current.npcVoiceInteractionCounts ?? {},
+    solvedPuzzleIds: patch.solvedPuzzleIds ?? current.solvedPuzzleIds ?? [],
+    takenPoiItems: patch.takenPoiItems ?? current.takenPoiItems ?? {},
   };
+}
+
+/** Take an item from a POI and add it to a character's inventory */
+export function takeItemFromPoi(
+  runId: string,
+  poiId: string,
+  itemId: string,
+  characterId: string
+): void {
+  const state = getRunState(runId);
+  addItemToCharacter(runId, characterId, itemId);
+  const poiTaken = state.takenPoiItems?.[poiId] ?? {};
+  saveRunState(runId, {
+    takenPoiItems: {
+      ...state.takenPoiItems,
+      [poiId]: { ...poiTaken, [itemId]: characterId },
+    },
+  });
+}
+
+/** Check if an item has been taken from a POI */
+export function isItemTakenFromPoi(
+  runId: string,
+  poiId: string,
+  itemId: string
+): boolean {
+  const state = getRunState(runId);
+  return !!(state.takenPoiItems?.[poiId]?.[itemId]);
+}
+
+/** Get the character ID who took an item from a POI */
+export function getItemTakenBy(runId: string, poiId: string, itemId: string): string | undefined {
+  const state = getRunState(runId);
+  return state.takenPoiItems?.[poiId]?.[itemId];
+}
+
+/** Mark a puzzle as solved (e.g. prefab-terminal for airlock override) */
+export function markPuzzleSolved(runId: string, puzzleId: string): void {
+  const state = getRunState(runId);
+  const ids = state.solvedPuzzleIds ?? [];
+  if (ids.includes(puzzleId)) return;
+  saveRunState(runId, { solvedPuzzleIds: [...ids, puzzleId] });
+}
+
+/** Check if a puzzle has been solved */
+export function isPuzzleSolved(runId: string, puzzleId: string): boolean {
+  const state = getRunState(runId);
+  return (state.solvedPuzzleIds ?? []).includes(puzzleId);
 }
 
 /** Increment NPC voice interaction count (for irritation escalation) */
@@ -335,6 +385,68 @@ export function removeExploredLocation(runId: string, locationId: string): void 
 /** Set active NPC for voice session */
 export function setActiveNpc(runId: string, npcId: string | undefined): void {
   saveRunState(runId, { activeNpcId: npcId });
+}
+
+/** Stat/Save key for stress over-20 reduction (Mothership rules 20.1) */
+export type MothershipStatKey =
+  | "strength"
+  | "speed"
+  | "intellect"
+  | "combat"
+  | "sanity"
+  | "fear"
+  | "body";
+
+/**
+ * Add Stress to a character. Per Mothership rules 20.1:
+ * - Max stress 20; excess does not increase stress but reduces "most relevant" Stat/Save by that amount.
+ * - Pass relevantStatKey when the stress is from a failed check (the stat/save that was tested).
+ */
+export function addStressToCharacter(
+  runId: string,
+  characterId: string,
+  amount: number,
+  relevantStatKey?: MothershipStatKey
+): void {
+  const state = getRunState(runId);
+  const char = state.characters.find((c) => c.id === characterId);
+  if (!char?.mothership) return;
+
+  const m = char.mothership;
+  const current = m.stressCurrent ?? 0;
+  const max = 20; // Per rules 20.1
+  const next = current + amount;
+
+  if (next <= max) {
+    updateCharacter(runId, characterId, {
+      mothership: { ...m, stressCurrent: Math.min(max, next) },
+    });
+    return;
+  }
+
+  const excess = next - max;
+  const cappedStress = max;
+
+  if (relevantStatKey) {
+    const stats = { ...m.stats };
+    const val = stats[relevantStatKey] ?? 0;
+    stats[relevantStatKey] = Math.max(1, val - excess);
+    updateCharacter(runId, characterId, {
+      mothership: { ...m, stressCurrent: cappedStress, stats },
+    });
+  } else {
+    // No specific stat; reduce worst save (sanity, fear, body) as fallback
+    const saveKeys: MothershipStatKey[] = ["sanity", "fear", "body"];
+    const worst = saveKeys.reduce((a, k) =>
+      (m.stats[a] ?? 99) <= (m.stats[k] ?? 99) ? a : k
+    );
+    const stats = { ...m.stats };
+    const val = stats[worst] ?? 0;
+    stats[worst] = Math.max(1, val - excess);
+    updateCharacter(runId, characterId, {
+      mothership: { ...m, stressCurrent: cappedStress, stats },
+    });
+  }
 }
 
 /** Complete prologue: move from The Metamorphosis to Landing Zone */

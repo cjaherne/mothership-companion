@@ -7,6 +7,8 @@ import type { BriefingPage } from "@/campaigns/types";
 interface BriefingSectionProps {
   /** Background text (single pane, no pagination) */
   text: string;
+  /** Optional pre-generated TTS URL (e.g. /sounds/briefing/prologue.mp3) for faster playback */
+  preGeneratedTtsUrl?: string;
   /** @deprecated Pagination removed; use text only */
   pages?: BriefingPage[];
   /** Compact mode: smaller text, tighter padding, inline controls */
@@ -18,6 +20,7 @@ interface BriefingSectionProps {
 
 export function BriefingSection({
   text,
+  preGeneratedTtsUrl,
   compact,
   useWardenVoice = true,
   className = "",
@@ -49,10 +52,10 @@ export function BriefingSection({
   }, [wardenTts]);
 
   const play = useCallback(() => {
-    if (!displayText) return;
+    if (!displayText && !preGeneratedTtsUrl) return;
     setErrorDismissed(false);
-    wardenTts.play(displayText);
-  }, [displayText, wardenTts]);
+    wardenTts.play(displayText ?? "", preGeneratedTtsUrl);
+  }, [displayText, preGeneratedTtsUrl, wardenTts]);
 
   const dismissError = useCallback(() => {
     setErrorDismissed(true);
@@ -111,7 +114,7 @@ export function BriefingSection({
         <button
           type="button"
           onClick={play}
-          disabled={isLoading || !displayText}
+          disabled={isLoading || (!displayText && !preGeneratedTtsUrl)}
           className={iconBtnClass}
           title={isLoading ? "Loading…" : isPaused ? "Resume" : "Play"}
           aria-label={isLoading ? "Loading" : isPaused ? "Resume" : "Play"}

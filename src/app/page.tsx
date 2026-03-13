@@ -208,7 +208,7 @@ function HomeContent({ onSelectCampaign }: HomeContentProps) {
         </h2>
         <p className="max-w-2xl text-base leading-relaxed text-neutral-400">
           A voice-interactive Warden for Mothership RPG scenarios. Real-time
-          voice chat with NPCs powered by LiveKit and the Vercel AI SDK. Create
+          voice chat with NPCs powered by OpenAI (STT, LLM, TTS). Create
           characters, read the briefing, explore locations, and talk to the
           Warden—ideal for in-person play with a shared device.
         </p>
@@ -229,29 +229,16 @@ function HomeContent({ onSelectCampaign }: HomeContentProps) {
               <code className="rounded bg-neutral-700 px-1.5 py-0.5 text-xs text-neutral-200">.env.local</code> and set:
             </p>
             <ul className="list-inside list-disc space-y-1 text-sm text-neutral-400">
-              <li><strong className="text-neutral-300">LIVEKIT_URL</strong>, <strong className="text-neutral-300">LIVEKIT_API_KEY</strong>, <strong className="text-neutral-300">LIVEKIT_API_SECRET</strong></li>
-              <li><strong className="text-neutral-300">OPENAI_API_KEY</strong> (required for AI and TTS)</li>
+              <li><strong className="text-neutral-300">OPENAI_API_KEY</strong> (required for AI and voice)</li>
               <li><strong className="text-neutral-300">REPLICATE_API_TOKEN</strong> (optional, for character artwork)</li>
             </ul>
           </div>
           <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
-            <h4 className="mb-2 font-medium text-neutral-200">2. Run the app and agent</h4>
-            <p className="mb-3 text-sm text-neutral-400">
-              Use two terminals:
+            <h4 className="mb-2 font-medium text-neutral-200">2. Run the app</h4>
+            <p className="mb-2 text-sm text-neutral-400">
+              Start the dev server:
             </p>
-            <ol className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <span className="shrink-0 font-medium text-neutral-500">Terminal 1:</span>
-                <code className="rounded bg-neutral-700 px-2 py-1 text-xs text-neutral-200">npm run dev</code>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="shrink-0 font-medium text-neutral-500">Terminal 2:</span>
-                <code className="rounded bg-neutral-700 px-2 py-1 text-xs text-neutral-200">npm run agent:dev</code>
-              </li>
-            </ol>
-            <p className="mt-3 text-xs text-neutral-500">
-              The agent processes voice and must run before you connect.
-            </p>
+            <code className="block rounded bg-neutral-700 px-2 py-1 text-xs text-neutral-200">npm run dev</code>
           </div>
         </div>
       </section>

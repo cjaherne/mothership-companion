@@ -8,6 +8,7 @@ import { updateCharacter } from "@/lib/runs";
 import { StatBadge, ValueOverMaxBadge } from "./MothershipStatDisplay";
 import { SkillsTreeView } from "./SkillsTreeView";
 import { CharacterArtworkModal } from "./CharacterArtworkModal";
+import { DiceRollerModal } from "./DiceRollerModal";
 
 type ModalTab = "character" | "skills";
 
@@ -99,11 +100,17 @@ function CharacterStatsInline({ m, compact }: { m: NonNullable<Character["mother
             <StatBadge label="BOD" value={m.stats.body} dark />
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded border border-neutral-600 bg-neutral-700/50 px-1.5 py-0.5">
-          <span className="text-[9px] text-neutral-400">HP</span>
-          <span className="text-xs font-medium text-white">{health}/{health}</span>
-          <span className="text-[9px] text-neutral-400">W</span>
-          <span className="text-xs font-medium text-white">{wounds}/{maxWounds}</span>
+        <div className="flex flex-col gap-1 rounded border border-neutral-600 bg-neutral-700/50 px-1.5 py-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] text-neutral-400">HP</span>
+            <span className="text-xs font-medium text-white">{health}/{health}</span>
+            <span className="text-[9px] text-neutral-400">W</span>
+            <span className="text-xs font-medium text-white">{wounds}/{maxWounds}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[9px] text-neutral-400">Stress</span>
+            <span className="text-xs font-medium text-white">{stressCur}/{stressMax}</span>
+          </div>
         </div>
       </div>
     );
@@ -177,6 +184,7 @@ export function CharacterList({
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [modalTab, setModalTab] = useState<ModalTab>("character");
   const [showRegenerateArtwork, setShowRegenerateArtwork] = useState(false);
+  const [showDiceModal, setShowDiceModal] = useState(false);
 
   const openCharacter = (char: Character) => {
     setSelectedCharacter(char);
@@ -193,9 +201,20 @@ export function CharacterList({
       className={`flex flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${className}`}
       style={minH ? { minHeight: minH } : undefined}
     >
-      <h4 className={`font-heading shrink-0 border-b border-neutral-600 font-semibold uppercase tracking-widest text-amber-200/90 ${compact ? "px-2 py-1 text-xs" : "px-4 py-3 text-lg"}`}>
-        Players
-      </h4>
+      <div className={`flex shrink-0 items-center justify-between border-b border-neutral-600 ${compact ? "px-2 py-1" : "px-4 py-3"}`}>
+        <h4 className={`font-heading font-semibold uppercase tracking-widest text-amber-200/90 ${compact ? "text-xs" : "text-lg"}`}>
+          Players
+        </h4>
+        {runId && characters.some((c) => c.mothership) && (
+          <button
+            type="button"
+            onClick={() => setShowDiceModal(true)}
+            className="rounded border border-amber-600/60 bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-300 transition hover:bg-amber-900/50"
+          >
+            Call for check
+          </button>
+        )}
+      </div>
       <ul
         className="flex-1 overflow-y-auto p-1 min-h-0"
         style={{ maxHeight: characters.length > 0 ? maxH : undefined }}
@@ -234,6 +253,16 @@ export function CharacterList({
           ))
         )}
       </ul>
+
+      {showDiceModal && runId && (
+        <DiceRollerModal
+          characters={characters}
+          runId={runId}
+          initialCharacterId={selectedCharacter?.id}
+          onClose={() => setShowDiceModal(false)}
+          onCharacterUpdate={onCharacterUpdate}
+        />
+      )}
 
       {showRegenerateArtwork && selectedCharacter && runId && (
         <CharacterArtworkModal

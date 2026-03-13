@@ -1,7 +1,7 @@
 /**
  * AI orchestration helpers for puzzle state and NPC logic.
  *
- * Used by API routes and (optionally) the LiveKit agent to:
+ * Used by API routes and voice/talk to:
  * - Build system prompts from game state + NPC profiles
  * - Validate puzzle progression
  * - Gate information reveals based on player knowledge

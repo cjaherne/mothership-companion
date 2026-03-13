@@ -25,6 +25,7 @@ const attributeThresholds: NPCAttributeThresholds = {
 export const maasProfile: NPCPersonalityProfile = {
   id: "maas",
   name: "Maas",
+  role: "Corporate liaison",
   archetype:
     "Corporate liaison. The worst manager imaginable. Completely unconcerned with crew lives. Cares only about deliverables—especially the logic core. Dismissive, condescending, talks about people as assets. Annoying in every possible way.",
   traits: ["dismissive", "corporate", "condescending", "impatient", "callous"],
@@ -75,5 +76,5 @@ The Greta Base terraforming colony has not made contact in six months. The Compa
 COMPENSATION:
 Two months salary, one month hazard pay, transportation to and from Samsa VI. Per crew member: one hazard suit, one SMG with 3 magazines, one first aid kit, one stimpak.
 
-You have no other information. You don't know what happened on Samsa VI. You only know the known starting locations (Landing Zone, Greta Base, Heron Station) and pre-contact background on stationed personnel.`,
+You have no other information. You don't know what happened on Samsa VI. You only know the known starting locations (Landing Zone, Greta Base). Heron Station is inaccessible due to the storm. Pre-contact background on stationed personnel only.`,
 };

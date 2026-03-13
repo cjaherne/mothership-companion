@@ -21,7 +21,7 @@ function unlockAudioOnGesture(): AudioContext | null {
 }
 
 export interface UseWardenTtsResult {
-  play: (text: string) => void;
+  play: (text: string, preGeneratedUrl?: string) => void;
   pause: () => void;
   stop: () => void;
   rewind: () => void;
@@ -94,11 +94,11 @@ export function useWardenTts(): UseWardenTtsResult {
     }
   }, []);
 
-  const play = useCallback(async (text: string) => {
+  const play = useCallback(async (text: string, preGeneratedUrl?: string) => {
     // CRITICAL: Unlock audio synchronously before any await (browser autoplay policy)
     const ctx = unlockAudioOnGesture();
 
-    if (typeof window === "undefined" || !text.trim()) {
+    if (typeof window === "undefined" || (!text.trim() && !preGeneratedUrl)) {
       fetch("/api/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,6 +109,43 @@ export function useWardenTts(): UseWardenTtsResult {
 
     currentTextRef.current = text;
     clearCacheForNewText(text);
+
+    // If pre-generated URL provided, try it first (faster than TTS API)
+    if (preGeneratedUrl && ctx) {
+      stopSource();
+      playbackOffsetRef.current = 0;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(preGeneratedUrl);
+        if (res.ok) {
+          const arrayBuffer = await res.arrayBuffer();
+          ctxRef.current = ctx;
+          await ctx.resume();
+          const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+          bufferCacheRef.current = { buffer: audioBuffer, text };
+          const source = ctx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(ctx.destination);
+          source.onended = () => {
+            audioSourceRef.current = null;
+            setIsPlaying(false);
+            setIsPaused(false);
+          };
+          audioSourceRef.current = source;
+          startTimeRef.current = ctx.currentTime;
+          source.start(0, 0);
+          setIsPlaying(true);
+          setIsPaused(false);
+          setError(null);
+          setIsLoading(false);
+          return;
+        }
+      } catch {
+        // Fall through to TTS if pre-generated fetch fails
+      }
+      setIsLoading(false);
+    }
 
     // Resume from pause (Web Audio): use cached buffer, start from playbackOffset
     if (isPaused && bufferCacheRef.current?.text === text && ctx) {

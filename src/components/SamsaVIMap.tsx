@@ -7,6 +7,8 @@ interface SamsaVIMapProps {
   currentRegionId?: string;
   exploredRegionIds: string[];
   knownRegionIds?: string[];
+  /** Region IDs that cannot be navigated to (e.g. storms); shown greyed out */
+  inaccessibleRegionIds?: string[];
   exploredPoiIds?: string[];
   selectedRegionId?: string;
   onRegionClick?: (regionId: string) => void;
@@ -26,17 +28,21 @@ export function SamsaVIMap({
   currentRegionId,
   exploredRegionIds,
   knownRegionIds = planetMap.initialKnownRegionIds,
+  inaccessibleRegionIds = [],
   exploredPoiIds = [],
   selectedRegionId,
   onRegionClick,
   onMarkVisited,
   className = "",
 }: SamsaVIMapProps) {
+  const inaccessibleSet = new Set(inaccessibleRegionIds);
   const exploredPoiSet = new Set(exploredPoiIds);
   const knownPaths = planetMap.paths.filter(
     (p) =>
-      p.knownAtStart ||
-      (p.requiredPoiId != null && exploredPoiSet.has(p.requiredPoiId))
+      (p.knownAtStart ||
+        (p.requiredPoiId != null && exploredPoiSet.has(p.requiredPoiId))) &&
+      !inaccessibleSet.has(p.fromRegionId) &&
+      !inaccessibleSet.has(p.toRegionId)
   );
 
   const reachableRegionIds: Set<string> = new Set(
@@ -48,8 +54,13 @@ export function SamsaVIMap({
               p.toRegionId === currentRegionId
           )
           .flatMap((p) => [p.fromRegionId, p.toRegionId])
-          .filter((id) => id !== currentRegionId && knownRegionIds.includes(id))
-      : knownRegionIds
+          .filter(
+            (id) =>
+              id !== currentRegionId &&
+              knownRegionIds.includes(id) &&
+              !inaccessibleSet.has(id)
+          )
+      : knownRegionIds.filter((id) => !inaccessibleSet.has(id))
   );
 
   // Layout: regions as boxes with clear gaps for paths (paths run in gaps, not through boxes)
@@ -108,10 +119,13 @@ export function SamsaVIMap({
   }
 
   const getRegionStyle = (id: string) => {
+    const isInaccessible = inaccessibleSet.has(id);
     const isCurrent = id === currentRegionId;
     const isSelected = id === selectedRegionId;
     const isVisited = exploredRegionIds.includes(id);
     const isReachable = currentRegionId ? reachableRegionIds.has(id) : true;
+    if (isInaccessible)
+      return { fill: "rgba(40, 40, 40, 0.4)", stroke: "#404040", textFill: "#525252", strokeWidth: 1 };
     if (isCurrent) return { fill: "rgba(57, 255, 20, 0.35)", stroke: "#39ff14", textFill: "#39ff14", strokeWidth: 2 };
     if (isSelected) return { fill: "rgba(255, 0, 110, 0.25)", stroke: "#ff006e", textFill: "#ff006e", strokeWidth: 2 };
     if (isVisited) return { fill: "rgba(37, 99, 235, 0.3)", stroke: "#2563eb", textFill: "#60a5fa", strokeWidth: 1.5 };
@@ -121,14 +135,14 @@ export function SamsaVIMap({
 
   return (
     <div
-      className={`overflow-auto rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-2 ${className}`}
+      className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-2 ${className}`}
     >
-      <h4 className="font-heading mb-1 text-[10px] font-medium uppercase tracking-wider text-amber-200/90">
+      <h4 className="font-heading shrink-0 mb-1 text-[10px] font-medium uppercase tracking-wider text-amber-200/90">
         Samsa VI
       </h4>
       <svg
         viewBox="0 0 470 280"
-        className="h-full min-h-[120px] w-full"
+        className="min-h-0 flex-1 w-full"
         preserveAspectRatio="xMidYMid meet"
       >
         <defs>
@@ -198,8 +212,9 @@ export function SamsaVIMap({
             const rect = regionRects[region.id];
             if (!rect) return null;
             const style = getRegionStyle(region.id);
+            const isInaccessible = inaccessibleSet.has(region.id);
             const isReachable = !currentRegionId || reachableRegionIds.has(region.id);
-            const isClickable = !!onRegionClick && isReachable;
+            const isClickable = !!onRegionClick && isReachable && !isInaccessible;
             return (
               <g
                 key={region.id}
@@ -226,6 +241,7 @@ export function SamsaVIMap({
                   fill={(style as { textFill?: string }).textFill ?? style.stroke}
                 >
                   {region.name}
+                  {isInaccessible ? " (storms)" : ""}
                 </text>
               </g>
             );
@@ -233,7 +249,7 @@ export function SamsaVIMap({
       </svg>
 
       {/* Legend */}
-      <div className="mt-1 flex flex-wrap items-center gap-2 text-[9px] text-neutral-600">
+      <div className="mt-1 shrink-0 flex flex-wrap items-center gap-2 text-[9px] text-neutral-600">
         <span className="flex items-center gap-1">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Current
         </span>

@@ -45,7 +45,7 @@ Samsa VI is a jungle planet in The Company's portfolio: a terraforming colony an
 Known locations:
 • Landing Zone — Where your shuttle will touch down. A short muddy walk to Greta Base.
 • Greta Base — The primary facility. Six months of silence. Power likely offline.
-• Heron Station — Secondary outpost, reachable via rough trail from Greta Base.
+• Heron Station — Secondary outpost. Currently inaccessible due to the tropical storm.
 
 Your objectives: rendezvous with the station's marine commander, re-establish power to the main computer, and retrieve biological samples from the medical laboratory. A raging tropical storm will make radio communication nearly impossible.
 
@@ -60,6 +60,20 @@ The transition from cryosleep is never gentle. One moment: the familiar hum of s
 You are aboard The Metamorphosis, a J2C-I Executive Transport—The Company's preferred vessel for long-haul corporate operations. The viewport shows Samsa VI below: a swath of greens and grays, storm systems churning across the terminator. You have arrived in orbit.
 
 A figure waits by the briefing console. Maas—your corporate liaison, nominally in charge of the entire mission. Sharp suit, sharper smile, the kind of person who uses "expediency" and "cost-effective" in the same sentence. They've been awake for hours, reviewing the same files you're about to hear.`,
+    },
+    {
+      title: "Arrival",
+      content: `ARRIVAL — The Dropship to Samsa VI
+
+You board the dropship and strap in. The craft shudders as it breaks atmosphere—Samsa VI's storm systems claw at the hull. Inside, the air is thick: human sweat, recycled oxygen, the sour tang of fear. The ship creaks and shakes. Loud alarms blare from the cockpit.
+
+Up front, Pilot Anders—stocky, experienced—and Copilot Renfield—chatty, chewing gum—fight the controls. The tropical storm is worse than expected. [Fear Save]
+
+---
+
+When the Fear Saves are settled, the dropship touches down at the Greta Base Landing Zone. The ramp drops. Lush jungle presses in on all sides. Torrential rain hammers the muddy clearing. Thick mud makes every step treacherous. Visibility is poor—the storm obscures everything beyond a few metres.
+
+What do you want to do?`,
     },
   ],
 };

@@ -16,6 +16,8 @@ interface ClickToTalkPanelProps {
   onInteractionComplete?: () => void;
   /** Optional label override (e.g. "Talk to Maas") */
   label?: string;
+  /** When true, omit outer border (e.g. inside combined NPC panel) */
+  embedded?: boolean;
 }
 
 type PanelState = "idle" | "recording" | "processing" | "playing";
@@ -28,6 +30,7 @@ export function ClickToTalkPanel({
   onExit,
   onInteractionComplete,
   label,
+  embedded,
 }: ClickToTalkPanelProps) {
   const [state, setState] = useState<PanelState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -155,7 +158,7 @@ export function ClickToTalkPanel({
   const isDisabled = state === "processing" || state === "playing";
 
   return (
-    <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+    <div className={embedded ? "p-0" : "rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4"}>
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-neutral-100">{displayLabel}</p>
