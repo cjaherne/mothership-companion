@@ -25,7 +25,7 @@ describe("RunSetupView", () => {
     expect(screen.getByRole("button", { name: /Start session/ })).toBeDisabled();
   });
 
-  it("enables Start session after adding a character", () => {
+  it("enables Start session after adding a character", async () => {
     const run = mockRun();
     render(
       <RunSetupView
@@ -35,10 +35,13 @@ describe("RunSetupView", () => {
         onBack={() => {}}
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: /Random full/i }));
     fireEvent.change(screen.getByPlaceholderText(/Corporal Vasquez/), {
       target: { value: "Corporal Vasquez" },
     });
     fireEvent.click(screen.getByRole("button", { name: /Add player/ }));
+    const skipBtn = await screen.findByRole("button", { name: /Skip/i });
+    fireEvent.click(skipBtn);
     expect(screen.getByText("Corporal Vasquez")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Start session/ })).toBeEnabled();
   });

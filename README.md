@@ -9,6 +9,7 @@ A voice-interactive Warden companion for **Mothership** RPG scenarios. Create ch
 - **Briefing & maps** — Read scenario background, explore the Samsa VI planet map, drill into regions (Greta Base, Heron Station, etc.), and view location details with points of interest.
 - **NPC interaction** — See NPCs in each location. Connect to the Warden or any NPC for real-time voice chat via click-to-talk (OpenAI STT, LLM, TTS).
 - **Rule references** — Open the Player's Survival Guide and Shipbreaker's Toolkit PDFs from the sidebar.
+- **Mobile responsive** — Sidebar becomes a drawer on small screens; hamburger menu, touch-friendly buttons, responsive padding.
 
 ## Tech Stack
 
@@ -58,7 +59,7 @@ Go to [http://localhost:3000](http://localhost:3000). Sign in with username `adm
 
 ### Step 1: Select a campaign
 
-From the sidebar or home page, choose a campaign (e.g. **Another Bug Hunt**). Create a new run or resume a previous one.
+From the sidebar (or hamburger menu on mobile) or home page, choose a campaign (e.g. **Another Bug Hunt**). Create a new run or resume a previous one.
 
 ### Step 2: Create characters
 
@@ -125,6 +126,8 @@ mothership-companion/
 │   │   ├── InternalLocationMap.tsx
 │   │   ├── LocationDetailMap.tsx
 │   │   └── ClickToTalkPanel.tsx
+│   ├── hooks/
+│   │   └── useMediaQuery.ts      # Responsive breakpoint hook
 │   ├── lib/
 │   │   ├── mothership.ts         # Character creation rules
 │   │   ├── mothership-skills.ts
@@ -144,7 +147,8 @@ mothership-companion/
 | `npm run start` | Run production server |
 | `npm run pregenerate-tts` | Pre-generate static TTS (NPC intros, briefing pages, location backgrounds) |
 | `npm run generate-admin-credentials` | Generate ADMIN_PASSWORD and SESSION_SECRET for local or hosted auth |
-| `npm test` | Run tests |
+| `npm test` | Run unit tests (including responsive tests) |
+| `npm run validate` | Run tests then build (for CI) |
 
 ## Documentation
 

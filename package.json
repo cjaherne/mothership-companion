@@ -1,10 +1,11 @@
 {
   "name": "mothership-companion",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "validate": "npm test && npm run build",
     "test": "jest",
     "test:ui": "jest --testPathPatterns=components/__tests__",
     "test:agent": "jest --testPathPatterns=__tests__/agent",
@@ -35,6 +36,7 @@
     "eslint-config-next": "14.2.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "jest-matchmedia-mock": "^1.1.0",
     "tailwindcss": "^3.4.0",
     "tsx": "^4.0.0",
     "typescript": "^5"
