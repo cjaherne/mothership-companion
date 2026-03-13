@@ -72,6 +72,12 @@ export const distressSignalsFacts: Fact[] = [
     scenarioId: "1-distress-signals",
   },
   {
+    id: "prefab-security-footage",
+    text: "Security footage from the prefab terminal shows the landing zone cameras. The feed is too fuzzy to make out clearly, but faint high-pitched noises can be heard—then screaming.",
+    tier: "minor",
+    scenarioId: "1-distress-signals",
+  },
+  {
     id: "backup-generator-offline",
     text: "The backup generator in the Garage is offline. If restarted, electricity returns to the entire base—and loud party music immediately blares from the Commissary. The music triggers a Fear Save.",
     tier: "minor",

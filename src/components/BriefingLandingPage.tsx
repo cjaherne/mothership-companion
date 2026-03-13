@@ -16,6 +16,8 @@ import {
   addExploredPoi,
   removeExploredPoi,
   setActiveNpc,
+  markPuzzleSolved,
+  takeItemFromPoi,
 } from "@/lib/runs";
 import { BriefingSection } from "./BriefingSection";
 import { CharacterList } from "./CharacterList";
@@ -29,6 +31,7 @@ import {
   GRETA_BASE_ENTRY_POIS,
 } from "@/campaigns/another-bug-hunt/world";
 import { getItemName } from "@/campaigns/another-bug-hunt/items";
+import { getWordPuzzleConfig } from "@/campaigns/another-bug-hunt/scenarios/1-distress-signals/puzzles";
 const REGION_IDS = [
   THE_METAMORPHOSIS_ID,
   "landing-zone",
@@ -65,16 +68,29 @@ export function BriefingLandingPage({
     : undefined;
   const briefingPages = mission?.briefingPages;
   const prologuePage = briefingPages?.find((p) => p.title === "Prologue");
-  const backgroundText =
-    prologuePage?.content ??
+  const arrivalPage = briefingPages?.find((p) => p.title === "Arrival");
+  const overviewPage = briefingPages?.find((p) => p.title === "Overview");
+
+  const currentLocationId =
+    runState.currentLocationId ?? campaign.world.defaultLocationId;
+  const briefingPageId = (() => {
+    if (currentLocationId === THE_METAMORPHOSIS_ID) return "prologue";
+    if (currentLocationId === "landing-zone") return "arrival";
+    return "overview";
+  })();
+
+  const locations = campaign.world.locations;
+  const currentLocation = locations.find((l) => l.id === currentLocationId);
+  const backgroundText = (() => {
+    if (currentLocation?.backgroundText) return currentLocation.backgroundText;
+    if (currentLocationId === THE_METAMORPHOSIS_ID) return prologuePage?.content;
+    if (currentLocationId === "landing-zone") return arrivalPage?.content;
+    return overviewPage?.content ?? prologuePage?.content;
+  })() ??
     briefingPages?.[0]?.content ??
     campaign.wardenNarrator?.narrative ??
     mission?.briefing ??
     "No background available.";
-
-  const currentLocationId =
-    runState.currentLocationId ?? campaign.world.defaultLocationId;
-  const locations = campaign.world.locations;
   const planetMap = campaign.world.planetMap;
 
   const currentRegionId = useMemo(
@@ -89,6 +105,7 @@ export function BriefingLandingPage({
 
   const [selectedPrimaryRegionId, setSelectedPrimaryRegionId] = useState<string | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+  const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
   const [, forceRefresh] = useState(0);
   // Local NPC selection — not persisted until Connect is pressed; resets on location change
   const [selectedNpcId, setSelectedNpcId] = useState<string | null>(null);
@@ -138,6 +155,7 @@ export function BriefingLandingPage({
   const handleSelectPrimaryRegion = (regionId: string) => {
     setSelectedPrimaryRegionId(regionId);
     setSelectedLocationId(null);
+    setSelectedPoiId(null);
   };
 
   const handleSelectLocation = (locationId: string) => {
@@ -149,6 +167,7 @@ export function BriefingLandingPage({
       }
     }
     setSelectedLocationId(locationId);
+    setSelectedPoiId(null);
   };
 
   const handleMarkVisited = (locationId: string) => {
@@ -161,6 +180,11 @@ export function BriefingLandingPage({
     forceRefresh((x) => x + 1);
   };
 
+  const handlePuzzleSolved = (puzzleId: string) => {
+    markPuzzleSolved(runId, puzzleId);
+    forceRefresh((x) => x + 1);
+  };
+
   const handleMarkPoiExplored = (poiId: string) => {
     const state = getRunState(runId);
     const alreadyInspected = (state.exploredPoiIds ?? []).includes(poiId);
@@ -168,12 +192,15 @@ export function BriefingLandingPage({
       removeExploredPoi(runId, poiId);
     } else {
       addExploredPoi(runId, poiId);
-      // Implicitly mark the viewed location as explored when a POI is inspected —
-      // you must physically be there to inspect it.
       if (viewedLocationId) {
         addExploredLocation(runId, viewedLocationId);
       }
     }
+    forceRefresh((x) => x + 1);
+  };
+
+  const handleTakeItem = (poiId: string, itemId: string, characterId: string) => {
+    takeItemFromPoi(runId, poiId, itemId, characterId);
     forceRefresh((x) => x + 1);
   };
 
@@ -187,7 +214,6 @@ export function BriefingLandingPage({
     forceRefresh((x) => x + 1);
   };
 
-  const currentLocation = locations.find((l) => l.id === currentLocationId);
   const currentLocationName = currentLocation?.name ?? currentLocationId ?? "Unknown";
   const baseName = viewedLocation?.name ?? currentLocationName;
   const headerLocationName =
@@ -217,6 +243,11 @@ export function BriefingLandingPage({
           </h4>
           <BriefingSection
             text={backgroundText}
+            preGeneratedTtsUrl={
+              currentLocation?.backgroundText
+                ? `/sounds/briefing/${currentLocationId}.mp3`
+                : `/sounds/briefing/${briefingPageId}.mp3`
+            }
             compact
             useWardenVoice
             className="min-h-0 flex-1 overflow-hidden"
@@ -224,17 +255,18 @@ export function BriefingLandingPage({
         </div>
 
         {/* Center col row 1: Samsa VI map */}
-        <div className="flex min-h-[100px] flex-col overflow-hidden lg:min-h-0">
+        <div className="flex min-h-0 flex-col overflow-hidden">
           {!isPrologue && planetMap ? (
             <SamsaVIMap
               planetMap={planetMap}
               currentRegionId={currentRegionId}
               exploredRegionIds={exploredRegionIds}
+              inaccessibleRegionIds={scenario?.inaccessibleRegionIds}
               exploredPoiIds={runState.exploredPoiIds ?? []}
               selectedRegionId={primaryRegionId}
               onRegionClick={handleSelectPrimaryRegion}
               onMarkVisited={handleMarkRegionVisited}
-              className="h-full min-h-0"
+              className="min-h-0 flex-1"
             />
           ) : (
             <div
@@ -265,37 +297,48 @@ export function BriefingLandingPage({
           />
         </div>
 
-        {/* Left col row 2: NPCs + voice */}
-        <div className="flex min-h-0 flex-col gap-2 overflow-hidden">
-          <NpcSelector
-            campaignId={campaignId}
-            npcIds={npcsInLocation}
-            activeNpcId={selectedNpcId ?? undefined}
-            onSelectNpc={(id) => {
-              const next = selectedNpcId === id ? null : id;
-              setSelectedNpcId(next);
-              setActiveNpc(runId, next ?? undefined);
-            }}
-            compact
-            className="min-h-0 flex-1"
-          />
-          {selectedNpcId && (
-            <NpcVoicePanelWithIntro
+        {/* Left col row 2: NPCs + voice (single panel) */}
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60">
+          <h4 className="font-heading shrink-0 border-b border-neutral-600 px-3 py-2 text-xs font-medium uppercase tracking-wider text-amber-200/90">
+            NPCs in this location
+          </h4>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2">
+            <NpcSelector
               campaignId={campaignId}
-              runId={runId}
-              npcId={selectedNpcId}
-              onExit={() => {
-                setActiveNpc(runId, undefined);
-                setSelectedNpcId(null);
-                forceRefresh((x) => x + 1);
+              npcIds={npcsInLocation}
+              activeNpcId={selectedNpcId ?? undefined}
+              onSelectNpc={(id) => {
+                const next = selectedNpcId === id ? null : id;
+                setSelectedNpcId(next);
+                setActiveNpc(runId, next ?? undefined);
               }}
-              onUpdate={() => forceRefresh((x) => x + 1)}
+              strip
+              className="shrink-0"
             />
-          )}
+            {selectedNpcId ? (
+              <div className="mt-2 min-h-0 flex-1 overflow-hidden border-t border-neutral-600 pt-2">
+                <NpcVoicePanelWithIntro
+                  key={selectedNpcId}
+                  campaignId={campaignId}
+                  runId={runId}
+                  npcId={selectedNpcId}
+                  embedded
+                  onExit={() => {
+                    setActiveNpc(runId, undefined);
+                    setSelectedNpcId(null);
+                    forceRefresh((x) => x + 1);
+                  }}
+                  onUpdate={() => forceRefresh((x) => x + 1)}
+                />
+              </div>
+            ) : (
+              <p className="mt-2 shrink-0 text-xs text-neutral-500">Select an NPC to talk.</p>
+            )}
+          </div>
         </div>
 
         {/* Center col row 2: Internal map (hidden during prologue) */}
-        <div className="hidden min-h-0 overflow-hidden lg:block">
+        <div className="hidden min-h-0 overflow-hidden lg:flex lg:flex-col">
           {!isPrologue && (
             <InternalLocationMap
               locations={internalLocations}
@@ -303,13 +346,17 @@ export function BriefingLandingPage({
               exploredLocationIds={runState.exploredLocationIds ?? []}
               exploredPoiIds={runState.exploredPoiIds ?? []}
               characters={runState.characters ?? []}
+              solvedPuzzleIds={runState.solvedPuzzleIds ?? []}
               selectedLocationId={viewedLocationId ?? undefined}
+              selectedPoiId={selectedPoiId ?? undefined}
               onLocationClick={handleSelectLocation}
+              onPoiClick={(poiId) => setSelectedPoiId((prev) => (prev === poiId ? null : poiId))}
               onMarkVisited={handleMarkVisited}
+              onMarkPoiExplored={handleMarkPoiExplored}
               regionName={regionName}
               primaryRegionId={primaryRegionId}
               compact
-              className="h-full"
+              className="min-h-0 flex-1"
             />
           )}
         </div>
@@ -323,10 +370,15 @@ export function BriefingLandingPage({
               currentLocationId={currentLocationId}
               exploredLocationIds={runState.exploredLocationIds ?? []}
               exploredPoiIds={runState.exploredPoiIds ?? []}
+              solvedPuzzleIds={runState.solvedPuzzleIds ?? []}
               characters={runState.characters ?? []}
               onLocationClick={handleSelectLocation}
               onMarkVisited={handleMarkVisited}
               onMarkPoiExplored={handleMarkPoiExplored}
+              onPuzzleSolved={campaignId === "another-bug-hunt" ? handlePuzzleSolved : undefined}
+              getPuzzleConfig={campaignId === "another-bug-hunt" ? getWordPuzzleConfig : undefined}
+              takenPoiItems={runState.takenPoiItems}
+              onTakeItem={handleTakeItem}
               entryConfig={GRETA_BASE_ENTRY_POIS}
               onEnterInterior={(targetId) => {
                 addExploredLocation(runId, targetId);
@@ -362,9 +414,13 @@ export function BriefingLandingPage({
             exploredLocationIds={runState.exploredLocationIds ?? []}
             exploredPoiIds={runState.exploredPoiIds ?? []}
             characters={runState.characters ?? []}
+            solvedPuzzleIds={runState.solvedPuzzleIds ?? []}
             selectedLocationId={viewedLocationId ?? undefined}
+            selectedPoiId={selectedPoiId ?? undefined}
             onLocationClick={handleSelectLocation}
+            onPoiClick={(poiId) => setSelectedPoiId((prev) => (prev === poiId ? null : poiId))}
             onMarkVisited={handleMarkVisited}
+            onMarkPoiExplored={handleMarkPoiExplored}
             regionName={regionName}
             primaryRegionId={primaryRegionId}
             compact

@@ -148,7 +148,7 @@ export const ANOTHER_BUG_HUNT_ITEMS: Record<string, Item> = {
   "birthday-card-olsson": {
     id: "birthday-card-olsson",
     name: "Birthday card to Olsson (unopened)",
-    description: "'Thanks for always listening. Hopefully, they'll let me leave after this one.'",
+    description: "'Thanks for always listening. Happy 47th. –E'",
   },
 
   // Command Center
@@ -208,6 +208,21 @@ export const ANOTHER_BUG_HUNT_ITEMS: Record<string, Item> = {
     id: "freezer-keycard",
     name: "Freezer keycard",
     description: "Opens the Walk-in Freezer door.",
+  },
+  "greta-base-schematics": {
+    id: "greta-base-schematics",
+    name: "Greta Base Schematics",
+    description: "Complete floorplan showing all rooms, doors, and ventilation ducts.",
+  },
+  "mulburstrawberlyberry-gum": {
+    id: "mulburstrawberlyberry-gum",
+    name: "Mulburstrawberlyberry chewing gum",
+    description: "Rare vintage gum. Distinctive purple wrapper. Apparently a family heirloom to some.",
+  },
+  "debt-slip-50cr": {
+    id: "debt-slip-50cr",
+    name: "Debt slip (50cr)",
+    description: "A handwritten IOU from Renfield for 50 credits. Collectable at Last Light Station.",
   },
 
   // Crafted items

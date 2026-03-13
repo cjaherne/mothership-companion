@@ -9,6 +9,7 @@
 /** Emotional state modifiers that influence NPC responses */
 export type EmotionalState =
   | "calm"
+  | "nervous"
   | "panicked"
   | "suspicious"
   | "hostile"
@@ -47,6 +48,9 @@ export interface NPCPersonalityProfile {
 
   /** Display name (e.g., "Panicked Marine", "Cynical Android") */
   name: string;
+
+  /** Short role label for UI (e.g., "Pilot", "Corporate liaison") */
+  role?: string;
 
   /** Archetype description for system prompt injection */
   archetype: string;

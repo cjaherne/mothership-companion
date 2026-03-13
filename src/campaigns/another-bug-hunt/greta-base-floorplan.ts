@@ -22,6 +22,8 @@ export interface DoorConnection {
   isLocked: boolean;
   /** Item IDs required to unlock; party must possess all. Overrides isLocked when satisfied. */
   requiredItemIds?: string[];
+  /** Puzzle IDs that bypass the lock when solved (e.g. prefab-terminal overrides airlock) */
+  unlockOverridePuzzleIds?: string[];
 }
 
 export interface VentConnection {
@@ -64,19 +66,13 @@ const EXTERIOR_DOORS: DoorConnection[] = [
     poiId: "airlock-exterior-door",
     isLocked: true,
     requiredItemIds: ["airlock-keycard"],
+    unlockOverridePuzzleIds: ["prefab-terminal"],
   },
   { from: "outside-garage", to: "garage", poiId: "garage-exterior-doors", isLocked: false },
 ];
 
 const DOORS: DoorConnection[] = [
   ...EXTERIOR_DOORS,
-  {
-    from: "airlock",
-    to: "commissary",
-    poiId: "interior-door",
-    isLocked: true,
-    requiredItemIds: ["interior-keycard"],
-  },
   { from: "commissary", to: "pantry", poiId: "kitchenette", isLocked: false },
   { from: "commissary", to: "crew-habitat", poiId: "barricade", isLocked: false },
   { from: "crew-habitat", to: "armory", poiId: "blast-door", isLocked: false },
@@ -94,8 +90,20 @@ const VENTS: VentConnection[] = [
   { from: "medbay-operating-room", to: "garage", poiIds: ["vent-to-garage", "fuel-barrels"] },
 ];
 
+/** Extended implicit door: can include puzzle overrides (e.g. prefab-terminal bypasses airlock keycard) */
+export interface ImplicitDoor extends Omit<DoorConnection, "poiId"> {
+  unlockOverridePuzzleIds?: string[];
+}
+
 /** Generic door connections (no explicit POI; revealed when either room visited) */
-const IMPLICIT_DOORS: Omit<DoorConnection, "poiId">[] = [
+const IMPLICIT_DOORS: ImplicitDoor[] = [
+  {
+    from: "airlock",
+    to: "commissary",
+    isLocked: true,
+    requiredItemIds: ["airlock-keycard"],
+    unlockOverridePuzzleIds: ["prefab-terminal"],
+  },
   { from: "commissary", to: "command-center", isLocked: false },
   { from: "crew-habitat", to: "medbay", isLocked: false },
   { from: "medbay", to: "command-center", isLocked: false },

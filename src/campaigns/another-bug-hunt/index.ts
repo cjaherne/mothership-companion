@@ -28,11 +28,19 @@ export const anotherBugHuntCampaign: CampaignConfig = {
   world: anotherBugHuntWorld,
   scenarios,
   missions,
-  npcIds: ["maas", "demar"],
+  npcIds: ["maas", "anders", "renfield", "demar"],
   npcUnlockConditions: {
     maas: {
       type: "location",
       locationIds: ["the-metamorphosis"],
+    },
+    anders: {
+      type: "location",
+      locationIds: ["landing-zone"],
+    },
+    renfield: {
+      type: "location",
+      locationIds: ["landing-zone"],
     },
     demar: {
       type: "poi",
@@ -43,7 +51,6 @@ export const anotherBugHuntCampaign: CampaignConfig = {
   },
   puzzleIds,
   craftRecipes,
-  roomName: "mothership-another-bug-hunt",
   wardenNarrator: {
     narrative: `Six months. That's how long Greta Base has been silent. Samsa VI—a jungle planet, a terraforming colony, a research station. The Company sends you because someone has to. The tropical storm howls outside. Radio is dead. You descend into darkness. The facility is ransacked. No survivors—or so it seems. Something waits in the shadows. Something that came from the samples.`,
   },

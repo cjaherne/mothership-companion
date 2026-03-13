@@ -7,7 +7,7 @@ A voice-interactive Warden companion for **Mothership** RPG scenarios. Create ch
 - **Character creation** — Build Mothership characters with class (Marine, Android, Scientist, Teamster), sex, stats, saves, skills, loadout, trinket, and patch. Roll random or customize. Optional AI-generated character artwork (Replicate SDXL).
 - **Campaign runs** — Create new runs or resume previous sessions. Runs persist locally.
 - **Briefing & maps** — Read scenario background, explore the Samsa VI planet map, drill into regions (Greta Base, Heron Station, etc.), and view location details with points of interest.
-- **NPC interaction** — See NPCs in each location. Connect to the Warden or any NPC for real-time voice chat powered by LiveKit and OpenAI.
+- **NPC interaction** — See NPCs in each location. Connect to the Warden or any NPC for real-time voice chat via click-to-talk (OpenAI STT, LLM, TTS).
 - **Rule references** — Open the Player's Survival Guide and Shipbreaker's Toolkit PDFs from the sidebar.
 
 ## Tech Stack
@@ -15,7 +15,7 @@ A voice-interactive Warden companion for **Mothership** RPG scenarios. Create ch
 | Layer | Technology |
 |-------|------------|
 | **Frontend** | Next.js 14, React 18, Tailwind CSS |
-| **Voice** | LiveKit (VAD, STT, TTS), OpenAI |
+| **Voice** | OpenAI (Whisper STT, gpt-4o-mini, TTS) — click-to-talk |
 | **AI** | Vercel AI SDK, OpenAI (orchestration, NPC logic) |
 | **Character art** | Replicate (SDXL img2img) — optional |
 
@@ -38,29 +38,16 @@ Edit `.env.local` and set:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `LIVEKIT_URL` | Yes | LiveKit WebSocket URL (e.g. `wss://your-project.livekit.cloud`) |
-| `LIVEKIT_API_KEY` | Yes | LiveKit API key |
-| `LIVEKIT_API_SECRET` | Yes | LiveKit API secret |
-| `OPENAI_API_KEY` | Yes | OpenAI API key (AI + TTS) |
+| `OPENAI_API_KEY` | Yes | OpenAI API key (AI, TTS, Whisper STT) |
 | `REPLICATE_API_TOKEN` | No | For character artwork generation |
 
 > `.env.local` is gitignored. Never commit it. See [docs/env-setup.md](docs/env-setup.md) for details.
 
-### 3. Run the app and agent
+### 3. Run the app
 
-Use **two terminals**:
-
-**Terminal 1 — Next.js app:**
 ```bash
 npm run dev
 ```
-
-**Terminal 2 — LiveKit voice agent:**
-```bash
-npm run agent:dev
-```
-
-The agent must run before voice sessions work.
 
 ### 4. Open the app
 
@@ -93,7 +80,7 @@ Click **Add player** for each character, then **Start session** when ready.
 ### Step 4: Talk to the Warden or NPCs
 
 - Click **Talk to Warden** to speak with the narrator, or select an NPC and click **Connect** to talk to them
-- Your mic streams to LiveKit; the agent responds with voice
+- Use click-to-talk; the AI responds with voice
 - Exit the session to return to the briefing view
 
 ### Other actions
@@ -111,7 +98,7 @@ mothership-companion/
 │   │   ├── api/
 │   │   │   ├── ai/orchestrate/   # AI SDK NPC/puzzle logic
 │   │   │   ├── character-art/    # Replicate artwork generation
-│   │   │   ├── livekit/token/    # LiveKit JWT for client
+│   │   │   ├── voice/talk/       # Click-to-talk (STT → LLM → TTS)
 │   │   │   ├── run/state/        # Run state persistence
 │   │   │   └── tts/              # Briefing TTS
 │   │   ├── layout.tsx
@@ -131,19 +118,18 @@ mothership-companion/
 │   │   ├── BriefingLandingPage.tsx
 │   │   ├── CharacterList.tsx
 │   │   ├── NpcSelector.tsx
-│   │   ├── NpcVoicePanel.tsx
+│   │   ├── NpcVoicePanelWithIntro.tsx
 │   │   ├── SamsaVIMap.tsx
 │   │   ├── InternalLocationMap.tsx
 │   │   ├── LocationDetailMap.tsx
-│   │   └── VoiceSessionView.tsx
+│   │   └── ClickToTalkPanel.tsx
 │   ├── lib/
 │   │   ├── mothership.ts         # Character creation rules
 │   │   ├── mothership-skills.ts
 │   │   └── runs.ts               # Run state
 │   └── types/
-├── agent/                        # LiveKit voice agent (runs separately)
-│   ├── main.ts
-│   └── README.md
+├── scripts/                  # Build utilities
+│   └── preGenerateTts.ts     # Pre-generate TTS MP3s
 └── package.json
 ```
 
@@ -154,15 +140,13 @@ mothership-companion/
 | `npm run dev` | Start Next.js dev server |
 | `npm run build` | Production build |
 | `npm run start` | Run production server |
-| `npm run agent:dev` | Start LiveKit agent (dev) |
-| `npm run agent:start` | Start LiveKit agent (prod) |
+| `npm run pregenerate-tts` | Pre-generate static TTS (NPC intros, briefing pages, location backgrounds) |
 | `npm test` | Run tests |
 
 ## Documentation
 
 - [Environment setup](docs/env-setup.md) — Env vars and security
 - [OpenAI API key](docs/openai-api-key.md) — Getting an API key
-- [Agent README](agent/README.md) — LiveKit agent details
 
 ## License
 

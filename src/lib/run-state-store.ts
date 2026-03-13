@@ -1,7 +1,7 @@
 /**
  * Server-side in-memory run state store
  *
- * Used by /api/run/state and /api/livekit/cleanup.
+ * Used by /api/run/state for voice and orchestration.
  * Resets on server restart.
  */
 

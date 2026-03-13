@@ -15,6 +15,8 @@ const medbayOperatingRoom: Location = {
   name: "Medbay — Operating Room",
   description:
     "The entire operating area has been destroyed. Equipment is smashed or fused together by carc webbing. Four large specimen containment tubes hold carcinid larvae. Something has been here.",
+  backgroundText:
+    "The operating room. The entire area has been destroyed—equipment smashed or fused together by something that doesn't belong in a medbay. Specimen containment tubes line the space. A vent in the wall connects to the Garage. A fuel-barrel stack blocks another passage. Whatever happened here, it wasn't surgery.",
   parentLocationId: "medbay",
   isLocked: true,
   lockNote: "Only Dr. Edem has the keycard.",
@@ -69,6 +71,8 @@ const outsideAirlockLocation: Location = {
   name: "Outside Airlock",
   description:
     "The front of Greta Base. Deep tread tracks in the mud lead straight to the reinforced exterior door of the Airlock. The door is rusted but sealed. Rain hammers the prefab walls.",
+  backgroundText:
+    "The storm hasn't let up. Rain hammers the prefab walls of Greta Base, streaming down corrugated panels in grey sheets. You're standing in the mud at the front of the facility—deep tread tracks cut through the muck, leading straight to the reinforced exterior door of the Airlock. The door is rusted, sealed, silent. To your sides, the perimeter wall stretches away into the downpour. The base looms above you, dark and unresponsive.",
   connectedLocationIds: ["landing-zone", "airlock"],
   pointsOfInterest: [
     {
@@ -93,6 +97,8 @@ const outsideGarageLocation: Location = {
   name: "Outside Garage",
   description:
     "Around the back of Greta Base. The heavy industrial roll-up doors of the Garage loom ahead. A rhythmic thud reverberates through the metal. Piles of mud flank the entrance — something is buried in them.",
+  backgroundText:
+    "The back of Greta Base. Torrential rain soaks everything—the mud underfoot, the industrial roll-up doors ahead, the rear perimeter wall. A rhythmic thud reverberates through the metal, barely audible over the storm. Piles of mud flank the garage entrance, slumped and uneven. The heavy doors loom in front of you. The jungle presses in from all sides, grey and thrashing.",
   connectedLocationIds: ["landing-zone", "garage"],
   pointsOfInterest: [
     {
@@ -127,9 +133,12 @@ export const gretaBaseLocations: Location[] = [
     name: "Airlock",
     description:
       "Rust creeps over the large metal door barring entry. Muddy floors inside. Storage lockers line the walls. The interior door will not open while the exterior is open.",
+    backgroundText:
+      "You're inside the Airlock. Mud from outside has been tracked across the floor. Rust creeps over the exterior door behind you and the interior door ahead. Storage lockers line the walls—standard issue, a few dented. The air is stale. Beyond the interior door lies the base proper.",
     isLocked: true,
     lockNote: "Exterior door requires a keycard (reinforced steel). Interior door is also keycard-locked.",
     requiredItemIds: ["airlock-keycard"],
+    unlockOverridePuzzleIds: ["prefab-terminal"],
     connectedLocationIds: ["outside-airlock", "commissary"],
     pointsOfInterest: [
       {
@@ -148,6 +157,15 @@ export const gretaBaseLocations: Location[] = [
         description: "Lockers lining the walls. A few have deep indentations. One has giant claw marks across it.",
         itemIds: ["hazard-suit", "pulse-rifle-magazine-x2", "rosary"],
       },
+      {
+        id: "locker-47",
+        name: "Locker 47 (Olsson)",
+        description:
+          "One locker bears scratched initials O.R. and the number 47. A small combination dial. Someone (Resnick?) hid something here.",
+        requiredPoiIds: ["storage-lockers"],
+        puzzleId: "olsson-birthday-locker",
+        itemIds: ["freezer-keycard"],
+      },
     ],
   },
   {
@@ -155,12 +173,15 @@ export const gretaBaseLocations: Location[] = [
     name: "Commissary",
     description:
       "Ransacked mess hall and rec room. Flickering lights. Rain drips from bullet holes in the ceiling. A 'Happy Birthday Olsson' banner droops from above. Empty cups, broken glass, bullet casings, and giant claw gouges everywhere.",
+    backgroundText:
+      "The commissary—mess hall and rec room. The space has been ransacked. Flickering emergency lighting casts long shadows. Rain drips through bullet holes in the ceiling. A 'Happy Birthday Olsson' banner droops from above. You can make out the kitchenette, tables, a makeshift barricade against one door. The air tastes of stale smoke and something else.",
     connectedLocationIds: ["airlock", "pantry", "crew-habitat", "command-center"],
     pointsOfInterest: [
       {
         id: "birthday-banner",
         name: "'Happy Birthday Olsson' Banner",
-        description: "Droops from the ceiling. The party clearly went very wrong.",
+        description:
+          "Droops from the ceiling. The party clearly went very wrong. On the back, in fading marker: 'Present in the usual spot. –R' and a list of names: Xavier, Lange, Kaplan, Edem, Resnick.",
       },
       {
         id: "xcorp-corpse",
@@ -201,6 +222,8 @@ export const gretaBaseLocations: Location[] = [
     name: "Pantry",
     description:
       "The shelves are completely bare, their contents divided into large piles of MREs on the floor. Something slumped in the far corner.",
+    backgroundText:
+      "The pantry. Every shelf has been stripped bare. MRE rations are stacked in rough piles across the floor—someone emptied the stocks in a hurry. The kitchenette connects back to the commissary. The air is thick. It pays to look around.",
     connectedLocationIds: ["commissary"],
     pointsOfInterest: [
       {
@@ -216,6 +239,13 @@ export const gretaBaseLocations: Location[] = [
           "A marine, slumped in the far corner. 'Paper cuts' criss-cross the emaciated body. Scientist or Medical skill: starved to death.",
         itemIds: ["dog-tags-lange"],
       },
+      {
+        id: "birthday-cake-ruins",
+        name: "Ruined Birthday Cake",
+        description:
+          "Smashed cake, mostly eaten. A plastic '47' candle topper lies in the frosting.",
+        requiredPoiIds: ["mre-piles"],
+      },
     ],
   },
   {
@@ -223,6 +253,8 @@ export const gretaBaseLocations: Location[] = [
     name: "Walk-in Freezer",
     description:
       "A medical-grade walk-in freezer. Around -40°C. Empty except for one frozen marine and a discarded medical case.",
+    backgroundText:
+      "A medical-grade walk-in freezer. The cold hits you like a wall—around -40°C. Frost coats the walls. The space is mostly empty. A ceiling vent connects to the Medbay above. Your breath fogs in the air.",
     isLocked: true,
     lockNote: "Locked. No keycard has been found.",
     requiredItemIds: ["freezer-keycard"],
@@ -255,6 +287,8 @@ export const gretaBaseLocations: Location[] = [
     name: "Crew Habitat",
     description:
       "The main habitation unit of the base. Graffiti at the entrance reads 'COMMS OFF.' A rhythmic thud carries through the walls. Made up of areas A through F.",
+    backgroundText:
+      "The main habitation unit. Graffiti at the entrance reads 'COMMS OFF.' A rhythmic thud carries through the walls—distant, relentless. The space is divided into areas: group showers, enlisted barracks, officer barracks, quarters. Doors line the corridor. The barricade from the commissary has been pushed aside. Something happened here.",
     connectedLocationIds: ["commissary", "armory", "medbay"],
     pointsOfInterest: [
       {
@@ -303,7 +337,7 @@ export const gretaBaseLocations: Location[] = [
         id: "research-barracks",
         name: "E. Research Team Barracks",
         description:
-          "Five bunks. A Bao-Neumann 'BZT' gaming console, a marijuana plant, a copy of 'The Auctioneer' by Joan Samson, and an anime body pillow.",
+          "Five bunks. A Bao-Neumann 'BZT' gaming console, a marijuana plant, a copy of 'The Auctioneer' by Joan Samson (a bookmark at p.47; margin note: 'Resnick's verse — line 23'), and an anime body pillow.",
         itemIds: [
           "bao-neumann-bzt-console",
           "marijuana-plant",
@@ -316,7 +350,7 @@ export const gretaBaseLocations: Location[] = [
         id: "edem-quarters",
         name: "F. Dr. Edem's Quarters",
         description:
-          "Weather charts pinned to the wall show a major storm system incoming. An unopened birthday card addressed to Olsson sits on the desk. Inside: 'Thanks for always listening. Hopefully, they'll let me leave after this one.'",
+          "Weather charts pinned to the wall show a major storm system incoming. An unopened birthday card addressed to Olsson sits on the desk. Inside: 'Thanks for always listening. Happy 47th. –E'",
         itemIds: [
           "weather-charts-storm",
           "birthday-card-olsson",
@@ -330,6 +364,8 @@ export const gretaBaseLocations: Location[] = [
     name: "Armory",
     description:
       "A rugged interior metal cage lined with lockers. The industrial blast door has been ripped off and discarded. What's left of the armory is a giant pile of fused, melted metal.",
+    backgroundText:
+      "The armory. Or what's left of it. The industrial blast door has been torn from its frame and thrown aside. The rugged metal cage is breached. Lockers line the interior. The contents have been altered—something did a number on the weapons cache. The air smells of scorched metal.",
     connectedLocationIds: ["crew-habitat"],
     pointsOfInterest: [
       {
@@ -355,6 +391,8 @@ export const gretaBaseLocations: Location[] = [
     name: "Medbay — Analysis Lab",
     description:
       "A small medical area. The observation and analysis lab is separated from the operating room by a glass wall. Computer terminals are powered down. Piles of loose paperwork. A log book.",
+    backgroundText:
+      "The Medbay—specifically the analysis and observation lab. Computer terminals sit powered down. Piles of loose paperwork. A glass wall separates this area from the operating room beyond; the door is locked. A ceiling vent leads to the walk-in freezer. The medbay has seen better days.",
     connectedLocationIds: ["crew-habitat", "command-center"],
     pointsOfInterest: [
       {
@@ -366,7 +404,7 @@ export const gretaBaseLocations: Location[] = [
         id: "logbook",
         name: "Dr. Edem's Log Book",
         description:
-          "Latest entries: notes from Dr. Edem, excited at their discovery of what they call the 'krebslieder' or 'crabsong' — a shrill Shriek the carcinids use in order to replicate. Edem credits Hinton with much of the legwork but claims to have 'put two and two together' herself.",
+          "Latest entries: notes from Dr. Edem, excited at their discovery of what they call the 'krebslieder' or 'crabsong' — a shrill Shriek the carcinids use in order to replicate. Edem credits Hinton with much of the legwork but claims to have 'put two and two together' herself. A later note: 'Resnick insisted on that awful song for Olsson. And the book — Olsson never went anywhere without it.'",
         isHidden: true,
       },
       {
@@ -390,6 +428,8 @@ export const gretaBaseLocations: Location[] = [
     name: "Command Center",
     description:
       "The central nervous system of the base and primary communication station for the Company. Central computer and communication instruments are smashed. Emergency lighting only.",
+    backgroundText:
+      "The Command Center—the base's central nervous system. Primary comms for the Company. The central computer and communication equipment have been smashed. Emergency lighting casts a dull glow over the wreckage.",
     connectedLocationIds: ["medbay", "commissary"],
     pointsOfInterest: [
       {
@@ -416,6 +456,8 @@ export const gretaBaseLocations: Location[] = [
     name: "Garage / Utilities",
     description:
       "The back entrance to the base. Heavy industrial overhead roll-up doors, barricaded from inside. An APC on one side. A gigantic dirt hole on the other. Something is in here.",
+    backgroundText:
+      "The Garage and utilities bay. Heavy industrial roll-up doors—barricaded from inside—let in slivers of grey storm light. An Armored Personnel Carrier sits on one side, controls visible. A gigantic dirt hole dominates the other. A tool bench, fuel barrels, and a backup generator fill the space. A vent leads to the Medbay Operating Room. The rhythmic thud is loudest here.",
     connectedLocationIds: ["outside-garage", "medbay"],
     pointsOfInterest: [
       {
@@ -469,7 +511,7 @@ export const gretaBaseLocations: Location[] = [
         id: "backup-generator",
         name: "Backup Generator",
         description:
-          "Currently offline. If restarted it brings electricity back to the entire base. Warning: loud party music immediately plays from the Commissary (Fear Save with advantage).",
+          "Currently offline. If restarted it brings electricity back to the entire base. Warning: loud party music immediately plays from the Commissary (Fear Save with advantage). The tinny pop song blares: '...twenty-two, make a wish for me...'",
       },
     ],
   },
@@ -478,13 +520,32 @@ export const gretaBaseLocations: Location[] = [
 /** Prologue location — one-off, no connections. Only Maas is here. */
 export const THE_METAMORPHOSIS_ID = "the-metamorphosis";
 
-/** Exterior locations and POIs that allow entry into Greta Base interior rooms */
-export const GRETA_BASE_ENTRY_POIS: Record<
-  string,
-  { poiId: string; targetLocationId: string }
-> = {
-  "outside-airlock": { poiId: "airlock-exterior-door", targetLocationId: "airlock" },
+/** Entry config: POI that reveals "Enter X" button; lock from target or per-entry override */
+export interface EntryConfigItem {
+  poiId: string;
+  targetLocationId: string;
+  /** Lock for this passage (when lock is on the door, not the target room) */
+  requiredItemIds?: string[];
+  unlockOverridePuzzleIds?: string[];
+  lockNote?: string;
+}
+
+export const GRETA_BASE_ENTRY_POIS: Record<string, EntryConfigItem> = {
+  "outside-airlock": {
+    poiId: "airlock-exterior-door",
+    targetLocationId: "airlock",
+    requiredItemIds: ["airlock-keycard"],
+    unlockOverridePuzzleIds: ["prefab-terminal"],
+    lockNote: "Keycard or solve the prefab terminal puzzle.",
+  },
   "outside-garage": { poiId: "garage-exterior-doors", targetLocationId: "garage" },
+  "airlock": {
+    poiId: "interior-door",
+    targetLocationId: "commissary",
+    requiredItemIds: ["airlock-keycard"],
+    unlockOverridePuzzleIds: ["prefab-terminal"],
+    lockNote: "Keycard or solve the prefab terminal puzzle.",
+  },
 };
 
 /** Location IDs that belong to each primary region (for Internal Location Map) */
@@ -527,7 +588,7 @@ export const samsaVIPlanetMap = {
       id: "heron-station",
       name: "Heron Station",
       description:
-        "Secondary terraforming research outpost. A riverbank clearing in dense jungle.",
+        "Secondary terraforming research outpost. A riverbank clearing in dense jungle. Inaccessible during the storm.",
     },
     {
       id: "mothership",
@@ -608,11 +669,55 @@ export const anotherBugHuntWorld: World = {
       connectedLocationIds: ["outside-airlock", "outside-garage"],
       pointsOfInterest: [
         {
+          id: "dropship",
+          name: "Dropship",
+          description:
+            "The craft you just stepped off. Pilots Anders and Renfield wait by the ramp, staying close to the ship.",
+          npcsPresent: ["anders", "renfield"],
+        },
+        {
+          id: "investigate-area",
+          name: "Investigate the Area",
+          description:
+            "You survey the mud-soaked landing zone. Deep tread tracks cut through the mud, leading toward Greta Base in the distance. A deserted prefab structure sits to one side, a broken window staring out at the rain. You can investigate the prefab, proceed down the tread tracks toward Greta Base to get out of the rain and storm, or examine the tread tracks more closely.",
+        },
+        {
+          id: "landing-zone-prefab",
+          name: "Landing Zone Prefab",
+          description:
+            "A deserted modular prefab structure. A broken window. Abandoned equipment and vines creep through the gaps. A marine corpse lies in a pool of dried blood. A security terminal glows faintly in one corner—locked.",
+          requiredPoiIds: ["investigate-area"],
+        },
+        {
+          id: "prefab-corpse",
+          name: "Dead Marine Corpse",
+          description:
+            "A marine in torn fatigues. Viciously mauled—deep claw gouges across the torso. The dog-tag chain is broken; the tags have been removed. A thorough search reveals a rare mulburstrawberlyberry chewing gum tucked in a pocket.",
+          requiredPoiIds: ["landing-zone-prefab"],
+          itemIds: ["mulburstrawberlyberry-gum"],
+        },
+        {
+          id: "prefab-terminal",
+          name: "Locked Security Terminal",
+          description:
+            "A terminal still drawing power. Locked. If bypassed, it could override the base Airlock door system. The security footage option shows landing zone cameras—the feed is too fuzzy to make out details, but faint high-pitched noises followed by screaming can be heard.",
+          requiredPoiIds: ["landing-zone-prefab"],
+          puzzleId: "prefab-terminal",
+        },
+        {
           id: "tread-tracks",
           name: "Deep Tread Tracks",
           description:
-            "Heavy vehicle tracks pressed deep into the mud. Path A.1 follows them to the Airlock exterior.",
+            "Heavy vehicle tracks pressed deep into the mud. Path A.1 follows them to the Airlock exterior—a route to get out of the rain and storm. Closer inspection reveals a fork where the trail splits.",
           connectedTo: ["outside-airlock"],
+          requiredPoiIds: ["investigate-area"],
+        },
+        {
+          id: "greta-base-view",
+          name: "Greta Base (Distant)",
+          description:
+            "In the distance ahead: Greta Base. Lights out. Unresponsive to hailing. The tread tracks lead straight toward it.",
+          requiredPoiIds: ["investigate-area"],
         },
         {
           id: "trail-fork",
@@ -620,12 +725,7 @@ export const anotherBugHuntWorld: World = {
           description:
             "A muddy fork in the trail. Path A.2 winds around the back of the base toward the Garage.",
           connectedTo: ["outside-garage"],
-        },
-        {
-          id: "greta-base-view",
-          name: "Greta Base (Distant)",
-          description:
-            "In the distance ahead: Greta Base. Lights out. Unresponsive to hailing.",
+          requiredPoiIds: ["tread-tracks"],
         },
       ],
     },
@@ -635,21 +735,21 @@ export const anotherBugHuntWorld: World = {
       id: "greta-base",
       name: "Greta Base",
       description:
-        "Abandoned terraforming facility. Accessible via the Airlock (front) or the Garage (back). All but emergency power is out. A powerful tropical storm is rolling in.",
-      connectedLocationIds: ["outside-airlock", "outside-garage", "heron-station"],
+        "Abandoned terraforming facility. Accessible via the Airlock (front) or the Garage (back). All but emergency power is out. A powerful tropical storm is rolling in. The trail to Heron Station is impassable in these conditions.",
+      connectedLocationIds: ["outside-airlock", "outside-garage"],
     },
     {
       id: "heron-station",
       name: "Heron Station",
       description:
-        "A river bank clearing in the middle of dense jungle. The terraforming station sits against a fast-flowing river, which threatens to flood.",
-      connectedLocationIds: ["greta-base"],
+        "A river bank clearing in the middle of dense jungle. The terraforming station sits against a fast-flowing river. Currently inaccessible—the tropical storm has made the trails impassable.",
+      connectedLocationIds: [],
     },
     {
       id: "mothership",
       name: "Mothership",
       description: "Location not yet discovered.",
-      connectedLocationIds: ["greta-base", "heron-station"],
+      connectedLocationIds: ["greta-base"],
       isHiddenAtStart: true,
     },
     ...gretaBaseLocations,

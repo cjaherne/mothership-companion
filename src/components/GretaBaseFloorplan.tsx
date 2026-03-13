@@ -1,6 +1,6 @@
 "use client";
 
-import type { RoomRect, DoorConnection, VentConnection } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
+import type { RoomRect, DoorConnection, VentConnection, ImplicitDoor } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
 import { GRETA_BASE_FLOORPLAN } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
 import { hasRequiredItems } from "@/lib/inventory-utils";
 import type { Character } from "@/types/run";
@@ -12,6 +12,8 @@ interface GretaBaseFloorplanProps {
   exploredPoiIds: string[];
   /** Party characters (for item-based door unlocks) */
   characters?: Character[];
+  /** Solved puzzle IDs (e.g. prefab-terminal overrides airlock keycard) */
+  solvedPuzzleIds?: string[];
   selectedLocationId?: string;
   onLocationClick?: (locationId: string) => void;
   onMarkVisited?: (locationId: string) => void;
@@ -76,6 +78,7 @@ export function GretaBaseFloorplan({
   exploredLocationIds,
   exploredPoiIds,
   characters = [],
+  solvedPuzzleIds = [],
   selectedLocationId,
   onLocationClick,
   onMarkVisited,
@@ -85,18 +88,29 @@ export function GretaBaseFloorplan({
   const roomMap = new Map(rooms.map((r) => [r.id, r]));
   const exploredSet = new Set(exploredPoiIds);
   const exploredLocs = new Set(exploredLocationIds);
+  const hasSchematics = hasRequiredItems(characters, ["greta-base-schematics"]);
 
   const { doors, vents, implicitDoors } = GRETA_BASE_FLOORPLAN;
+
+  /** Room is visible: has schematics (shows all) or is current/visited */
+  const isRoomVisible = (id: string) =>
+    hasSchematics || exploredLocs.has(id) || id === currentLocationId;
 
   const isDoorRevealed = (poiId: string) => exploredSet.has(poiId);
   const isImplicitDoorRevealed = (from: string, to: string) =>
     exploredLocs.has(from) || exploredLocs.has(to);
   const isVentRevealed = (poiIds: string[]) => poiIds.some((id) => exploredSet.has(id));
 
-  const isDoorUnlocked = (d: DoorConnection | Omit<DoorConnection, "poiId">) =>
-    d.requiredItemIds?.length
+  const solvedSet = new Set(solvedPuzzleIds);
+  const isDoorUnlocked = (d: DoorConnection | ImplicitDoor) => {
+    const implicit = d as ImplicitDoor;
+    if (implicit.unlockOverridePuzzleIds?.some((id) => solvedSet.has(id))) {
+      return true;
+    }
+    return d.requiredItemIds?.length
       ? hasRequiredItems(characters, d.requiredItemIds)
       : !d.isLocked;
+  };
 
   const getRoomStyle = (id: string) => {
     const isCurrent = id === currentLocationId;
@@ -109,13 +123,13 @@ export function GretaBaseFloorplan({
   };
 
   return (
-    <div className={`overflow-auto rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${compact ? "p-2" : "p-4"} ${className}`}>
-      <h4 className={`font-heading text-xs font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "mb-1" : "mb-3"}`}>
+    <div className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${compact ? "p-2" : "p-4"} ${className}`}>
+      <h4 className={`font-heading shrink-0 text-xs font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "mb-1" : "mb-3"}`}>
         Greta Base — Minimap
       </h4>
       <svg
         viewBox={`0 0 ${GRETA_BASE_FLOORPLAN.viewBox.w} ${GRETA_BASE_FLOORPLAN.viewBox.h}`}
-        className={`h-full w-full ${compact ? "min-h-[140px]" : "min-h-[280px]"}`}
+        className="min-h-0 flex-1 w-full"
         preserveAspectRatio="xMidYMid meet"
       >
         <defs>
@@ -129,7 +143,8 @@ export function GretaBaseFloorplan({
         {vents.map((v) => {
           const from = roomMap.get(v.from);
           const to = roomMap.get(v.to);
-          if (!from || !to || !isVentRevealed(v.poiIds)) return null;
+          const bothVisible = from && to && isRoomVisible(v.from) && isRoomVisible(v.to);
+          if (!bothVisible || !(hasSchematics || isVentRevealed(v.poiIds))) return null;
           const fc = getRoomCenter(from);
           const tc = getRoomCenter(to);
           return (
@@ -149,7 +164,7 @@ export function GretaBaseFloorplan({
           );
         })}
 
-        {rooms.map((r) => {
+        {rooms.filter((r) => isRoomVisible(r.id)).map((r) => {
           const style = getRoomStyle(r.id);
           const isClickable = !!onLocationClick;
           return (
@@ -184,7 +199,8 @@ export function GretaBaseFloorplan({
         {doors.map((d) => {
           const from = roomMap.get(d.from);
           const to = roomMap.get(d.to);
-          if (!from || !to || !isDoorRevealed(d.poiId)) return null;
+          const bothVisible = from && to && isRoomVisible(d.from) && isRoomVisible(d.to);
+          if (!bothVisible || !(hasSchematics || isDoorRevealed(d.poiId))) return null;
           const pos = getEdgeMidpoint(from, to);
           const unlocked = isDoorUnlocked(d);
           return unlocked ? (
@@ -197,7 +213,8 @@ export function GretaBaseFloorplan({
         {implicitDoors.map((d) => {
           const from = roomMap.get(d.from);
           const to = roomMap.get(d.to);
-          if (!from || !to || !isImplicitDoorRevealed(d.from, d.to)) return null;
+          const bothVisible = from && to && isRoomVisible(d.from) && isRoomVisible(d.to);
+          if (!bothVisible || !(hasSchematics || isImplicitDoorRevealed(d.from, d.to))) return null;
           const pos = getEdgeMidpoint(from, to);
           const unlocked = isDoorUnlocked(d);
           return unlocked ? (
@@ -208,7 +225,7 @@ export function GretaBaseFloorplan({
         })}
       </svg>
 
-      <div className="mt-3 space-y-2 text-[10px] text-neutral-400">
+      <div className="mt-2 shrink-0 space-y-2 text-[10px] text-neutral-400">
         <div className="flex flex-wrap items-center gap-4">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-emerald-400" /> Current

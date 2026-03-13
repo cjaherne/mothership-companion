@@ -26,14 +26,13 @@ export const wardenCampaign: CampaignConfig = {
   },
   npcIds: [],
   puzzleIds: [],
-  roomName: "mothership-warden",
   wardenNarrator: {
     narrative: `You are on the bridge. The Warden awaits. This is your connection to the Mothership experience—voice-interactive, ready to guide you through whatever scenarios lie ahead.`,
   },
   theCompany: {
     hints: [
-      "Run the LiveKit agent with npm run agent:dev for voice processing.",
       "Select a campaign from the sidebar to begin a scenario.",
+      "Use click-to-talk to speak with the Warden or NPCs.",
     ],
   },
 };

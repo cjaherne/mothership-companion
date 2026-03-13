@@ -140,8 +140,9 @@ export async function POST(request: NextRequest) {
 
     if (agentType === "warden") {
       systemPrompt = getWardenContext(campaignId as CampaignId, runState);
-      ttsVoice = "onyx";
+      ttsVoice = "onyx"; // Reserved for Warden only
     } else {
+      ttsVoice = "fable"; // Neutral NPC default (onyx=Warden, alloy=quirky)
       const npc = getNpcProfile(npcId!);
       if (!npc) {
         return NextResponse.json(
@@ -177,8 +178,11 @@ export async function POST(request: NextRequest) {
         intent
       );
 
-      if (npc.speechProfile?.vocalQuality?.includes("tinny")) {
+      const vq = npc.speechProfile?.vocalQuality ?? "";
+      if (vq.includes("tinny")) {
         ttsVoice = "echo";
+      } else if (vq.includes("high-pitched") || vq.includes("squeaky")) {
+        ttsVoice = "alloy"; // Quirky characters like Renfield
       }
     }
 

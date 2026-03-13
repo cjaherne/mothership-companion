@@ -48,6 +48,10 @@ export interface RunState {
   npcIntroPlayedIds?: string[];
   /** How many times the player has spoken to each NPC via push-to-talk this session */
   npcVoiceInteractionCounts?: Record<string, number>;
+  /** Puzzle IDs the party has solved (e.g. prefab-terminal for airlock override) */
+  solvedPuzzleIds?: string[];
+  /** Items taken from POIs: poiId -> { itemId -> characterId } */
+  takenPoiItems?: Record<string, Record<string, string>>;
   /** Turn or session count */
   turn?: number;
 }

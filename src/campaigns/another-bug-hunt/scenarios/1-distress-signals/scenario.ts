@@ -12,14 +12,14 @@ export const distressSignalsScenario: Scenario = {
   description:
     "Investigate the abandoned Greta Base. Re-establish power, retrieve samples, survive.",
   missionId: "distress-signals",
+  inaccessibleRegionIds: ["heron-station"],
   locationIds: [
     THE_METAMORPHOSIS_ID,
-    // Planet-level regions
+    // Planet-level regions (Heron Station excluded — inaccessible due to storms)
     "landing-zone",
     "outside-airlock",
     "outside-garage",
     "greta-base",
-    "heron-station",
     "mothership",
     // Greta Base internal rooms (from PDF pp.10-15)
     "airlock",

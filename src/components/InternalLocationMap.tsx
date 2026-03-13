@@ -3,6 +3,7 @@
 import type { Location } from "@/campaigns/types";
 import type { Character } from "@/types/run";
 import { GretaBaseFloorplan } from "./GretaBaseFloorplan";
+import { LandingZoneFloorplan } from "./LandingZoneFloorplan";
 import { GRETA_BASE_FLOORPLAN } from "@/campaigns/another-bug-hunt/greta-base-floorplan";
 
 interface InternalLocationMapProps {
@@ -10,17 +11,23 @@ interface InternalLocationMapProps {
   locations: Location[];
   currentLocationId?: string;
   exploredLocationIds: string[];
-  /** POI IDs the party has inspected (reveals doors/vents on Greta Base minimap) */
+  /** POI IDs the party has inspected (reveals doors/vents on Greta Base; nodes on Landing Zone) */
   exploredPoiIds?: string[];
   /** Party characters (for item-based door unlocks on Greta Base floorplan) */
   characters?: Character[];
+  /** Solved puzzle IDs (e.g. prefab-terminal overrides airlock keycard) */
+  solvedPuzzleIds?: string[];
   /** Location being viewed in detail */
   selectedLocationId?: string;
+  /** POI selected on Landing Zone map (for Mark as Inspected) */
+  selectedPoiId?: string;
   onLocationClick?: (locationId: string) => void;
+  onPoiClick?: (poiId: string) => void;
   onMarkVisited?: (locationId: string) => void;
+  onMarkPoiExplored?: (poiId: string) => void;
   /** Name of the primary region (for header) */
   regionName?: string;
-  /** Primary region ID (e.g. "greta-base") to choose minimap style */
+  /** Primary region ID (e.g. "greta-base", "landing-zone") to choose minimap style */
   primaryRegionId?: string;
   /** Compact mode: smaller container, abbreviated legend */
   compact?: boolean;
@@ -45,9 +52,13 @@ export function InternalLocationMap({
   exploredLocationIds,
   exploredPoiIds = [],
   characters = [],
+  solvedPuzzleIds = [],
   selectedLocationId,
+  selectedPoiId,
   onLocationClick,
+  onPoiClick,
   onMarkVisited,
+  onMarkPoiExplored,
   regionName = "Internal",
   primaryRegionId,
   compact,
@@ -55,6 +66,19 @@ export function InternalLocationMap({
 }: InternalLocationMapProps) {
   const ids = locations.map((l) => l.id);
   const idSet = new Set(ids);
+
+  if (primaryRegionId === "landing-zone") {
+    return (
+      <LandingZoneFloorplan
+        exploredPoiIds={exploredPoiIds}
+        selectedPoiId={selectedPoiId}
+        onPoiClick={onPoiClick}
+        onMarkPoiExplored={onMarkPoiExplored}
+        compact={compact}
+        className={className}
+      />
+    );
+  }
 
   if (primaryRegionId === "greta-base") {
     const floorplanRooms = GRETA_BASE_FLOORPLAN.rooms.filter((r) => idSet.has(r.id));
@@ -66,6 +90,7 @@ export function InternalLocationMap({
           exploredLocationIds={exploredLocationIds}
           exploredPoiIds={exploredPoiIds}
           characters={characters}
+          solvedPuzzleIds={solvedPuzzleIds}
           selectedLocationId={selectedLocationId}
           onLocationClick={onLocationClick}
           onMarkVisited={onMarkVisited}
@@ -94,14 +119,14 @@ export function InternalLocationMap({
 
   return (
     <div
-      className={`overflow-auto rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${compact ? "p-2" : "p-4"} ${className}`}
+      className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-2 border-neutral-600 bg-neutral-800/60 ${compact ? "p-2" : "p-4"} ${className}`}
     >
-      <h4 className={`font-heading text-xs font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "mb-1" : "mb-3"}`}>
+      <h4 className={`font-heading shrink-0 text-xs font-medium uppercase tracking-wider text-amber-200/90 ${compact ? "mb-1" : "mb-3"}`}>
         {regionName} — Internal Map
       </h4>
       <svg
         viewBox="0 0 400 250"
-        className={`h-full w-full ${compact ? "min-h-[120px]" : "min-h-[200px]"}`}
+        className="min-h-0 flex-1 w-full"
         preserveAspectRatio="xMidYMid meet"
       >
         {ids.map((id) => {
@@ -181,7 +206,7 @@ export function InternalLocationMap({
           );
         })}
       </svg>
-      <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-neutral-400">
+      <div className="mt-2 shrink-0 flex flex-wrap items-center gap-3 text-[10px] text-neutral-400">
         <span className="flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-green-500" /> Current
         </span>

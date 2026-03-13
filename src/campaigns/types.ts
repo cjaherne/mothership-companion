@@ -21,8 +21,12 @@ export interface PointOfInterest {
   items?: string[];
   /** Requires active searching to discover (not immediately visible) */
   isHidden?: boolean;
+  /** Only shown after these POI IDs have been inspected (e.g. "investigate area" reveals others) */
+  requiredPoiIds?: string[];
   /** NPC IDs associated with / physically present at this POI */
   npcsPresent?: string[];
+  /** If set, this POI has a puzzle; solving it may unlock features (see campaign puzzle defs) */
+  puzzleId?: string;
 }
 
 /** A location or scene within a world */
@@ -30,6 +34,8 @@ export interface Location {
   id: string;
   name: string;
   description: string;
+  /** Optional flavourful background text for the Briefing panel—atmospheric, avoids spoiling investigation discoveries */
+  backgroundText?: string;
   /** Location IDs reachable from here (doors, corridors, vents) */
   connectedLocationIds?: string[];
   /** Points of interest within this location (for detailed map) */
@@ -40,6 +46,8 @@ export interface Location {
   lockNote?: string;
   /** Item IDs required to unlock; party must possess all (checked across characters) */
   requiredItemIds?: string[];
+  /** Puzzle IDs that, when solved, allow entry without requiredItemIds (e.g. terminal override) */
+  unlockOverridePuzzleIds?: string[];
   /** Not shown on the map until discovered/unlocked */
   isHiddenAtStart?: boolean;
   /** If set, this is a sub-location nested inside the given location ID */
@@ -116,6 +124,8 @@ export interface Scenario {
   locationIds: string[];
   /** Where the party begins this scenario (must be in locationIds) */
   startingLocationId: string;
+  /** Region IDs that cannot be navigated to in this scenario (e.g. storms, locked) */
+  inaccessibleRegionIds?: string[];
 }
 
 /** Warden Narrator - provides opening backstory/narrative (campaign-specific) */
@@ -165,8 +175,6 @@ export interface CampaignConfig {
   puzzleIds: string[];
   /** Craft recipes (combine items to produce new items) */
   craftRecipes?: CraftRecipe[];
-  /** LiveKit room name (unique per campaign session) */
-  roomName: string;
   /** Warden Narrator - opening backstory and narrative (above all campaigns) */
   wardenNarrator?: WardenNarratorConfig;
   /** The Company - hint provider when players ask (above all campaigns) */

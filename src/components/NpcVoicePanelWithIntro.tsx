@@ -16,6 +16,8 @@ interface NpcVoicePanelWithIntroProps {
   npcId: string;
   onExit: () => void;
   onUpdate?: () => void;
+  /** When true, omit outer border (e.g. inside combined NPC panel) */
+  embedded?: boolean;
 }
 
 export function NpcVoicePanelWithIntro({
@@ -24,6 +26,7 @@ export function NpcVoicePanelWithIntro({
   npcId,
   onExit,
   onUpdate,
+  embedded,
 }: NpcVoicePanelWithIntroProps) {
   const npc = getNpcProfile(npcId);
   const npcName = npc?.name ?? npcId;
@@ -34,8 +37,12 @@ export function NpcVoicePanelWithIntro({
   const [introError, setIntroError] = useState<string | null>(null);
   const [showPushToTalk, setShowPushToTalk] = useState(introPlayed || !introText);
 
-  const voice =
-    npc?.speechProfile?.vocalQuality?.includes("tinny") ? "echo" : "onyx";
+  const vq = npc?.speechProfile?.vocalQuality ?? "";
+  const voice = vq.includes("tinny")
+    ? "echo"
+    : vq.includes("high-pitched") || vq.includes("squeaky")
+      ? "alloy" // Quirky characters like Renfield
+      : "fable"; // Neutral NPC default (onyx reserved for Warden)
 
   const handlePlayIntro = useCallback(async () => {
     if (!introText) {
@@ -47,15 +54,20 @@ export function NpcVoicePanelWithIntro({
     setIntroError(null);
 
     try {
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: introText, voice }),
-      });
+      // Try pre-generated asset first (faster); fall back to TTS API
+      const preGeneratedUrl = `/sounds/npcs/${npcId}-intro.mp3`;
+      let res = await fetch(preGeneratedUrl);
+      if (!res.ok) {
+        res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: introText, voice }),
+        });
+      }
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Failed to play intro");
+        const data = await res.json?.().catch(() => ({}));
+        throw new Error(data?.error ?? "Failed to play intro");
       }
 
       const arrayBuffer = await res.arrayBuffer();
@@ -87,39 +99,70 @@ export function NpcVoicePanelWithIntro({
 
   if (showPushToTalk) {
     return (
-      <ClickToTalkPanel
-        campaignId={campaignId}
-        runId={runId}
-        agentType="npc"
-        npcId={npcId}
-        label={`Talk to ${npcName}`}
-        onExit={onExit}
-        onInteractionComplete={() => {
-          incrementNpcVoiceInteraction(runId, npcId);
-          onUpdate?.();
-        }}
-      />
+      <div className="space-y-2">
+        <ClickToTalkPanel
+          campaignId={campaignId}
+          runId={runId}
+          agentType="npc"
+          npcId={npcId}
+          label={`Talk to ${npcName}`}
+          onExit={onExit}
+          onInteractionComplete={() => {
+            incrementNpcVoiceInteraction(runId, npcId);
+            onUpdate?.();
+          }}
+          embedded={embedded}
+        />
+        {introText && (
+          <button
+            type="button"
+            onClick={handlePlayIntro}
+            disabled={playingIntro}
+            className="w-full rounded border border-neutral-600 px-3 py-2 text-xs text-neutral-400 hover:bg-neutral-700/50 hover:text-neutral-300 disabled:opacity-50"
+          >
+            {playingIntro ? "Playing intro…" : "Listen to intro again"}
+          </button>
+        )}
+      </div>
     );
   }
 
   return (
-    <div className="rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4">
+    <div className={embedded ? "p-1" : "rounded-lg border-2 border-neutral-600 bg-neutral-800/60 p-4"}>
       <p className="text-sm font-medium text-neutral-100">
         Talk to {npcName}
       </p>
       <p className="mt-1 text-xs text-neutral-400">
         {introText
-          ? "Listen to the briefing first, then use push-to-talk to respond."
+          ? "Listen to the intro first, or use push-to-talk to speak."
           : "Use push-to-talk to speak."}
       </p>
       {introText && (
+        <div className="mt-3 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handlePlayIntro}
+            disabled={playingIntro}
+            className="w-full rounded border border-neon-pink/50 px-4 py-2 text-sm font-medium text-neon-pink hover:bg-neon-pink/10 disabled:opacity-50"
+          >
+            {playingIntro ? "Playing intro…" : "Listen to intro"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowPushToTalk(true)}
+            className="w-full rounded border border-neutral-600 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-700/50 hover:text-neutral-300"
+          >
+            Skip to push-to-talk
+          </button>
+        </div>
+      )}
+      {!introText && (
         <button
           type="button"
-          onClick={handlePlayIntro}
-          disabled={playingIntro}
-          className="mt-3 w-full rounded border border-neon-pink/50 px-4 py-2 text-sm font-medium text-neon-pink hover:bg-neon-pink/10 disabled:opacity-50"
+          onClick={() => setShowPushToTalk(true)}
+          className="mt-3 w-full rounded border border-neon-pink/50 px-4 py-2 text-sm font-medium text-neon-pink hover:bg-neon-pink/10"
         >
-          {playingIntro ? "Playing briefing…" : `Talk to ${npcName}`}
+          Talk to {npcName}
         </button>
       )}
       {introError && (

@@ -18,8 +18,10 @@ import {
   getFact,
   getFactsForScenario,
 } from "./another-bug-hunt/facts";
+import { getItemName } from "./another-bug-hunt/items";
 import { getNpcProfile } from "./another-bug-hunt/npcs";
 import type { RunState } from "@/types/run";
+import { getPartyItemIds } from "@/lib/inventory-utils";
 
 export interface CampaignContextOptions {
   /** Current scenario; defaults to first */
@@ -436,6 +438,16 @@ export function getNpcContext(
     runState.characters.forEach((c) => {
       parts.push(`- ${c.name}: ${c.traits.join(", ")}`);
     });
+  }
+
+  // Party inventory (for item-reactive NPCs like Renfield with the gum)
+  if (runState?.characters?.length && campaignId === "another-bug-hunt") {
+    const partyItemIds = getPartyItemIds(runState.characters);
+    if (partyItemIds.length > 0) {
+      const itemNames = partyItemIds.map((id) => getItemName(id)).join(", ");
+      parts.push("");
+      parts.push(`## Party inventory: ${itemNames}`);
+    }
   }
 
   parts.push("");
